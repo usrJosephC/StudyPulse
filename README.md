@@ -5,6 +5,7 @@
 Aplicativo de rotina de estudos com gamificação: streaks de dias consecutivos estudando, metas diárias/semanais e grupos de estudo com ranking entre colegas.
 
 ## Equipe
+- Alex Davi Gomes do Nascimento 
 - Joseph Bartholomeu Cavalcante Rocha
 - Letícya Beatriz dos Santos Medeiros
 - Mariana Pereira de Melo
