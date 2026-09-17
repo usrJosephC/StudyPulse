@@ -34,5 +34,5 @@ yarn-error.*
 .idea/
 
 # Local tooling state
-.claude/settings.local.json
+.claude/
 .maestri/
