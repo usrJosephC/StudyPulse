@@ -36,3 +36,105 @@ yarn-error.*
 # Local tooling state
 .claude/
 .maestri/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Diagnostic reports
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage
+lib-cov
+coverage
+*.lcov
+.nyc_output
+
+# Build artifacts
+.grunt
+bower_components
+jspm_packages/
+web_modules/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional caches
+.npm
+.eslintcache
+.stylelintcache
+.node_repl_history
+
+# Package management
+*.tgz
+.yarn-integrity
+.pnp.*
+.yarn/*
+
+# Vite files
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+.vite/
+
+# Next.js
+.next
+out
+
+# Nuxt.js
+.nuxt
+dist
+.output
+
+# Gatsby
+.cache/
+
+# Docusaurus
+.vuepress/dist
+.temp
+.svelte-kit/
+**/.vitepress/dist
+**/.vitepress/cache
+.docusaurus
+
+# Serverless
+.serverless/
+.fusebox/
+
+# DynamoDB Local
+.dynamodb/
+
+# Firebase
+.firebase/
+
+# TernJS
+.tern-port
+
+# VSCode testing
+.vscode-test/
+
+# Yarn v3
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+# VuePress
+.vuepress/dist
+
+# VitePress
+**/.vitepress/cache
+**/.vitepress/dist
+
+# SvelteKit
+.svelte-kit/
