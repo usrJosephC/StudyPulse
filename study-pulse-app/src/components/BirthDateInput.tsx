@@ -143,9 +143,11 @@ export function BirthDateInput({
               )}
             </View>
 
-            {errors.birthDate && (
+            {(errors.birthDate?.day ||
+              errors.birthDate?.month ||
+              errors.birthDate?.year) && (
               <Text style={styles.error}>
-                {String(errors.birthDate.message)}
+                Please enter your complete date of birth.
               </Text>
             )}
 
