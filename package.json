@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "@hookform/resolvers": "^5.9.1",
+    "@react-navigation/native-stack": "^7.19.2",
+    "axios": "^1.20.0",
+    "react-hook-form": "^7.88.0",
+    "yup": "^1.7.1"
+  }
+}
