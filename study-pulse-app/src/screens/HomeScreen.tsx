@@ -1,4 +1,5 @@
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useMemo, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -9,9 +10,20 @@ import { Button } from '../components/Button';
 import { Pill } from '../components/Pill';
 import { Avatar } from '../components/Avatar';
 import { colors, fonts, radius, spacing } from '../theme';
-import { currentUser, todaysTasks, tasksProgress, homeSquadPreview } from '../data/mockData';
+import { currentUser, todaysTasks, homeSquadPreview } from '../data/mockData';
 
 export function HomeScreen() {
+  const [tasks, setTasks] = useState(todaysTasks);
+
+  const nextTaskId = useMemo(() => tasks.find((task) => !task.done)?.id, [tasks]);
+  const tasksDone = tasks.filter((task) => task.done).length;
+  const tasksTotal = tasks.length;
+  const tasksProgress = tasksTotal > 0 ? tasksDone / tasksTotal : 0;
+
+  function toggleTask(id: string) {
+    setTasks((current) => current.map((task) => (task.id === id ? { ...task, done: !task.done } : task)));
+  }
+
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScreenHeader userInitial={currentUser.initial} />
@@ -32,9 +44,9 @@ export function HomeScreen() {
         </LinearGradient>
 
         <Card style={styles.tasksCard}>
-          <ProgressRing progress={tasksProgress.done / tasksProgress.total} size={150} strokeWidth={14}>
+          <ProgressRing progress={tasksProgress} size={150} strokeWidth={14}>
             <Text style={styles.ringValue}>
-              {tasksProgress.done}/{tasksProgress.total}
+              {tasksDone}/{tasksTotal}
             </Text>
             <Text style={styles.ringLabel}>Tasks</Text>
           </ProgressRing>
@@ -51,26 +63,35 @@ export function HomeScreen() {
           <Text style={styles.sectionTitle}>Today's Tasks</Text>
           <Text style={styles.seeAll}>See All</Text>
         </View>
-        <View style={{ gap: spacing.sm }}>
-          {todaysTasks.map((task) => (
-            <View key={task.id} style={[styles.taskRow, !task.done && task.id === '2' && styles.taskRowActive]}>
+        <View style={styles.taskList}>
+          {tasks.map((task) => (
+            <Pressable
+              key={task.id}
+              onPress={() => toggleTask(task.id)}
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: task.done }}
+              accessibilityLabel={`${task.title}, ${task.category}`}
+              hitSlop={4}
+              style={({ pressed }) => [
+                styles.taskRow,
+                !task.done && task.id === nextTaskId && styles.taskRowActive,
+                pressed && styles.taskRowPressed,
+              ]}
+            >
               <Ionicons
                 name={task.done ? 'checkmark-circle' : 'ellipse-outline'}
                 size={24}
                 color={task.done ? colors.primary : colors.inkFaint}
               />
-              <View style={{ flex: 1 }}>
+              <View style={styles.flexFill}>
                 <Text style={[styles.taskTitle, task.done && styles.taskTitleDone]}>{task.title}</Text>
                 <Pill label={task.category} variant="muted" />
               </View>
-              {!task.done && task.id === '2' && (
-                <Ionicons name="chevron-forward" size={20} color={colors.inkMuted} />
-              )}
-            </View>
+            </Pressable>
           ))}
         </View>
 
-        <Text style={[styles.sectionTitle, { marginTop: spacing.xl }]}>Study Squad</Text>
+        <Text style={[styles.sectionTitle, styles.squadSectionTitle]}>Study Squad</Text>
         <Card>
           <View style={styles.squadHeaderRow}>
             <View style={styles.squadHeaderLeft}>
@@ -191,6 +212,18 @@ const styles = StyleSheet.create({
   taskRowActive: {
     borderWidth: 1.5,
     borderColor: colors.primary,
+  },
+  taskRowPressed: {
+    opacity: 0.8,
+  },
+  taskList: {
+    gap: spacing.sm,
+  },
+  flexFill: {
+    flex: 1,
+  },
+  squadSectionTitle: {
+    marginTop: spacing.xl,
   },
   taskTitle: {
     fontFamily: fonts.bodyBold,

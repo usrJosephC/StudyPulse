@@ -1,3 +1,20 @@
+import type { Ionicons } from '@expo/vector-icons';
+import type { ButtonVariant } from '../components/Button';
+
+export type IconName = keyof typeof Ionicons.glyphMap;
+
+export type Goal = {
+  id: string;
+  category: string;
+  title: string;
+  due: string;
+  progress: number;
+  icon: IconName;
+  cta: string;
+  ctaVariant: ButtonVariant;
+  ctaIcon: IconName;
+};
+
 export const currentUser = {
   name: 'Alex',
   initial: 'A',
@@ -34,17 +51,17 @@ export const consistencyWeeks: number[][] = [
   [4, 2, 3, 1, 0, 1, 4],
 ];
 
-export const activeGoals = [
+export const activeGoals: Goal[] = [
   {
     id: 'chem',
     category: 'Science',
     title: 'Master Organic Chemistry',
     due: 'Due in 3 days',
     progress: 0.75,
-    icon: 'flask-outline' as const,
+    icon: 'flask-outline',
     cta: 'Continue Study',
-    ctaVariant: 'primary' as const,
-    ctaIcon: 'arrow-forward' as const,
+    ctaVariant: 'primary',
+    ctaIcon: 'arrow-forward',
   },
   {
     id: 'reading',
@@ -52,10 +69,10 @@ export const activeGoals = [
     title: 'Read 50 Pages',
     due: 'Due tomorrow',
     progress: 0.4,
-    icon: 'bookmark-outline' as const,
+    icon: 'bookmark-outline',
     cta: 'Log Reading',
-    ctaVariant: 'muted' as const,
-    ctaIcon: 'create-outline' as const,
+    ctaVariant: 'muted',
+    ctaIcon: 'create-outline',
   },
 ];
 
