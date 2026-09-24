@@ -306,7 +306,7 @@ const styles = StyleSheet.create({
 
   optionText: {
     fontFamily: fonts.bodyMedium,
-    fontSize: 15,
+    fontSize: 14,
     color: colors.ink,
   },
 });

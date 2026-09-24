@@ -138,8 +138,8 @@ const styles = StyleSheet.create({
 
   label: {
     fontFamily: fonts.bodyMedium,
-    fontSize: 13,
-    color: colors.inkMuted,
+    fontSize: 14,
+    color: colors.inkFaint,
   },
 
   labelSelected: {
