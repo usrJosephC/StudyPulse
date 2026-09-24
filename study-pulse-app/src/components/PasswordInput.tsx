@@ -1,6 +1,15 @@
 import { useState } from 'react';
-import { Controller, Control, FieldErrors } from 'react-hook-form';
+
+import {
+  Controller,
+  Control,
+  FieldErrors,
+  FieldValues,
+  Path,
+} from 'react-hook-form';
+
 import { Ionicons } from '@expo/vector-icons';
+
 import {
   Pressable,
   StyleSheet,
@@ -8,22 +17,30 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { colors, fonts, radius, spacing } from '../theme';
 
-import type { RegisterFormData } from '../validation/schemas';
+import {
+  colors,
+  fonts,
+  radius,
+  spacing,
+} from '../theme';
 
-type Props = {
-  control: Control<RegisterFormData>;
-  errors: FieldErrors<RegisterFormData>;
+type Props<T extends FieldValues> = {
+  control: Control<T>;
+  errors: FieldErrors<T>;
 };
 
-export function PasswordInput({ control, errors }: Props) {
-  const [showPassword, setShowPassword] = useState(false);
+export function PasswordInput<T extends FieldValues>({
+  control,
+  errors,
+}: Props<T>) {
+  const [showPassword, setShowPassword] =
+    useState(false);
 
   return (
     <Controller
       control={control}
-      name="password"
+      name={'password' as Path<T>}
       render={({ field: { onChange, onBlur, value } }) => (
         <View style={styles.wrapper}>
           <View style={styles.inputContainer}>
@@ -47,11 +64,19 @@ export function PasswordInput({ control, errors }: Props) {
             />
 
             <Pressable
-              onPress={() => setShowPassword((current) => !current)}
+              onPress={() =>
+                setShowPassword(
+                  (current) => !current
+                )
+              }
               hitSlop={8}
             >
               <Ionicons
-                name={showPassword ? 'eye-outline' : 'eye-off-outline'}
+                name={
+                  showPassword
+                    ? 'eye-outline'
+                    : 'eye-off-outline'
+                }
                 size={20}
                 color={colors.inkMuted}
               />
@@ -60,7 +85,7 @@ export function PasswordInput({ control, errors }: Props) {
 
           {errors.password && (
             <Text style={styles.error}>
-              {errors.password.message}
+              {String(errors.password.message)}
             </Text>
           )}
         </View>
@@ -73,6 +98,7 @@ const styles = StyleSheet.create({
   wrapper: {
     width: '100%',
   },
+
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -81,15 +107,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     height: 48,
   },
+
   icon: {
     marginRight: spacing.sm,
   },
+
   input: {
     flex: 1,
     fontFamily: fonts.bodyRegular,
     fontSize: 14,
     color: colors.ink,
   },
+
   error: {
     fontFamily: fonts.bodyMedium,
     fontSize: 12,
