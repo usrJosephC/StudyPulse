@@ -1,7 +1,9 @@
-import { Controller, Control, FieldErrors } from 'react-hook-form';
 import {
-  Ionicons,
-} from '@expo/vector-icons';
+  Controller,
+  Control,
+  FieldErrors,
+} from 'react-hook-form';
+import { Ionicons } from '@expo/vector-icons';
 import {
   Pressable,
   StyleSheet,
@@ -9,7 +11,12 @@ import {
   View,
 } from 'react-native';
 
-import { colors, fonts, radius, spacing } from '../theme';
+import {
+  colors,
+  fonts,
+  radius,
+  spacing,
+} from '../theme';
 
 import type { RegisterFormData } from '../validation/schemas';
 
@@ -29,7 +36,7 @@ const options = [
   },
   {
     label: 'Other',
-    value: 'Outro',
+    value: 'Other',
   },
 ];
 
@@ -45,21 +52,26 @@ export function GenderInput({
         <View style={styles.container}>
           <View style={styles.row}>
             {options.map((option) => {
-              const selected = value === option.value;
+              const selected =
+                value === option.value;
 
               return (
                 <Pressable
                   key={option.value}
-                  onPress={() => onChange(option.value)}
+                  onPress={() =>
+                    onChange(option.value)
+                  }
                   style={[
                     styles.option,
-                    selected && styles.optionSelected,
+                    selected &&
+                      styles.optionSelected,
                   ]}
                 >
                   <Text
                     style={[
                       styles.label,
-                      selected && styles.labelSelected,
+                      selected &&
+                        styles.labelSelected,
                     ]}
                   >
                     {option.label}
@@ -68,7 +80,8 @@ export function GenderInput({
                   <View
                     style={[
                       styles.circle,
-                      selected && styles.circleSelected,
+                      selected &&
+                        styles.circleSelected,
                     ]}
                   >
                     {selected && (
