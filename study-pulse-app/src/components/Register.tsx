@@ -5,7 +5,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import axios from 'axios';
+// import axios from 'axios';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 
@@ -58,61 +58,91 @@ export function Register({
   });
 
   async function onSubmit(data: RegisterFormData) {
-    const payload = {
-      nome: data.name,
-      email: data.email,
-      senha: data.password,
-      nascimento: data.birthDate,
-      genero: data.gender,
-    };
+  try {
+    setIsLoading(true);
 
-    try {
-      setIsLoading(true);
+    // mock temporário: simula uma resposta do backend! apenas para testes
+    await new Promise((resolve) =>
+      setTimeout(resolve, 800)
+    );
 
-      const response = await axios.post(
-        'http://localhost:3000/cadastro',
-        payload,
+    Alert.alert(
+      'Account created',
+      'Your account was created successfully.',
+      [
         {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      if (response.status === 201) {
-        Alert.alert(
-          'Account created',
-          'Your account was created successfully.',
-          [
-            {
-              text: 'Continue',
-              onPress: onRegisterSuccess,
-            },
-          ]
-        );
-      }
-    } catch (error: any) {
-      if (error.response) {
-        Alert.alert(
-          'Registration error',
-          error.response.data?.message ||
-            'Unable to create your account.'
-        );
-      } else if (error.request) {
-        Alert.alert(
-          'Connection error',
-          'No response from the server.'
-        );
-      } else {
-        Alert.alert(
-          'Error',
-          'An error occurred while creating your account.'
-        );
-      }
-    } finally {
-      setIsLoading(false);
-    }
+          text: 'Continue',
+          onPress: onRegisterSuccess,
+        },
+      ]
+    );
+  } catch (error) {
+    Alert.alert(
+      'Error',
+      'An error occurred while creating your account.'
+    );
+  } finally {
+    setIsLoading(false);
   }
+}
+
+  // função para quando adicionar backend!!
+  // async function onSubmit(data: RegisterFormData) {
+  //   const payload = {
+  //     nome: data.name,
+  //     email: data.email,
+  //     senha: data.password,
+  //     nascimento: data.birthDate,
+  //     genero: data.gender,
+  //   };
+
+  //   try {
+  //     setIsLoading(true);
+
+  //     const response = await axios.post(
+  //       'http://localhost:3000/cadastro',
+  //       payload,
+  //       {
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //         },
+  //       }
+  //     );
+
+  //     if (response.status === 201) {
+  //       Alert.alert(
+  //         'Account created',
+  //         'Your account was created successfully.',
+  //         [
+  //           {
+  //             text: 'Continue',
+  //             onPress: onRegisterSuccess,
+  //           },
+  //         ]
+  //       );
+  //     }
+  //   } catch (error: any) {
+  //     if (error.response) {
+  //       Alert.alert(
+  //         'Registration error',
+  //         error.response.data?.message ||
+  //           'Unable to create your account.'
+  //       );
+  //     } else if (error.request) {
+  //       Alert.alert(
+  //         'Connection error',
+  //         'No response from the server.'
+  //       );
+  //     } else {
+  //       Alert.alert(
+  //         'Error',
+  //         'An error occurred while creating your account.'
+  //       );
+  //     }
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // }
 
   return (
     <View style={styles.container}>
