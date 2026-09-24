@@ -1,4 +1,5 @@
 import { useState } from 'react';
+
 import {
   Alert,
   Modal,
@@ -8,8 +9,9 @@ import {
   Text,
   View,
 } from 'react-native';
+
 import { Ionicons } from '@expo/vector-icons';
-// import axios from 'axios';
+
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 
@@ -17,7 +19,12 @@ import { Button } from './Button';
 import { EmailInput } from './EmailInput';
 import { PasswordInput } from './PasswordInput';
 
-import { colors, fonts, radius, spacing } from '../theme';
+import {
+  colors,
+  fonts,
+  radius,
+  spacing,
+} from '../theme';
 
 import {
   loginSchema,
@@ -33,9 +40,17 @@ export function Login({
   onLoginSuccess,
   onCreateAccount,
 }: Props) {
-  const [acceptedTerms, setAcceptedTerms] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] =
+    useState(false);
+
+  const [termsError, setTermsError] =
+    useState(false);
+
+  const [modalVisible, setModalVisible] =
+    useState(false);
+
+  const [isLoading, setIsLoading] =
+    useState(false);
 
   const {
     control,
@@ -52,24 +67,24 @@ export function Login({
 
   // mock temporário enquanto o backend não existe
   async function onSubmit(data: LoginFormData) {
-  try {
-    setIsLoading(true);
+    try {
+      setIsLoading(true);
 
-    // simula o tempo de resposta da API
-    await new Promise((resolve) =>
-      setTimeout(resolve, 800)
-    );
+      // simula o tempo de resposta da API
+      await new Promise((resolve) =>
+        setTimeout(resolve, 800)
+      );
 
-    console.log('Mock login:', {
-      email: data.email,
-    });
+      console.log('Mock login:', {
+        email: data.email,
+      });
 
-    // simula uma resposta de login bem-sucedida
-    onLoginSuccess?.();
-  } finally {
-    setIsLoading(false);
+      // Simula uma resposta de login bem-sucedida.
+      onLoginSuccess?.();
+    } finally {
+      setIsLoading(false);
+    }
   }
-}
 
   /*
   // Quando o backend estiver pronto, o mock acima
@@ -121,14 +136,18 @@ export function Login({
 
   function handleLogin() {
     if (!acceptedTerms) {
-      Alert.alert(
-        'Terms of Service',
-        'You need to accept the Terms of Service before continuing.'
-      );
+      setTermsError(true);
       return;
     }
 
+    setTermsError(false);
+
     handleSubmit(onSubmit)();
+  }
+
+  function handleTermsToggle() {
+    setAcceptedTerms((current) => !current);
+    setTermsError(false);
   }
 
   return (
@@ -157,40 +176,55 @@ export function Login({
           </Text>
         </Pressable>
 
-        <Pressable
-          style={styles.termsContainer}
-          onPress={() =>
-            setAcceptedTerms((current) => !current)
-          }
-        >
-          <Ionicons
-            name={
-              acceptedTerms
-                ? 'checkbox'
-                : 'square-outline'
-            }
-            size={18}
-            color={colors.secondary}
-          />
+        <View>
+          <Pressable
+            style={styles.termsContainer}
+            onPress={handleTermsToggle}
+          >
+            <Ionicons
+              name={
+                acceptedTerms
+                  ? 'checkbox'
+                  : 'square-outline'
+              }
+              size={18}
+              color={
+                termsError
+                  ? colors.danger
+                  : colors.secondary
+              }
+            />
 
-          <Text style={styles.termsText}>
-            I agree to the{' '}
+            <Text style={styles.termsText}>
+              I agree to the{' '}
 
-            <Text
-              style={styles.termsLink}
-              onPress={() => setModalVisible(true)}
-            >
-              Terms of Service
+              <Text
+                style={styles.termsLink}
+                onPress={() =>
+                  setModalVisible(true)
+                }
+              >
+                Terms of Service
+              </Text>
+              .
             </Text>
-            .
-          </Text>
-        </Pressable>
+          </Pressable>
+
+          {termsError && (
+            <Text style={styles.termsError}>
+              You must accept the Terms of Service
+              to continue.
+            </Text>
+          )}
+        </View>
 
         <Modal
           animationType="fade"
           transparent
           visible={modalVisible}
-          onRequestClose={() => setModalVisible(false)}
+          onRequestClose={() =>
+            setModalVisible(false)
+          }
         >
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
@@ -202,9 +236,10 @@ export function Login({
                 </Text>
 
                 <Text style={styles.modalText}>
-                  By using StudyPulse, you agree to use the
-                  application responsibly and provide accurate
-                  information when creating your account.
+                  By using StudyPulse, you agree to use
+                  the application responsibly and provide
+                  accurate information when creating your
+                  account.
                 </Text>
 
                 <Text style={styles.modalText}>
@@ -216,7 +251,9 @@ export function Login({
 
               <Button
                 label="Close"
-                onPress={() => setModalVisible(false)}
+                onPress={() =>
+                  setModalVisible(false)
+                }
               />
             </View>
           </View>
@@ -283,7 +320,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: spacing.xs,
-    marginVertical: spacing.xs,
   },
 
   termsText: {
@@ -298,6 +334,14 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bodyBold,
     color: colors.secondary,
     textDecorationLine: 'underline',
+  },
+
+  termsError: {
+    fontFamily: fonts.bodyMedium,
+    fontSize: 12,
+    color: colors.danger,
+    marginTop: spacing.xs,
+    marginLeft: spacing.xl,
   },
 
   modalOverlay: {
