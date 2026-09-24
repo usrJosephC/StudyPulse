@@ -50,34 +50,26 @@ export function Login({
     },
   });
 
-  // Mock temporário enquanto o backend não existe.
+  // mock temporário enquanto o backend não existe
   async function onSubmit(data: LoginFormData) {
-    try {
-      setIsLoading(true);
+  try {
+    setIsLoading(true);
 
-      // Simula o tempo de resposta de uma API.
-      await new Promise((resolve) =>
-        setTimeout(resolve, 800)
-      );
+    // simula o tempo de resposta da API
+    await new Promise((resolve) =>
+      setTimeout(resolve, 800)
+    );
 
-      console.log('Mock login:', {
-        email: data.email,
-      });
+    console.log('Mock login:', {
+      email: data.email,
+    });
 
-      Alert.alert(
-        'Login successful',
-        'You have successfully logged in.',
-        [
-          {
-            text: 'Continue',
-            onPress: onLoginSuccess,
-          },
-        ]
-      );
-    } finally {
-      setIsLoading(false);
-    }
+    // simula uma resposta de login bem-sucedida
+    onLoginSuccess?.();
+  } finally {
+    setIsLoading(false);
   }
+}
 
   /*
   // Quando o backend estiver pronto, o mock acima
