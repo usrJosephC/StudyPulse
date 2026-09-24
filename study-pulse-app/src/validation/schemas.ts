@@ -66,3 +66,5 @@ export const signUpSchema = yup.object().shape({
       'Please select a valid gender.'
     ),
 });
+
+export type RegisterFormData = yup.InferType<typeof signUpSchema>;
