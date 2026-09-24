@@ -11,31 +11,24 @@ import {
 } from 'react-native';
 
 import { colors, fonts, radius, spacing } from '../theme';
-
-type BirthDate = {
-  day: number | null;
-  month: number | null;
-  year: number | null;
-};
-
-type FormData = {
-  name: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-  birthDate: BirthDate;
-  gender: string;
-};
+import type { RegisterFormData } from '../validation/schemas';
 
 type Props = {
-  control: Control<FormData>;
-  errors: FieldErrors<FormData>;
+  control: Control<RegisterFormData>;
+  errors: FieldErrors<RegisterFormData>;
 };
 
 type PickerType = 'day' | 'month' | 'year' | null;
 
-const days = Array.from({ length: 31 }, (_, index) => index + 1);
-const months = Array.from({ length: 12 }, (_, index) => index + 1);
+const days = Array.from(
+  { length: 31 },
+  (_, index) => index + 1
+);
+
+const months = Array.from(
+  { length: 12 },
+  (_, index) => index + 1
+);
 
 const currentYear = new Date().getFullYear();
 
@@ -54,7 +47,8 @@ export function BirthDateInput({
   control,
   errors,
 }: Props) {
-  const [pickerType, setPickerType] = useState<PickerType>(null);
+  const [pickerType, setPickerType] =
+    useState<PickerType>(null);
 
   return (
     <Controller
@@ -69,7 +63,7 @@ export function BirthDateInput({
               : years;
 
         function handleChange(
-          key: keyof BirthDate,
+          key: keyof RegisterFormData['birthDate'],
           selectedValue: number
         ) {
           onChange({
@@ -80,10 +74,15 @@ export function BirthDateInput({
           setPickerType(null);
         }
 
-        function getValue(type: keyof BirthDate) {
+        function getValue(
+          type: keyof RegisterFormData['birthDate']
+        ) {
           const selectedValue = value?.[type];
 
-          if (selectedValue === null || selectedValue === undefined) {
+          if (
+            selectedValue === null ||
+            selectedValue === undefined
+          ) {
             return fieldLabels[type];
           }
 
@@ -93,36 +92,39 @@ export function BirthDateInput({
         return (
           <View style={styles.container}>
             <View style={styles.row}>
-              {(['day', 'month', 'year'] as const).map((type) => {
-                const hasValue = value?.[type] !== null &&
-                  value?.[type] !== undefined;
+              {(['day', 'month', 'year'] as const).map(
+                (type) => {
+                  const hasValue =
+                    value?.[type] !== null &&
+                    value?.[type] !== undefined;
 
-                return (
-                  <Pressable
-                    key={type}
-                    onPress={() => setPickerType(type)}
-                    style={({ pressed }) => [
-                      styles.field,
-                      pressed && styles.fieldPressed,
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.fieldText,
-                        !hasValue && styles.placeholder,
+                  return (
+                    <Pressable
+                      key={type}
+                      onPress={() => setPickerType(type)}
+                      style={({ pressed }) => [
+                        styles.field,
+                        pressed && styles.fieldPressed,
                       ]}
                     >
-                      {getValue(type)}
-                    </Text>
+                      <Text
+                        style={[
+                          styles.fieldText,
+                          !hasValue && styles.placeholder,
+                        ]}
+                      >
+                        {getValue(type)}
+                      </Text>
 
-                    <Ionicons
-                      name="chevron-down"
-                      size={18}
-                      color={colors.inkMuted}
-                    />
-                  </Pressable>
-                );
-              })}
+                      <Ionicons
+                        name="chevron-down"
+                        size={18}
+                        color={colors.inkMuted}
+                      />
+                    </Pressable>
+                  );
+                }
+              )}
             </View>
 
             {errors.birthDate && (
@@ -135,7 +137,9 @@ export function BirthDateInput({
               visible={pickerType !== null}
               transparent
               animationType="fade"
-              onRequestClose={() => setPickerType(null)}
+              onRequestClose={() =>
+                setPickerType(null)
+              }
             >
               <View style={styles.overlay}>
                 <Pressable
@@ -145,26 +149,37 @@ export function BirthDateInput({
 
                 <View style={styles.modal}>
                   <Text style={styles.modalTitle}>
-                    Select {pickerType ? fieldLabels[pickerType] : ''}
+                    Select{' '}
+                    {pickerType
+                      ? fieldLabels[pickerType]
+                      : ''}
                   </Text>
 
                   <FlatList
                     data={options}
-                    keyExtractor={(item) => String(item)}
+                    keyExtractor={(item) =>
+                      String(item)
+                    }
                     showsVerticalScrollIndicator={false}
                     renderItem={({ item }) => (
                       <Pressable
                         onPress={() => {
                           if (pickerType) {
-                            handleChange(pickerType, item);
+                            handleChange(
+                              pickerType,
+                              item
+                            );
                           }
                         }}
                         style={({ pressed }) => [
                           styles.option,
-                          pressed && styles.optionPressed,
+                          pressed &&
+                            styles.optionPressed,
                         ]}
                       >
-                        <Text style={styles.optionText}>
+                        <Text
+                          style={styles.optionText}
+                        >
                           {item}
                         </Text>
                       </Pressable>
