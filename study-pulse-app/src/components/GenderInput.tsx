@@ -11,22 +11,11 @@ import {
 
 import { colors, fonts, radius, spacing } from '../theme';
 
-type FormData = {
-  name: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-  birthDate: {
-    day: number | null;
-    month: number | null;
-    year: number | null;
-  };
-  gender: string;
-};
+import type { RegisterFormData } from '../validation/schemas';
 
 type Props = {
-  control: Control<FormData>;
-  errors: FieldErrors<FormData>;
+  control: Control<RegisterFormData>;
+  errors: FieldErrors<RegisterFormData>;
 };
 
 const options = [
