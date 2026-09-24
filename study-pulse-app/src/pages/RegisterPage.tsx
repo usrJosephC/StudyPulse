@@ -4,9 +4,13 @@ import {
   Text,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
+import { SafeAreaView } from 'react-native-safe-area-context';
+import {
+  NativeStackScreenProps,
+} from '@react-navigation/native-stack';
+
+import { Register } from '../components/Register';
 import { RootStackParamList } from '../navigation/RootStack';
 import { colors, fonts, spacing } from '../theme';
 
@@ -15,7 +19,9 @@ type Props = NativeStackScreenProps<
   'Register'
 >;
 
-export function RegisterPage({ navigation }: Props) {
+export function RegisterPage({
+  navigation,
+}: Props) {
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView
@@ -25,19 +31,27 @@ export function RegisterPage({ navigation }: Props) {
       >
         <View style={styles.container}>
           <View style={styles.header}>
-            <Text style={styles.title}>Create Account</Text>
+            <Text style={styles.title}>
+              Create Account
+            </Text>
 
             <Text style={styles.subtitle}>
-              Create your account and start your study journey.
+              Create your account and start your study
+              journey.
             </Text>
           </View>
 
           <View style={styles.form}>
-            {/* O componente Cadastro será colocado aqui */}
+            <Register
+              onRegisterSuccess={() =>
+                navigation.replace('Main')
+              }
+            />
           </View>
 
           <Text style={styles.footer}>
             Already have an account?{' '}
+
             <Text
               style={styles.footerLink}
               onPress={() => navigation.goBack()}
