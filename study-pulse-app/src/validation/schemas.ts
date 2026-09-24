@@ -38,24 +38,24 @@ export const signUpSchema = yup.object().shape({
   birthDate: yup.object({
     day: yup
       .number()
-      .nullable()
       .required('Day is required.')
       .min(1, 'Please enter a valid day.')
       .max(31, 'Please enter a valid day.'),
 
     month: yup
       .number()
-      .nullable()
       .required('Month is required.')
       .min(1, 'Please enter a valid month.')
       .max(12, 'Please enter a valid month.'),
 
     year: yup
       .number()
-      .nullable()
       .required('Year is required.')
       .min(1900, 'Please enter a valid year.')
-      .max(2026, 'Please enter a valid year.'),
+      .max(
+        new Date().getFullYear(),
+        'Please enter a valid year.'
+      ),
   }),
 
   gender: yup
@@ -67,4 +67,5 @@ export const signUpSchema = yup.object().shape({
     ),
 });
 
-export type RegisterFormData = yup.InferType<typeof signUpSchema>;
+export type RegisterFormData =
+  yup.InferType<typeof signUpSchema>;
