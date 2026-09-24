@@ -64,7 +64,6 @@ const styles = StyleSheet.create({
 
   input: {
     flex: 1,
-    height: '100%',
     fontFamily: fonts.bodyRegular,
     fontSize: 15,
     color: colors.ink,
