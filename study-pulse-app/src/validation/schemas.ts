@@ -12,6 +12,9 @@ export const loginSchema = yup.object().shape({
     .required('Password is required.'),
 });
 
+export type LoginFormData =
+  yup.InferType<typeof loginSchema>;
+
 export const signUpSchema = yup.object().shape({
   name: yup
     .string()

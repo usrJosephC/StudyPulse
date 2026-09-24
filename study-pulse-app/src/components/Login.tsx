@@ -8,21 +8,28 @@ import {
   Text,
   View,
 } from 'react-native';
+
 import { Ionicons } from '@expo/vector-icons';
-import axios from 'axios';
+// import axios from 'axios';
+
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 
 import { Button } from './Button';
 import { EmailInput } from './EmailInput';
 import { PasswordInput } from './PasswordInput';
-import { colors, fonts, radius, spacing } from '../theme';
-import { loginSchema } from '../validation/schemas';
 
-type FormData = {
-  email: string;
-  password: string;
-};
+import {
+  colors,
+  fonts,
+  radius,
+  spacing,
+} from '../theme';
+
+import {
+  loginSchema,
+  type LoginFormData,
+} from '../validation/schemas';
 
 type Props = {
   onLoginSuccess?: () => void;
@@ -33,23 +40,70 @@ export function Login({
   onLoginSuccess,
   onCreateAccount,
 }: Props) {
-  const [acceptedTerms, setAcceptedTerms] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] =
+    useState(false);
+
+  const [modalVisible, setModalVisible] =
+    useState(false);
+
+  const [isLoading, setIsLoading] =
+    useState(false);
 
   const {
     control,
     formState: { errors },
     handleSubmit,
-  } = useForm<FormData>({
+  } = useForm<LoginFormData>({
     resolver: yupResolver(loginSchema),
     mode: 'onSubmit',
+
     defaultValues: {
       email: '',
       password: '',
     },
   });
 
-  async function onSubmit(data: FormData) {
+  // =====================================================
+  // MOCK TEMPORÁRIO
+  // Usado enquanto o backend ainda não existe.
+  // =====================================================
+
+  async function onSubmit(data: LoginFormData) {
+    try {
+      setIsLoading(true);
+
+      // Simula o tempo de resposta da API
+      await new Promise((resolve) =>
+        setTimeout(resolve, 800)
+      );
+
+      Alert.alert(
+        'Login successful',
+        `Welcome back, ${data.email}!`,
+        [
+          {
+            text: 'Continue',
+            onPress: onLoginSuccess,
+          },
+        ]
+      );
+    } catch (error) {
+      Alert.alert(
+        'Error',
+        'An error occurred while trying to log in.'
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  // =====================================================
+  // LOGIN ORIGINAL
+  // Manter comentado até o backend existir.
+  // =====================================================
+
+  /*
+  async function onSubmit(data: LoginFormData) {
     try {
       const response = await axios.post(
         'http://localhost:3000/login',
@@ -87,6 +141,7 @@ export function Login({
       }
     }
   }
+  */
 
   function handleLogin() {
     if (!acceptedTerms) {
@@ -94,6 +149,7 @@ export function Login({
         'Terms of Service',
         'You need to accept the Terms of Service before continuing.'
       );
+
       return;
     }
 
@@ -144,12 +200,14 @@ export function Login({
 
           <Text style={styles.termsText}>
             I agree to the{' '}
+
             <Text
               style={styles.termsLink}
               onPress={() => setModalVisible(true)}
             >
               Terms of Service
             </Text>
+
             .
           </Text>
         </Pressable>
@@ -158,7 +216,9 @@ export function Login({
           animationType="fade"
           transparent
           visible={modalVisible}
-          onRequestClose={() => setModalVisible(false)}
+          onRequestClose={() =>
+            setModalVisible(false)
+          }
         >
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
@@ -170,9 +230,10 @@ export function Login({
                 </Text>
 
                 <Text style={styles.modalText}>
-                  By using StudyPulse, you agree to use the
-                  application responsibly and provide accurate
-                  information when creating your account.
+                  By using StudyPulse, you agree to use
+                  the application responsibly and provide
+                  accurate information when creating your
+                  account.
                 </Text>
 
                 <Text style={styles.modalText}>
@@ -184,14 +245,20 @@ export function Login({
 
               <Button
                 label="Close"
-                onPress={() => setModalVisible(false)}
+                onPress={() =>
+                  setModalVisible(false)
+                }
               />
             </View>
           </View>
         </Modal>
 
         <Button
-          label="Log In"
+          label={
+            isLoading
+              ? 'Logging in...'
+              : 'Log In'
+          }
           onPress={handleLogin}
         />
 
@@ -229,9 +296,11 @@ const styles = StyleSheet.create({
   container: {
     width: '100%',
   },
+
   form: {
     gap: spacing.md,
   },
+
   forgotPassword: {
     fontFamily: fonts.bodyBold,
     fontSize: 13,
@@ -240,12 +309,14 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
     marginTop: -spacing.xs,
   },
+
   termsContainer: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: spacing.xs,
     marginVertical: spacing.xs,
   },
+
   termsText: {
     flex: 1,
     fontFamily: fonts.bodyRegular,
@@ -253,11 +324,13 @@ const styles = StyleSheet.create({
     color: colors.inkMuted,
     lineHeight: 17,
   },
+
   termsLink: {
     fontFamily: fonts.bodyBold,
     color: colors.secondary,
     textDecorationLine: 'underline',
   },
+
   modalOverlay: {
     flex: 1,
     justifyContent: 'center',
@@ -265,6 +338,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.45)',
     padding: spacing.xl,
   },
+
   modalContent: {
     width: '100%',
     maxWidth: 500,
@@ -274,12 +348,14 @@ const styles = StyleSheet.create({
     padding: spacing.xl,
     gap: spacing.lg,
   },
+
   modalTitle: {
     fontFamily: fonts.headlineBold,
     fontSize: 20,
     color: colors.ink,
     marginBottom: spacing.sm,
   },
+
   modalText: {
     fontFamily: fonts.bodyRegular,
     fontSize: 14,
@@ -287,6 +363,7 @@ const styles = StyleSheet.create({
     color: colors.inkMuted,
     marginBottom: spacing.md,
   },
+
   googleButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -294,6 +371,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     paddingVertical: spacing.md,
   },
+
   googleText: {
     fontFamily: fonts.bodyBold,
     fontSize: 14,
