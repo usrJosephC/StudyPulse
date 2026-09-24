@@ -16,7 +16,7 @@ export function NameInput({ control, errors }: Props) {
       control={control}
       name="name"
       render={({ field: { onChange, onBlur, value } }) => (
-        <View style={styles.wrapper}>
+        <View>
           <View style={styles.inputContainer}>
             <Ionicons
               name="person-outline"
@@ -49,10 +49,6 @@ export function NameInput({ control, errors }: Props) {
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
-    marginBottom: spacing.md,
-  },
-
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
