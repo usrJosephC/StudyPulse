@@ -6,12 +6,8 @@ import {
   View,
 } from 'react-native';
 import axios from 'axios';
-import {
-  useForm,
-} from 'react-hook-form';
-import {
-  yupResolver,
-} from '@hookform/resolvers/yup';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
 
 import { Button } from './Button';
 import { EmailInput } from './EmailInput';
@@ -21,21 +17,12 @@ import { ConfirmPasswordInput } from './ConfirmPasswordInput';
 import { BirthDateInput } from './BirthDateInput';
 import { GenderInput } from './GenderInput';
 
-import { signUpSchema } from '../validation/schemas';
-import { colors, fonts, spacing } from '../theme';
+import {
+  signUpSchema,
+  RegisterFormData,
+} from '../validation/schemas';
 
-type FormData = {
-  name: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-  birthDate: {
-    day: number | null;
-    month: number | null;
-    year: number | null;
-  };
-  gender: string;
-};
+import { colors, fonts, spacing } from '../theme';
 
 type Props = {
   onRegisterSuccess?: () => void;
@@ -50,9 +37,11 @@ export function Register({
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormData>({
+  } = useForm<RegisterFormData>({
     resolver: yupResolver(signUpSchema),
+
     mode: 'onSubmit',
+
     defaultValues: {
       name: '',
       email: '',
@@ -67,7 +56,7 @@ export function Register({
     },
   });
 
-  async function onSubmit(data: FormData) {
+  async function onSubmit(data: RegisterFormData) {
     const payload = {
       nome: data.name,
       email: data.email,
@@ -165,7 +154,11 @@ export function Register({
       />
 
       <Button
-        label={isLoading ? 'Creating account...' : 'Create Account'}
+        label={
+          isLoading
+            ? 'Creating account...'
+            : 'Create Account'
+        }
         onPress={handleSubmit(onSubmit)}
       />
     </View>
