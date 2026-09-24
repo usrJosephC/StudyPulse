@@ -17,10 +17,8 @@ import { ConfirmPasswordInput } from './ConfirmPasswordInput';
 import { BirthDateInput } from './BirthDateInput';
 import { GenderInput } from './GenderInput';
 
-import {
-  signUpSchema,
-  RegisterFormData,
-} from '../validation/schemas';
+import { signUpSchema } from '../validation/schemas';
+import type { RegisterFormData } from '../validation/schemas';
 
 import { colors, fonts, spacing } from '../theme';
 
@@ -37,9 +35,12 @@ export function Register({
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<RegisterFormData>({
+  } = useForm<
+    RegisterFormData,
+    unknown,
+    RegisterFormData
+  >({
     resolver: yupResolver(signUpSchema),
-
     mode: 'onSubmit',
 
     defaultValues: {
@@ -48,9 +49,9 @@ export function Register({
       password: '',
       confirmPassword: '',
       birthDate: {
-        day: null,
-        month: null,
-        year: null,
+        day: undefined,
+        month: undefined,
+        year: undefined,
       },
       gender: '',
     },
