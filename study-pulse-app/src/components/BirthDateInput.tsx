@@ -1,6 +1,13 @@
 import { useState } from 'react';
-import { Controller, Control, FieldErrors } from 'react-hook-form';
+
+import {
+  Controller,
+  Control,
+  FieldErrors,
+} from 'react-hook-form';
+
 import { Ionicons } from '@expo/vector-icons';
+
 import {
   FlatList,
   Modal,
@@ -10,7 +17,13 @@ import {
   View,
 } from 'react-native';
 
-import { colors, fonts, radius, spacing } from '../theme';
+import {
+  colors,
+  fonts,
+  radius,
+  spacing,
+} from '../theme';
+
 import type { RegisterFormData } from '../validation/schemas';
 
 type Props = {
@@ -101,7 +114,9 @@ export function BirthDateInput({
                   return (
                     <Pressable
                       key={type}
-                      onPress={() => setPickerType(type)}
+                      onPress={() =>
+                        setPickerType(type)
+                      }
                       style={({ pressed }) => [
                         styles.field,
                         pressed && styles.fieldPressed,
@@ -110,7 +125,8 @@ export function BirthDateInput({
                       <Text
                         style={[
                           styles.fieldText,
-                          !hasValue && styles.placeholder,
+                          !hasValue &&
+                            styles.placeholder,
                         ]}
                       >
                         {getValue(type)}
@@ -129,7 +145,7 @@ export function BirthDateInput({
 
             {errors.birthDate && (
               <Text style={styles.error}>
-                {errors.birthDate.message}
+                {String(errors.birthDate.message)}
               </Text>
             )}
 
@@ -144,7 +160,9 @@ export function BirthDateInput({
               <View style={styles.overlay}>
                 <Pressable
                   style={StyleSheet.absoluteFill}
-                  onPress={() => setPickerType(null)}
+                  onPress={() =>
+                    setPickerType(null)
+                  }
                 />
 
                 <View style={styles.modal}>
@@ -160,7 +178,12 @@ export function BirthDateInput({
                     keyExtractor={(item) =>
                       String(item)
                     }
-                    showsVerticalScrollIndicator={false}
+                    showsVerticalScrollIndicator
+                    persistentScrollbar
+                    nestedScrollEnabled
+                    contentContainerStyle={
+                      styles.listContent
+                    }
                     renderItem={({ item }) => (
                       <Pressable
                         onPress={() => {
@@ -197,7 +220,7 @@ export function BirthDateInput({
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: spacing.lg,
+    width: '100%',
   },
 
   row: {
@@ -251,7 +274,7 @@ const styles = StyleSheet.create({
   modal: {
     width: '100%',
     maxWidth: 360,
-    maxHeight: 420,
+    height: 480,
     backgroundColor: colors.card,
     borderRadius: radius.lg,
     padding: spacing.lg,
@@ -263,6 +286,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: colors.ink,
     textAlign: 'center',
+  },
+
+  listContent: {
+    paddingBottom: spacing.sm,
   },
 
   option: {
