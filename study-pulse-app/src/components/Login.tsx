@@ -8,10 +8,8 @@ import {
   Text,
   View,
 } from 'react-native';
-
 import { Ionicons } from '@expo/vector-icons';
 // import axios from 'axios';
-
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 
@@ -19,12 +17,7 @@ import { Button } from './Button';
 import { EmailInput } from './EmailInput';
 import { PasswordInput } from './PasswordInput';
 
-import {
-  colors,
-  fonts,
-  radius,
-  spacing,
-} from '../theme';
+import { colors, fonts, radius, spacing } from '../theme';
 
 import {
   loginSchema,
@@ -40,14 +33,9 @@ export function Login({
   onLoginSuccess,
   onCreateAccount,
 }: Props) {
-  const [acceptedTerms, setAcceptedTerms] =
-    useState(false);
-
-  const [modalVisible, setModalVisible] =
-    useState(false);
-
-  const [isLoading, setIsLoading] =
-    useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const {
     control,
@@ -56,30 +44,29 @@ export function Login({
   } = useForm<LoginFormData>({
     resolver: yupResolver(loginSchema),
     mode: 'onSubmit',
-
     defaultValues: {
       email: '',
       password: '',
     },
   });
 
-  // =====================================================
-  // MOCK TEMPORÁRIO
-  // Usado enquanto o backend ainda não existe.
-  // =====================================================
-
+  // Mock temporário enquanto o backend não existe.
   async function onSubmit(data: LoginFormData) {
     try {
       setIsLoading(true);
 
-      // Simula o tempo de resposta da API
+      // Simula o tempo de resposta de uma API.
       await new Promise((resolve) =>
         setTimeout(resolve, 800)
       );
 
+      console.log('Mock login:', {
+        email: data.email,
+      });
+
       Alert.alert(
         'Login successful',
-        `Welcome back, ${data.email}!`,
+        'You have successfully logged in.',
         [
           {
             text: 'Continue',
@@ -87,24 +74,19 @@ export function Login({
           },
         ]
       );
-    } catch (error) {
-      Alert.alert(
-        'Error',
-        'An error occurred while trying to log in.'
-      );
     } finally {
       setIsLoading(false);
     }
   }
 
-  // =====================================================
-  // LOGIN ORIGINAL
-  // Manter comentado até o backend existir.
-  // =====================================================
-
   /*
+  // Quando o backend estiver pronto, o mock acima
+  // poderá ser substituído por esta implementação:
+
   async function onSubmit(data: LoginFormData) {
     try {
+      setIsLoading(true);
+
       const response = await axios.post(
         'http://localhost:3000/login',
         {
@@ -139,6 +121,8 @@ export function Login({
           'An error occurred while trying to log in.'
         );
       }
+    } finally {
+      setIsLoading(false);
     }
   }
   */
@@ -149,7 +133,6 @@ export function Login({
         'Terms of Service',
         'You need to accept the Terms of Service before continuing.'
       );
-
       return;
     }
 
@@ -207,7 +190,6 @@ export function Login({
             >
               Terms of Service
             </Text>
-
             .
           </Text>
         </Pressable>
@@ -216,9 +198,7 @@ export function Login({
           animationType="fade"
           transparent
           visible={modalVisible}
-          onRequestClose={() =>
-            setModalVisible(false)
-          }
+          onRequestClose={() => setModalVisible(false)}
         >
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
@@ -230,10 +210,9 @@ export function Login({
                 </Text>
 
                 <Text style={styles.modalText}>
-                  By using StudyPulse, you agree to use
-                  the application responsibly and provide
-                  accurate information when creating your
-                  account.
+                  By using StudyPulse, you agree to use the
+                  application responsibly and provide accurate
+                  information when creating your account.
                 </Text>
 
                 <Text style={styles.modalText}>
@@ -245,9 +224,7 @@ export function Login({
 
               <Button
                 label="Close"
-                onPress={() =>
-                  setModalVisible(false)
-                }
+                onPress={() => setModalVisible(false)}
               />
             </View>
           </View>
