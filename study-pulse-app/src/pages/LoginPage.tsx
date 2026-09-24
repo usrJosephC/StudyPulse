@@ -28,7 +28,7 @@ export function LoginPage({ navigation }: Props) {
         <View style={styles.container}>
           <View style={styles.logoContainer}>
             <Image
-              source={require('../../assets/images/icon.png')}
+              source={require('../../assets/icon.png')}
               style={styles.logo}
               resizeMode="contain"
             />
