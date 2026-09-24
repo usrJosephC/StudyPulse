@@ -1,10 +1,24 @@
 import { ActivityIndicator, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
+import {
+  NavigationContainer,
+  DefaultTheme,
+} from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { useFonts, Montserrat_700Bold, Montserrat_800ExtraBold } from '@expo-google-fonts/montserrat';
-import { Quicksand_500Medium, Quicksand_600SemiBold, Quicksand_700Bold } from '@expo-google-fonts/quicksand';
-import { RootTabs } from './src/navigation/RootTabs';
+
+import {
+  useFonts,
+  Montserrat_700Bold,
+  Montserrat_800ExtraBold,
+} from '@expo-google-fonts/montserrat';
+
+import {
+  Quicksand_500Medium,
+  Quicksand_600SemiBold,
+  Quicksand_700Bold,
+} from '@expo-google-fonts/quicksand';
+
+import { RootStack } from './src/navigation/RootStack';
 import { colors } from './src/theme';
 
 const navigationTheme = {
@@ -30,8 +44,18 @@ export default function App() {
 
   if (!fontsLoaded) {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background }}>
-        <ActivityIndicator color={colors.primary} size="large" />
+      <View
+        style={{
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: colors.background,
+        }}
+      >
+        <ActivityIndicator
+          color={colors.primary}
+          size="large"
+        />
       </View>
     );
   }
@@ -39,8 +63,9 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <NavigationContainer theme={navigationTheme}>
-        <RootTabs />
+        <RootStack />
       </NavigationContainer>
+
       <StatusBar style="dark" />
     </SafeAreaProvider>
   );
