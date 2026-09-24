@@ -10,14 +10,11 @@ import {
 } from 'react-native';
 import { colors, fonts, radius, spacing } from '../theme';
 
-type FormData = {
-  email: string;
-  password: string;
-};
+import type { RegisterFormData } from '../validation/schemas';
 
 type Props = {
-  control: Control<FormData>;
-  errors: FieldErrors<FormData>;
+  control: Control<RegisterFormData>;
+  errors: FieldErrors<RegisterFormData>;
 };
 
 export function PasswordInput({ control, errors }: Props) {
