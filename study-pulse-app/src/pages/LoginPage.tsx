@@ -28,7 +28,7 @@ export function LoginPage({ navigation }: Props) {
         <View style={styles.container}>
           <View style={styles.logoContainer}>
             <Image
-              source={require('../../assets/icon.png')}
+              source={require('../../assets/studypulse-logo-v1.png')}
               style={styles.logo}
               resizeMode="contain"
             />
@@ -45,9 +45,6 @@ export function LoginPage({ navigation }: Props) {
           </View>
 
           <Login
-            onLoginSuccess={() =>
-              navigation.replace('Main')
-            }
             onCreateAccount={() =>
               navigation.navigate('Register')
             }
@@ -80,8 +77,8 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
   },
   logo: {
-    width: 180,
-    height: 100,
+    width: 240,
+    height: 90,
   },
   header: {
     alignItems: 'center',

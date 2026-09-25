@@ -138,3 +138,5 @@ dist
 
 # SvelteKit
 .svelte-kit/
+# Local documentation and orchestration context
+docs/

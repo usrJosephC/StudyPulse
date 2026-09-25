@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -7,21 +8,41 @@ import { Pill } from '../components/Pill';
 import { Avatar } from '../components/Avatar';
 import { colors, fonts, radius, spacing } from '../theme';
 import { currentUser, profileSettings, profileStats } from '../data/mockData';
+import { useAuth } from '../context/AuthContext';
 
 export function ProfileScreen() {
+  const { session, profile, signOut } = useAuth();
+  const [isSigningOut, setIsSigningOut] = useState(false);
+  const [signOutError, setSignOutError] = useState<string | null>(null);
+  const metadataName = session?.user.user_metadata?.name;
+  const displayName = profile?.name?.trim()
+    || (typeof metadataName === 'string' ? metadataName.trim() : '')
+    || 'Estudante';
+  const email = session?.user.email ?? '';
+  const userInitial = displayName.charAt(0).toUpperCase() || '?';
+
+  async function handleSignOut() {
+    setIsSigningOut(true);
+    setSignOutError(null);
+    const result = await signOut();
+    if (!result.ok) setSignOutError(result.error.message);
+    setIsSigningOut(false);
+  }
+
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      <ScreenHeader userInitial={currentUser.initial} />
+      <ScreenHeader userInitial={userInitial} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.centered}>
           <View>
-            <Avatar label={currentUser.initial} size={96} ringColor={colors.secondarySoft} />
+            <Avatar label={userInitial} size={96} ringColor={colors.secondarySoft} />
             <View style={styles.streakBadge}>
               <Ionicons name="flame" size={12} color={colors.primary} />
               <Text style={styles.streakBadgeText}>{currentUser.streak}</Text>
             </View>
           </View>
-          <Text style={styles.name}>{currentUser.name}</Text>
+          <Text style={styles.name} numberOfLines={1} ellipsizeMode="tail">{displayName}</Text>
+          <Text style={styles.email} numberOfLines={1} ellipsizeMode="tail">{email}</Text>
           <Text style={styles.since}>Studying since {currentUser.since}</Text>
           <Pill label={currentUser.badge} variant="secondary" icon={<Ionicons name="ribbon" size={12} color="#fff" />} />
         </View>
@@ -50,6 +71,21 @@ export function ProfileScreen() {
               <Ionicons name="chevron-forward" size={18} color={colors.inkFaint} />
             </Pressable>
           ))}
+          <Pressable
+            style={styles.settingRow}
+            onPress={handleSignOut}
+            disabled={isSigningOut}
+            accessibilityRole="button"
+            accessibilityLabel="Sair"
+            accessibilityState={{ disabled: isSigningOut, busy: isSigningOut }}
+          >
+            <View style={styles.settingIcon}>
+              <Ionicons name="log-out-outline" size={18} color={colors.danger} />
+            </View>
+            <Text style={styles.signOutLabel}>{isSigningOut ? 'Saindo...' : 'Sair'}</Text>
+            {isSigningOut && <Text style={styles.loadingText}>Aguarde</Text>}
+          </Pressable>
+          {signOutError && <Text style={styles.errorText}>{signOutError}</Text>}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -92,6 +128,11 @@ const styles = StyleSheet.create({
     fontSize: 22,
     color: colors.ink,
     marginTop: spacing.sm,
+  },
+  email: {
+    fontFamily: fonts.bodyRegular,
+    fontSize: 13,
+    color: colors.inkMuted,
   },
   since: {
     fontFamily: fonts.bodyRegular,
@@ -154,5 +195,22 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bodyBold,
     fontSize: 14,
     color: colors.ink,
+  },
+  signOutLabel: {
+    flex: 1,
+    fontFamily: fonts.bodyBold,
+    fontSize: 14,
+    color: colors.danger,
+  },
+  loadingText: {
+    fontFamily: fonts.bodyRegular,
+    fontSize: 12,
+    color: colors.inkMuted,
+  },
+  errorText: {
+    fontFamily: fonts.bodyRegular,
+    fontSize: 12,
+    color: colors.danger,
+    paddingHorizontal: spacing.sm,
   },
 });

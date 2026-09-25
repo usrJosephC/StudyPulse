@@ -1,4 +1,5 @@
 import {
+  Image,
   ScrollView,
   StyleSheet,
   Text,
@@ -30,23 +31,25 @@ export function RegisterPage({
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.container}>
+          <Image
+            source={require('../../assets/studypulse-logo-v1.png')}
+            style={styles.logo}
+            resizeMode="contain"
+            accessibilityLabel="StudyPulse"
+          />
+
           <View style={styles.header}>
             <Text style={styles.title}>
               Create Account
             </Text>
 
             <Text style={styles.subtitle}>
-              Create your account and start your study
-              journey.
+              Create your account and start your study journey.
             </Text>
           </View>
 
           <View style={styles.form}>
-            <Register
-              onRegisterSuccess={() =>
-                navigation.replace('Main')
-              }
-            />
+            <Register />
           </View>
 
           <Text style={styles.footer}>
@@ -87,6 +90,12 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     marginBottom: spacing.xl,
+  },
+
+  logo: {
+    width: 180,
+    height: 66,
+    marginBottom: spacing.lg,
   },
 
   title: {

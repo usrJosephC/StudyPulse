@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import {
   Alert,
@@ -22,6 +22,7 @@ import { signUpSchema } from '../validation/schemas';
 import type { RegisterFormData } from '../validation/schemas';
 
 import { colors, fonts, spacing } from '../theme';
+import { useAuth } from '../context/AuthContext';
 
 type Props = {
   onRegisterSuccess?: () => void;
@@ -30,7 +31,9 @@ type Props = {
 export function Register({
   onRegisterSuccess,
 }: Props) {
+  const { signUp } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const submitInProgress = useRef(false);
 
   const {
     control,
@@ -58,29 +61,44 @@ export function Register({
   });
 
   async function onSubmit(data: RegisterFormData) {
+    if (submitInProgress.current) return;
+    const normalizedName = data.name.trim();
+    if (normalizedName.length > 80) {
+      Alert.alert('Nome muito longo', 'Use no máximo 80 caracteres.');
+      return;
+    }
+    submitInProgress.current = true;
     try {
       setIsLoading(true);
 
-      // Mock temporário: simula uma resposta do backend.
-      await new Promise((resolve) =>
-        setTimeout(resolve, 800)
-      );
-
-      console.log('Mock register:', {
-        name: data.name,
-        email: data.email,
-        birthDate: data.birthDate,
+      const birthDate = [
+        data.birthDate.year,
+        String(data.birthDate.month).padStart(2, '0'),
+        String(data.birthDate.day).padStart(2, '0'),
+      ].join('-');
+      const result = await signUp(normalizedName, data.email, data.password, {
+        birthDate,
         gender: data.gender,
       });
-
-      // Simula um cadastro realizado com sucesso.
-      onRegisterSuccess?.();
+      if (!result.ok) {
+        Alert.alert('Não foi possível criar a conta', result.error.message);
+        return;
+      }
+      if (!result.data.session) {
+        Alert.alert(
+          'Confirme seu e-mail',
+          'Enviamos um link de confirmação. Depois de confirmar, volte e faça login.'
+        );
+        return;
+      }
+      // O AuthProvider muda o navegador quando a sessão é emitida.
     } catch (error) {
       Alert.alert(
-        'Error',
-        'An error occurred while creating your account.'
+        'Erro',
+        'Não foi possível criar sua conta. Tente novamente.'
       );
     } finally {
+      submitInProgress.current = false;
       setIsLoading(false);
     }
   }
@@ -126,12 +144,9 @@ export function Register({
       />
 
       <Button
-        label={
-          isLoading
-            ? 'Creating account...'
-            : 'Create Account'
-        }
+        label={isLoading ? 'Criando conta...' : 'Create Account'}
         onPress={handleSubmit(onSubmit)}
+        disabled={isLoading}
       />
     </View>
   );

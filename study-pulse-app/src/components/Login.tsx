@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import {
   Alert,
@@ -30,6 +30,7 @@ import {
   loginSchema,
   type LoginFormData,
 } from '../validation/schemas';
+import { useAuth } from '../context/AuthContext';
 
 type Props = {
   onLoginSuccess?: () => void;
@@ -40,6 +41,7 @@ export function Login({
   onLoginSuccess,
   onCreateAccount,
 }: Props) {
+  const { signIn } = useAuth();
   const [acceptedTerms, setAcceptedTerms] =
     useState(false);
 
@@ -51,6 +53,7 @@ export function Login({
 
   const [isLoading, setIsLoading] =
     useState(false);
+  const submitInProgress = useRef(false);
 
   const {
     control,
@@ -65,23 +68,19 @@ export function Login({
     },
   });
 
-  // mock temporário enquanto o backend não existe
   async function onSubmit(data: LoginFormData) {
+    if (submitInProgress.current) return;
+    submitInProgress.current = true;
     try {
       setIsLoading(true);
-
-      // simula o tempo de resposta da API
-      await new Promise((resolve) =>
-        setTimeout(resolve, 800)
-      );
-
-      console.log('Mock login:', {
-        email: data.email,
-      });
-
-      // Simula uma resposta de login bem-sucedida.
-      onLoginSuccess?.();
+      const result = await signIn(data.email, data.password);
+      if (!result.ok) {
+        Alert.alert('Não foi possível entrar', result.error.message);
+        return;
+      }
+      // O AuthProvider muda o navegador quando a sessão é emitida.
     } finally {
+      submitInProgress.current = false;
       setIsLoading(false);
     }
   }
@@ -164,6 +163,7 @@ export function Login({
         />
 
         <Pressable
+          disabled={isLoading}
           onPress={() =>
             Alert.alert(
               'Reset password',
@@ -179,6 +179,7 @@ export function Login({
         <View>
           <Pressable
             style={styles.termsContainer}
+            disabled={isLoading}
             onPress={handleTermsToggle}
           >
             <Ionicons
@@ -266,16 +267,19 @@ export function Login({
               : 'Log In'
           }
           onPress={handleLogin}
+          disabled={isLoading}
         />
 
         <Button
           label="Create Account"
           onPress={onCreateAccount}
           variant="outline"
+          disabled={isLoading}
         />
 
         <Pressable
           style={styles.googleButton}
+          disabled={isLoading}
           onPress={() =>
             Alert.alert(
               'Google Login',

@@ -19,6 +19,7 @@ import {
 } from '@expo-google-fonts/quicksand';
 
 import { RootStack } from './src/navigation/RootStack';
+import { AuthProvider } from './src/context/AuthContext';
 import { colors } from './src/theme';
 
 const navigationTheme = {
@@ -62,9 +63,11 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <NavigationContainer theme={navigationTheme}>
-        <RootStack />
-      </NavigationContainer>
+      <AuthProvider>
+        <NavigationContainer theme={navigationTheme}>
+          <RootStack />
+        </NavigationContainer>
+      </AuthProvider>
 
       <StatusBar style="dark" />
     </SafeAreaProvider>

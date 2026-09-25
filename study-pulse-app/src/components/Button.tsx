@@ -9,13 +9,17 @@ type Props = {
   onPress?: () => void;
   variant?: ButtonVariant;
   icon?: keyof typeof Ionicons.glyphMap;
+  disabled?: boolean;
 };
 
-export function Button({ label, onPress, variant = 'primary', icon }: Props) {
+export function Button({ label, onPress, variant = 'primary', icon, disabled = false }: Props) {
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => [styles.base, variantStyles[variant].container, pressed && styles.pressed]}
+      disabled={disabled}
+      accessibilityRole="button"
+      accessibilityState={{ disabled }}
+      style={({ pressed }) => [styles.base, variantStyles[variant].container, pressed && styles.pressed, disabled && { opacity: 0.5 }]}
     >
       <Text style={[styles.label, variantStyles[variant].label]}>{label}</Text>
       {icon && <Ionicons name={icon} size={18} color={variantStyles[variant].label.color as string} />}
