@@ -1,32 +1,66 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { Card } from '../components/Card';
 import { ProgressRing } from '../components/ProgressRing';
 import { Button } from '../components/Button';
 import { Pill } from '../components/Pill';
-import { Avatar } from '../components/Avatar';
 import { colors, fonts, radius, spacing } from '../theme';
-import { currentUser, todaysTasks, homeSquadPreview } from '../data/mockData';
+import { useAuth } from '../context/AuthContext';
+import { usePoints } from '../hooks/usePoints';
+import { useStreak } from '../hooks/useStreak';
+import { useTasks } from '../hooks/useTasks';
 
 export function HomeScreen() {
-  const [tasks, setTasks] = useState(todaysTasks);
+  const { session, profile } = useAuth();
+  const streak = useStreak();
+  const points = usePoints();
+  const { tasks, loading: tasksLoading, error: tasksError, refresh: refreshTasks, toggleTask } = useTasks();
+  const [taskError, setTaskError] = useState<string | null>(null);
+  const [updatingTaskId, setUpdatingTaskId] = useState<number | null>(null);
+  const displayName = profile?.name?.trim()
+    || (typeof session?.user.user_metadata?.name === 'string' ? session.user.user_metadata.name.trim() : '')
+    || 'Estudante';
+  const userInitial = displayName.charAt(0).toUpperCase() || '?';
 
   const nextTaskId = useMemo(() => tasks.find((task) => !task.done)?.id, [tasks]);
   const tasksDone = tasks.filter((task) => task.done).length;
   const tasksTotal = tasks.length;
   const tasksProgress = tasksTotal > 0 ? tasksDone / tasksTotal : 0;
 
-  function toggleTask(id: string) {
-    setTasks((current) => current.map((task) => (task.id === id ? { ...task, done: !task.done } : task)));
+  async function handleToggleTask(id: number) {
+    if (updatingTaskId !== null) return;
+    setUpdatingTaskId(id);
+    setTaskError(null);
+    const result = await toggleTask(id);
+    if (!result.ok) {
+      setTaskError(result.error.message);
+    } else {
+      const refreshed = await Promise.all([refreshTasks(), points.refresh(), streak.refresh()]);
+      const failedRefresh = refreshed.find((item) => !item.ok);
+      if (failedRefresh && !failedRefresh.ok) setTaskError(failedRefresh.error.message);
+    }
+    setUpdatingTaskId(null);
   }
+
+  async function refreshHomeData() {
+    setTaskError(null);
+    const refreshed = await Promise.all([refreshTasks(), points.refresh(), streak.refresh()]);
+    const failed = refreshed.find((item) => !item.ok);
+    if (failed && !failed.ok) setTaskError(failed.error.message);
+  }
+
+  useFocusEffect(useCallback(() => {
+    void Promise.all([refreshTasks(), points.refresh(), streak.refresh()]);
+  }, [points.refresh, refreshTasks, streak.refresh]));
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      <ScreenHeader userInitial={currentUser.initial} />
+      <ScreenHeader userInitial={userInitial} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <LinearGradient
           colors={[colors.primary, colors.primarySoft]}
@@ -39,7 +73,7 @@ export function HomeScreen() {
           </View>
           <View>
             <Text style={styles.streakLabel}>ON FIRE!</Text>
-            <Text style={styles.streakValue}>{currentUser.streak} Day Streak</Text>
+            <Text style={styles.streakValue}>{streak.loading ? 'Carregando…' : `${streak.streak} Day Streak`}</Text>
           </View>
         </LinearGradient>
 
@@ -50,7 +84,7 @@ export function HomeScreen() {
             </Text>
             <Text style={styles.ringLabel}>Tasks</Text>
           </ProgressRing>
-          <Text style={styles.encourageTitle}>Almost there, {currentUser.name}!</Text>
+          <Text style={styles.encourageTitle}>Almost there, {displayName}!</Text>
           <Text style={styles.encourageBody}>
             You're over halfway through today's goals. Keep that momentum going!
           </Text>
@@ -63,11 +97,22 @@ export function HomeScreen() {
           <Text style={styles.sectionTitle}>Today's Tasks</Text>
           <Text style={styles.seeAll}>See All</Text>
         </View>
+        {points.loading && <Text style={styles.loadingText}>Carregando seus pontos…</Text>}
+        {tasksLoading && <Text style={styles.loadingText}>Carregando tarefas…</Text>}
+        {(taskError || tasksError || points.error || streak.error) && (
+          <Pressable onPress={() => { void refreshHomeData(); }} accessibilityRole="button">
+            <Text style={styles.errorText}>
+              {taskError || tasksError?.message || points.error?.message || streak.error?.message} · Toque para tentar novamente
+            </Text>
+          </Pressable>
+        )}
+        {!tasksLoading && tasks.length === 0 && <Text style={styles.loadingText}>Nenhuma tarefa para hoje. Adicione uma pela aba Goals.</Text>}
         <View style={styles.taskList}>
           {tasks.map((task) => (
             <Pressable
               key={task.id}
-              onPress={() => toggleTask(task.id)}
+              onPress={() => { void handleToggleTask(task.id); }}
+              disabled={updatingTaskId !== null}
               accessibilityRole="checkbox"
               accessibilityState={{ checked: task.done }}
               accessibilityLabel={`${task.title}, ${task.category}`}
@@ -76,6 +121,7 @@ export function HomeScreen() {
                 styles.taskRow,
                 !task.done && task.id === nextTaskId && styles.taskRowActive,
                 pressed && styles.taskRowPressed,
+                updatingTaskId === task.id && styles.taskRowPressed,
               ]}
             >
               <Ionicons
@@ -91,27 +137,16 @@ export function HomeScreen() {
           ))}
         </View>
 
-        <Text style={[styles.sectionTitle, styles.squadSectionTitle]}>Study Squad</Text>
+        <Text style={[styles.sectionTitle, styles.squadSectionTitle]}>Weekly Points</Text>
         <Card>
           <View style={styles.squadHeaderRow}>
             <View style={styles.squadHeaderLeft}>
               <Ionicons name="trophy" size={18} color={colors.primary} />
-              <Text style={styles.squadTitle}>Weekly Ranking</Text>
+              <Text style={styles.squadTitle}>Your weekly total</Text>
             </View>
-            <Pill label={homeSquadPreview.rankLabel} variant="secondary" />
+            <Pill label={points.loading ? '…' : `${points.weekly.toLocaleString()} pt`} variant="secondary" />
           </View>
-          <View style={styles.squadMembers}>
-            {homeSquadPreview.members.map((member) => (
-              <View key={member.id} style={styles.squadMember}>
-                <Avatar
-                  label={member.initial}
-                  size={member.isYou ? 56 : 48}
-                  ringColor={member.isYou ? colors.primary : undefined}
-                />
-                <Text style={styles.squadMemberName}>{member.isYou ? 'You' : member.initial}</Text>
-              </View>
-            ))}
-          </View>
+          <Text style={styles.encourageBody}>Total points: {points.loading ? '…' : points.total.toLocaleString()}</Text>
         </Card>
       </ScrollView>
     </SafeAreaView>
@@ -235,6 +270,16 @@ const styles = StyleSheet.create({
     color: colors.inkFaint,
     textDecorationLine: 'line-through',
   },
+  loadingText: {
+    fontFamily: fonts.bodyRegular,
+    fontSize: 12,
+    color: colors.inkMuted,
+  },
+  errorText: {
+    fontFamily: fonts.bodyRegular,
+    fontSize: 12,
+    color: colors.danger,
+  },
   squadHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -249,19 +294,5 @@ const styles = StyleSheet.create({
     fontFamily: fonts.headlineBold,
     fontSize: 15,
     color: colors.ink,
-  },
-  squadMembers: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginTop: spacing.lg,
-  },
-  squadMember: {
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  squadMemberName: {
-    fontFamily: fonts.bodyMedium,
-    fontSize: 12,
-    color: colors.inkMuted,
   },
 });

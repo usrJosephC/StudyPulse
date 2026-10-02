@@ -1,17 +1,29 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { Card } from '../components/Card';
 import { Pill } from '../components/Pill';
 import { Avatar } from '../components/Avatar';
 import { colors, fonts, radius, spacing } from '../theme';
-import { currentUser, profileSettings, profileStats } from '../data/mockData';
 import { useAuth } from '../context/AuthContext';
+import { usePoints } from '../hooks/usePoints';
+import { useStreak } from '../hooks/useStreak';
+import { useTasks } from '../hooks/useTasks';
+
+const profileSettings = [
+  { id: 'account', icon: 'person-outline' as const, label: 'Account' },
+  { id: 'notifications', icon: 'notifications-outline' as const, label: 'Notifications' },
+  { id: 'squad', icon: 'people-outline' as const, label: 'Study Squad' },
+];
 
 export function ProfileScreen() {
-  const { session, profile, signOut } = useAuth();
+  const { session, profile, loading: authLoading, error: authError, signOut } = useAuth();
+  const streak = useStreak();
+  const points = usePoints();
+  const tasks = useTasks();
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [signOutError, setSignOutError] = useState<string | null>(null);
   const metadataName = session?.user.user_metadata?.name;
@@ -20,6 +32,18 @@ export function ProfileScreen() {
     || 'Estudante';
   const email = session?.user.email ?? '';
   const userInitial = displayName.charAt(0).toUpperCase() || '?';
+  const profileLoading = authLoading || streak.loading || points.loading || tasks.loading;
+  const loadError = authError || streak.error || points.error || tasks.error;
+  const [dataError, setDataError] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const profileStats = [
+    { id: 'streak', icon: 'flame' as const, value: String(streak.streak), label: 'Day Streak', tint: '#FCE4E4' },
+    { id: 'goals', icon: 'checkmark-circle' as const, value: String(tasks.tasks.filter((task) => task.done).length), label: 'Tasks Done', tint: '#EAEAEA' },
+    { id: 'points', icon: 'star' as const, value: points.total.toLocaleString(), label: 'Total Points', tint: '#FDF6D3' },
+  ];
+  const since = profile?.created_at
+    ? new Date(profile.created_at).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })
+    : '—';
 
   async function handleSignOut() {
     setIsSigningOut(true);
@@ -28,6 +52,19 @@ export function ProfileScreen() {
     if (!result.ok) setSignOutError(result.error.message);
     setIsSigningOut(false);
   }
+
+  async function refreshProfileData() {
+    setIsRefreshing(true);
+    setDataError(null);
+    const results = await Promise.all([streak.refresh(), points.refresh(), tasks.refresh()]);
+    const failed = results.find((result) => !result.ok);
+    if (failed && !failed.ok) setDataError(failed.error.message);
+    setIsRefreshing(false);
+  }
+
+  useFocusEffect(useCallback(() => {
+    void Promise.all([streak.refresh(), points.refresh(), tasks.refresh()]);
+  }, [points.refresh, streak.refresh, tasks.refresh]));
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -38,16 +75,24 @@ export function ProfileScreen() {
             <Avatar label={userInitial} size={96} ringColor={colors.secondarySoft} />
             <View style={styles.streakBadge}>
               <Ionicons name="flame" size={12} color={colors.primary} />
-              <Text style={styles.streakBadgeText}>{currentUser.streak}</Text>
+              <Text style={styles.streakBadgeText}>{streak.loading ? '…' : streak.streak}</Text>
             </View>
           </View>
           <Text style={styles.name} numberOfLines={1} ellipsizeMode="tail">{displayName}</Text>
           <Text style={styles.email} numberOfLines={1} ellipsizeMode="tail">{email}</Text>
-          <Text style={styles.since}>Studying since {currentUser.since}</Text>
-          <Pill label={currentUser.badge} variant="secondary" icon={<Ionicons name="ribbon" size={12} color="#fff" />} />
+          <Text style={styles.since}>Studying since {since}</Text>
+          {profile?.badge ? <Pill label={profile.badge} variant="secondary" icon={<Ionicons name="ribbon" size={12} color="#fff" />} /> : null}
         </View>
 
         <Text style={styles.sectionTitle}>Your Stats</Text>
+        {profileLoading && <Text style={styles.loadingText}>Carregando perfil…</Text>}
+        {loadError && !dataError && (
+          <Pressable onPress={() => { void refreshProfileData(); }} accessibilityRole="button" disabled={isRefreshing}>
+            <Text style={styles.errorText}>{loadError.message} · Toque para tentar novamente</Text>
+          </Pressable>
+        )}
+        {dataError && <Pressable onPress={() => { void refreshProfileData(); }} accessibilityRole="button" disabled={isRefreshing}><Text style={styles.errorText}>{dataError} · Toque para tentar novamente</Text></Pressable>}
+        {!profileLoading && !dataError && !loadError && tasks.tasks.length === 0 && <Text style={styles.loadingText}>Nenhuma tarefa registrada ainda.</Text>}
         <View style={styles.statsRow}>
           {profileStats.map((stat) => (
             <Card key={stat.id} style={styles.statCard}>

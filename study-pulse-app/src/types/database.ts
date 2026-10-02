@@ -1,4 +1,4 @@
-﻿export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -416,6 +416,12 @@ export type Database = {
         Returns: number
       }
       rpc_join_squad: { Args: { code: string }; Returns: number }
+      rpc_leave_squad: { Args: { target_squad: number }; Returns: boolean }
+      rpc_reopen_task: { Args: { task_id: number }; Returns: boolean }
+      rpc_update_goal_progress: {
+        Args: { goal_id: number; new_progress: number }
+        Returns: number
+      }
       shares_squad: { Args: { target_user: string }; Returns: boolean }
     }
     Enums: {
