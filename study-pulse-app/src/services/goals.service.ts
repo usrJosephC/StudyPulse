@@ -31,8 +31,8 @@ export async function listActive(): Promise<Result<Goal[]>> {
 export async function createGoal(input: GoalInput): Promise<Result<Goal>> {
   const title = input.title.trim();
   if (!title || title.length > 160) return fail({ code: 'validation', message: 'Informe um título de até 160 caracteres.' });
-  if (input.progress !== undefined && (input.progress < 0 || input.progress >= 1)) {
-    return fail({ code: 'validation', message: 'O progresso inicial deve ser menor que 100%.' });
+  if (input.progress !== undefined && input.progress !== 0) {
+    return fail({ code: 'validation', message: 'Uma nova meta deve começar com 0% de progresso.' });
   }
   if (input.due_date && !isValidDate(input.due_date)) {
     return fail({ code: 'validation', message: 'Informe a data no formato AAAA-MM-DD.' });
@@ -52,7 +52,6 @@ export async function createGoal(input: GoalInput): Promise<Result<Goal>> {
         title,
         category: input.category?.trim() || 'Geral',
         due_date: input.due_date || null,
-        progress: input.progress ?? 0,
         icon: input.icon ?? null,
       })
       .select()

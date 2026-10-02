@@ -33,7 +33,7 @@ export function GoalsScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [category, setCategory] = useState('');
   const [title, setTitle] = useState('');
-  const [due, setDue] = useState('');
+  const [durationDays, setDurationDays] = useState('');
   const [titleError, setTitleError] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -44,7 +44,7 @@ export function GoalsScreen() {
   function openModal() {
     setCategory('');
     setTitle('');
-    setDue('');
+    setDurationDays('');
     setTitleError(false);
     setModalVisible(true);
   }
@@ -55,9 +55,10 @@ export function GoalsScreen() {
       setTitleError(true);
       return;
     }
-    const trimmedDue = due.trim();
-    if (trimmedDue && !isValidDate(trimmedDue)) {
-      setActionError('Enter a valid date in YYYY-MM-DD format.');
+    const trimmedDuration = durationDays.trim();
+    const duration = trimmedDuration ? Number(trimmedDuration) : null;
+    if (duration !== null && (!Number.isInteger(duration) || duration < 1 || duration > 3650)) {
+      setActionError('Informe uma duração entre 1 e 3650 dias.');
       return;
     }
     setSaving(true);
@@ -65,8 +66,7 @@ export function GoalsScreen() {
     const result = await createGoal({
       category: category.trim() || 'General',
       title: trimmedTitle,
-      due_date: trimmedDue || null,
-      progress: 0,
+      due_date: duration === null ? null : dueDateFromDays(duration),
       icon: 'school-outline',
     });
     setSaving(false);
@@ -211,14 +211,20 @@ export function GoalsScreen() {
               />
               {titleError && <Text style={styles.errorLabel}>Title is required</Text>}
 
-              <Text style={styles.fieldLabel}>Due</Text>
+              <Text style={styles.fieldLabel}>Duração em dias</Text>
               <TextInput
                 style={styles.input}
-                value={due}
-                onChangeText={setDue}
-                placeholder="YYYY-MM-DD"
+                value={durationDays}
+                onChangeText={(value) => {
+                  setDurationDays(value.replace(/\D/g, ''));
+                  setActionError(null);
+                }}
+                placeholder="Ex.: 30"
                 placeholderTextColor={colors.inkFaint}
-                accessibilityLabel="Goal due date"
+                accessibilityLabel="Duração da meta em dias"
+                keyboardType="number-pad"
+                inputMode="numeric"
+                maxLength={4}
                 returnKeyType="done"
               />
               {actionError && <Text style={styles.errorLabel} accessibilityRole="alert">{actionError}</Text>}
@@ -449,16 +455,32 @@ function getIntensityStyle(level: number) {
 }
 
 function formatDueDate(value: string | null) {
-  if (!value) return 'No due date';
-  const date = new Date(`${value}T00:00:00`);
-  return Number.isNaN(date.getTime()) ? value : `Due ${date.toLocaleDateString()}`;
+  if (!value) return 'Sem prazo definido';
+  const due = parseIsoDate(value);
+  const today = parseIsoDate(todayInSaoPaulo());
+  if (!due || !today) return value;
+  const days = Math.ceil((due.getTime() - today.getTime()) / 86_400_000);
+  if (days < 0) return `Atrasada há ${Math.abs(days)} dia${days === -1 ? '' : 's'}`;
+  if (days === 0) return 'Vence hoje';
+  return `${days} dia${days === 1 ? '' : 's'} restante${days === 1 ? '' : 's'}`;
 }
 
-function isValidDate(value: string) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+function parseIsoDate(value: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
   const [year, month, day] = value.split('-').map(Number);
   const date = new Date(Date.UTC(year, month - 1, day));
-  return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day;
+  return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day ? date : null;
+}
+
+function todayInSaoPaulo() {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(new Date());
+}
+
+function dueDateFromDays(days: number) {
+  const today = parseIsoDate(todayInSaoPaulo());
+  if (!today) throw new Error('Não foi possível calcular a data de vencimento.');
+  today.setUTCDate(today.getUTCDate() + days);
+  return today.toISOString().slice(0, 10);
 }
 
 function toIconName(icon: string | null): keyof typeof Ionicons.glyphMap {
