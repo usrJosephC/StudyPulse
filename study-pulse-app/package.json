@@ -37,6 +37,7 @@
   },
   "scripts": {
     "start": "expo start",
+    "start:local": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/start-local.ps1",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web"
