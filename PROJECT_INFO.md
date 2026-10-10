@@ -10,7 +10,6 @@ Aplicativo de rotina de estudos com gamificação, desenvolvido para a disciplin
 
 | Integrante |
 |---|
-| Alex Davi Gomes do Nascimento |
 | Joseph Bartholomeu Cavalcante Rocha |
 | Letícya Beatriz dos Santos Medeiros |
 | Mariana Pereira de Melo |
