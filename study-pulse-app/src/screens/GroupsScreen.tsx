@@ -1,30 +1,99 @@
-import { useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useState } from 'react';
+import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { Card } from '../components/Card';
 import { Pill } from '../components/Pill';
 import { Avatar } from '../components/Avatar';
 import { colors, fonts, radius, spacing } from '../theme';
-import { currentUser, squad, squadActivity } from '../data/mockData';
-
-const podiumOrder = [2, 1, 3];
-
-const fullLeaderboard = [...squad.podium, ...squad.rest].sort((a, b) => a.rank - b.rank);
+import { useAuth } from '../context/AuthContext';
+import { useRanking } from '../hooks/useRanking';
+import { useSquad } from '../hooks/useSquad';
+import { useSquadActivity } from '../hooks/useSquadActivity';
+import type { RankingEntry, SquadActivity } from '../types/domain';
 
 export function GroupsScreen() {
-  const podiumById = Object.fromEntries(squad.podium.map((p) => [p.rank, p]));
+  const { session, profile } = useAuth();
+  const { squad, loading: squadLoading, error: squadError, refresh: refreshSquad, joinSquad } = useSquad();
+  const { ranking, loading: rankingLoading, error: rankingError, refresh: refreshRanking } = useRanking(squad?.id ?? null);
+  const { activities, loading: activityLoading, error: activityError, refresh: refreshActivity } = useSquadActivity(squad?.id ?? null);
+  const podium = [ranking[1], ranking[0], ranking[2]].filter((member): member is RankingEntry => Boolean(member));
+  const rest = ranking.slice(3);
   const [leaderboardVisible, setLeaderboardVisible] = useState(false);
+  const [inviteCode, setInviteCode] = useState('');
+  const [joining, setJoining] = useState(false);
+  const [joinError, setJoinError] = useState<string | null>(null);
+  const displayName = profile?.name?.trim()
+    || (typeof session?.user.user_metadata?.name === 'string' ? session.user.user_metadata.name.trim() : '')
+    || 'Estudante';
+  const loading = squadLoading || (Boolean(squad) && (rankingLoading || activityLoading));
+  const error = squadError || rankingError || activityError;
+
+  function refreshAll() {
+    void Promise.all([refreshSquad(), refreshRanking(), refreshActivity()]);
+  }
+
+  async function handleJoin() {
+    if (!inviteCode.trim() || joining) return;
+    setJoining(true);
+    setJoinError(null);
+    const result = await joinSquad(inviteCode);
+    if (!result.ok) setJoinError(result.error.message);
+    else setInviteCode('');
+    setJoining(false);
+  }
+
+  useFocusEffect(useCallback(() => {
+    void Promise.all([refreshSquad(), refreshRanking(), refreshActivity()]);
+  }, [refreshActivity, refreshRanking, refreshSquad]));
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      <ScreenHeader userInitial={currentUser.initial} />
+      <ScreenHeader userInitial={displayName.charAt(0).toUpperCase() || '?'} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        {loading && <ActivityIndicator color={colors.primary} accessibilityLabel="Loading study squad" />}
+        {error && (
+          <Pressable onPress={refreshAll} accessibilityRole="button" accessibilityLabel="Try loading the study squad again" style={styles.stateAction}>
+            <Text style={styles.errorText}>{error.message} · Tap to try again</Text>
+          </Pressable>
+        )}
+        {!squadLoading && !squad && !squadError && (
+          <Card style={styles.emptyCard}>
+            <Ionicons name="people-outline" size={32} color={colors.secondary} />
+            <Text style={styles.sectionTitle}>Você ainda não está em um grupo</Text>
+            <Text style={styles.stateText}>Informe o código de convite para acompanhar o ranking e as atividades.</Text>
+            <TextInput
+              value={inviteCode}
+              onChangeText={(value) => { setInviteCode(value.toUpperCase()); setJoinError(null); }}
+              placeholder="CÓDIGO DE CONVITE"
+              placeholderTextColor={colors.inkMuted}
+              autoCapitalize="characters"
+              autoCorrect={false}
+              editable={!joining}
+              maxLength={12}
+              style={styles.inviteInput}
+              accessibilityLabel="Código de convite do grupo"
+            />
+            {joinError && <Text style={styles.errorText}>{joinError}</Text>}
+            <Pressable
+              style={[styles.joinButton, (!inviteCode.trim() || joining) && styles.disabledButton]}
+              onPress={() => void handleJoin()}
+              disabled={!inviteCode.trim() || joining}
+              accessibilityRole="button"
+              accessibilityState={{ disabled: !inviteCode.trim() || joining, busy: joining }}
+            >
+              {joining ? <ActivityIndicator color="#fff" /> : <Text style={styles.joinButtonText}>Entrar no grupo</Text>}
+            </Pressable>
+          </Card>
+        )}
+
+        {squad && <>
         <View style={styles.centered}>
           <Pill label="STUDY SQUAD" variant="secondary" icon={<Ionicons name="people" size={12} color="#fff" />} />
           <Text style={styles.squadName}>{squad.name}</Text>
-          <Text style={styles.squadSubtitle}>{squad.subtitle}</Text>
+          <Text style={styles.squadSubtitle}>{squad.subtitle || 'Study together and reach your goals'}</Text>
         </View>
 
         <Card>
@@ -33,19 +102,19 @@ export function GroupsScreen() {
               <Ionicons name="bar-chart" size={18} color={colors.primary} />
               <Text style={styles.rankingTitle}>Weekly Ranking</Text>
             </View>
-            <Pill label={`Ends in ${squad.endsIn}`} variant="muted" />
+            <Pill label={formatSeasonEnd(squad.season_ends_at)} variant="muted" />
           </View>
 
-          <View style={styles.podiumRow}>
-            {podiumOrder.map((rank) => {
-              const member = podiumById[rank];
+          {ranking.length >= 3 ? <View style={styles.podiumRow}>
+            {podium.map((member) => {
+              const rank = member.rank;
               return (
-                <View key={member.id} style={styles.podiumMember}>
+                <View key={member.user_id} style={styles.podiumMember}>
                   {rank === 1 && <Ionicons name="star" size={16} color={colors.primary} style={styles.podiumStar} />}
-                  <Avatar label={member.initial} size={rank === 1 ? 64 : 52} ringColor={rank === 1 ? colors.primary : undefined} />
+                  <Avatar label={getInitial(member.name)} size={rank === 1 ? 64 : 52} ringColor={rank === 1 ? colors.primary : undefined} />
                   <View style={styles.streakBadge}>
                     <Ionicons name="flame" size={10} color={colors.primary} />
-                    <Text style={styles.streakBadgeText}>{member.streakDays}</Text>
+                    <Text style={styles.streakBadgeText}>{member.streak}</Text>
                   </View>
                   <Text style={styles.podiumName}>{member.name}</Text>
                   <View
@@ -55,31 +124,45 @@ export function GroupsScreen() {
                     ]}
                   >
                     <Text style={styles.podiumRank}>{rank}</Text>
-                    <Text style={styles.podiumPoints}>{member.points}</Text>
+                    <Text style={styles.podiumPoints}>{formatPoints(member.weekly_points)}</Text>
                   </View>
                 </View>
               );
             })}
-          </View>
+          </View> : !rankingLoading && ranking.length > 0 ? (
+            <View style={styles.restList}>
+              {ranking.map((member) => (
+                <View key={member.user_id} style={[styles.restRow, member.user_id === session?.user.id && styles.restRowActive]}>
+                  <Text style={styles.restRank}>{member.rank}</Text>
+                  <Avatar label={getInitial(member.name)} size={36} />
+                  <View style={styles.flexFill}>
+                    <Text style={styles.restName}>{member.name}</Text>
+                    <Text style={styles.restStreakText}>{member.streak} days</Text>
+                  </View>
+                  <Text style={styles.restPoints}>{formatPoints(member.weekly_points)}</Text>
+                </View>
+              ))}
+            </View>
+          ) : null}
 
           <View style={styles.restList}>
-            {squad.rest.map((member) => (
-              <View key={member.id} style={[styles.restRow, member.isYou && styles.restRowActive]}>
+            {rest.map((member) => (
+              <View key={member.user_id} style={[styles.restRow, member.user_id === session?.user.id && styles.restRowActive]}>
                 <Text style={styles.restRank}>{member.rank}</Text>
-                <Avatar label={member.initial} size={36} />
+                <Avatar label={getInitial(member.name)} size={36} />
                 <View style={styles.flexFill}>
                   <Text style={styles.restName}>{member.name}</Text>
                   <View style={styles.restStreak}>
                     <Ionicons name="flame" size={11} color={colors.primary} />
-                    <Text style={styles.restStreakText}>{member.streakDays} days</Text>
+                    <Text style={styles.restStreakText}>{member.streak} days</Text>
                   </View>
                 </View>
-                <Text style={styles.restPoints}>{member.points}</Text>
+                <Text style={styles.restPoints}>{formatPoints(member.weekly_points)}</Text>
               </View>
             ))}
           </View>
 
-          <View style={styles.viewAllWrap}>
+          {ranking.length > 0 ? <View style={styles.viewAllWrap}>
             <Pressable
               style={styles.viewAllButton}
               onPress={() => setLeaderboardVisible(true)}
@@ -88,23 +171,25 @@ export function GroupsScreen() {
             >
               <Text style={styles.viewAllLabel}>View Full Leaderboard</Text>
             </Pressable>
-          </View>
+          </View> : !rankingLoading && !rankingError ? <Text style={styles.stateText}>The weekly ranking is empty.</Text> : null}
         </Card>
 
         <Text style={styles.sectionTitle}>Squad Activity</Text>
         <View style={styles.activityList}>
-          {squadActivity.map((activity) => (
-            <Card key={activity.id} style={styles.activityCard}>
+          {activities.map((item) => (
+            <Card key={item.id} style={styles.activityCard}>
               <View style={styles.activityIcon}>
-                <Ionicons name={activity.icon} size={18} color={colors.secondary} />
+                <Ionicons name={getActivityIcon(item.action)} size={18} color={colors.secondary} />
               </View>
               <View style={styles.flexFill}>
-                <Text style={styles.activityMessage}>{activity.message}</Text>
-                <Text style={styles.activityTime}>{activity.timeAgo}</Text>
+                <Text style={styles.activityMessage}>{formatActivity(item, ranking)}</Text>
+                <Text style={styles.activityTime}>{formatRelativeTime(item.created_at)}</Text>
               </View>
             </Card>
           ))}
+          {!activityLoading && activities.length === 0 && !activityError && <Text style={styles.stateText}>No squad activity yet.</Text>}
         </View>
+        </>}
       </ScrollView>
 
       <Modal
@@ -129,18 +214,18 @@ export function GroupsScreen() {
             </View>
             <ScrollView showsVerticalScrollIndicator={false}>
               <View style={styles.modalList}>
-                {fullLeaderboard.map((member) => (
-                  <View key={member.id} style={[styles.restRow, member.id === 'you' && styles.restRowActive]}>
+                {ranking.map((member) => (
+                  <View key={member.user_id} style={[styles.restRow, member.user_id === session?.user.id && styles.restRowActive]}>
                     <Text style={styles.restRank}>{member.rank}</Text>
-                    <Avatar label={member.initial} size={36} />
+                    <Avatar label={getInitial(member.name)} size={36} />
                     <View style={styles.flexFill}>
-                      <Text style={styles.restName}>{member.id === 'you' ? 'You' : member.name}</Text>
+                      <Text style={styles.restName}>{member.user_id === session?.user.id ? 'You' : member.name}</Text>
                       <View style={styles.restStreak}>
                         <Ionicons name="flame" size={11} color={colors.primary} />
-                        <Text style={styles.restStreakText}>{member.streakDays} days</Text>
+                        <Text style={styles.restStreakText}>{member.streak} days</Text>
                       </View>
                     </View>
-                    <Text style={styles.restPoints}>{member.points}</Text>
+                    <Text style={styles.restPoints}>{formatPoints(member.weekly_points)}</Text>
                   </View>
                 ))}
               </View>
@@ -382,4 +467,89 @@ const styles = StyleSheet.create({
   modalList: {
     gap: spacing.sm,
   },
+  stateAction: {
+    minHeight: 44,
+    justifyContent: 'center',
+  },
+  errorText: {
+    fontFamily: fonts.bodyRegular,
+    fontSize: 12,
+    color: colors.danger,
+    textAlign: 'center',
+  },
+  stateText: {
+    fontFamily: fonts.bodyRegular,
+    fontSize: 13,
+    color: colors.inkMuted,
+    textAlign: 'center',
+  },
+  emptyCard: {
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  inviteInput: {
+    width: '100%',
+    minHeight: 48,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    fontFamily: fonts.bodyBold,
+    color: colors.ink,
+    textAlign: 'center',
+    letterSpacing: 1,
+  },
+  joinButton: {
+    width: '100%',
+    minHeight: 48,
+    borderRadius: radius.pill,
+    backgroundColor: colors.secondary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  joinButtonText: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 14,
+    color: '#fff',
+  },
+  disabledButton: {
+    opacity: 0.55,
+  },
 });
+
+function getInitial(name: string) {
+  return name.trim().charAt(0).toUpperCase() || '?';
+}
+
+function formatPoints(points: number) {
+  return `${points.toLocaleString()} pt`;
+}
+
+function formatSeasonEnd(value: string | null) {
+  if (!value) return 'This week';
+  const days = Math.max(0, Math.ceil((new Date(value).getTime() - Date.now()) / 86_400_000));
+  return `Ends in ${days}d`;
+}
+
+function getActivityIcon(action: string): keyof typeof Ionicons.glyphMap {
+  if (action === 'check_in') return 'flame';
+  if (action === 'goal_done') return 'trophy';
+  return 'book';
+}
+
+function formatActivity(item: SquadActivity, ranking: RankingEntry[]) {
+  const name = item.user_name || ranking.find((member) => member.user_id === item.user_id)?.name || 'A squad member';
+  if (item.action === 'check_in') return `${name} checked in and kept the momentum going.`;
+  if (item.action === 'goal_done') return `${name} completed a study goal.`;
+  if (item.action === 'task_done') return `${name} completed a task.`;
+  return `${name} shared new activity with the squad.`;
+}
+
+function formatRelativeTime(value: string) {
+  const elapsedMinutes = Math.max(0, Math.floor((Date.now() - new Date(value).getTime()) / 60_000));
+  if (elapsedMinutes < 1) return 'Just now';
+  if (elapsedMinutes < 60) return `${elapsedMinutes} min ago`;
+  const hours = Math.floor(elapsedMinutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
+}

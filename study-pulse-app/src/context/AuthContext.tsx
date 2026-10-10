@@ -1,0 +1,15 @@
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type PropsWithChildren } from 'react'
+import type { Session, User } from '@supabase/supabase-js'
+import { getProfile, getSession, onAuthChange, signIn as serviceSignIn, signOut as serviceSignOut, signUp as serviceSignUp } from '../services/auth.service'
+import type { AppError, Result } from '../lib/result'
+import type { Profile, SignUpMetadata } from '../types/domain'
+type AuthContextValue = { session: Session | null; profile: Profile | null; loading: boolean; error: AppError | null; signIn: (email: string, password: string) => Promise<Result<{ session: Session; user: User }>>; signUp: (name: string, email: string, password: string, metadata?: SignUpMetadata) => Promise<Result<{ session: Session | null; user: User | null }>>; signOut: () => Promise<Result<null>> }
+const AuthContext = createContext<AuthContextValue | undefined>(undefined)
+export function AuthProvider({ children }: PropsWithChildren) { const [session, setSession] = useState<Session | null>(null); const [profile, setProfile] = useState<Profile | null>(null); const [loading, setLoading] = useState(true); const [error, setError] = useState<AppError | null>(null); const generation = useRef(0)
+  const hydrate = useCallback(async (nextSession: Session | null, initial = false) => { const current = ++generation.current; setSession(nextSession); setProfile(null); if (initial) setLoading(true); if (!nextSession) { setError(null); setLoading(false); return }; const result = await getProfile(nextSession.user.id); if (current !== generation.current) return; if (result.ok) { setProfile(result.data); setError(null) } else setError(result.error); setLoading(false) }, [])
+  useEffect(() => { let mounted = true; void getSession().then((result) => { if (!mounted) return; if (result.ok) void hydrate(result.data, true); else { setError(result.error); setLoading(false) } }); const unsubscribe = onAuthChange((_event, nextSession) => { if (mounted) void hydrate(nextSession) }); return () => { mounted = false; generation.current += 1; unsubscribe() } }, [hydrate])
+  const signIn = useCallback(async (email: string, password: string) => { setError(null); const result = await serviceSignIn(email, password); if (!result.ok) setError(result.error); return result }, [])
+  const signUp = useCallback(async (name: string, email: string, password: string, metadata?: SignUpMetadata) => { setError(null); const result = await serviceSignUp(name, email, password, metadata); if (!result.ok) setError(result.error); return result }, [])
+  const signOut = useCallback(async () => { const result = await serviceSignOut(); if (!result.ok) setError(result.error); return result }, [])
+  const value = useMemo(() => ({ session, profile, loading, error, signIn, signUp, signOut }), [session, profile, loading, error, signIn, signUp, signOut]); return <AuthContext.Provider value={value}>{children}</AuthContext.Provider> }
+export function useAuth(): AuthContextValue { const context = useContext(AuthContext); if (!context) throw new Error('useAuth deve ser usado dentro de AuthProvider.'); return context }
