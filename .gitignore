@@ -140,3 +140,4 @@ dist
 .svelte-kit/
 # Local documentation and orchestration context
 docs/
+studypulse-artifact.md

@@ -208,7 +208,6 @@ Os testes SQL ficam em `study-pulse-app/supabase/tests/` e cobrem RLS, privilég
 
 ## 📚 Documentação
 
-- [Artifact técnico](studypulse-artifact.md)
 - [Projeto, equipe e links externos](PROJECT_INFO.md)
 - [Supabase local](study-pulse-app/supabase/README.md)
 

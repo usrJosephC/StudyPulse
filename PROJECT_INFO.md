@@ -35,5 +35,4 @@ O projeto está em desenvolvimento. A base da Sprint 1 inclui autenticação, ba
 ## Documentos relacionados
 
 - [README técnico e execução local](README.md)
-- [Artifact do estado atual](studypulse-artifact.md)
 - [Configuração local do Supabase](study-pulse-app/supabase/README.md)
