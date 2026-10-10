@@ -29,7 +29,14 @@ function TabIcon({ name, label, focused }: { name: keyof TabParamList; label: st
       <View style={[styles.iconWrap, focused && styles.iconWrapActive]}>
         <Ionicons name={icons[name]} size={20} color={focused ? colors.ink : colors.inkMuted} />
       </View>
-      <Text style={[styles.tabLabel, focused && styles.tabLabelActive]}>{label}</Text>
+      <Text
+        style={[styles.tabLabel, focused && styles.tabLabelActive]}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.9}
+      >
+        {label}
+      </Text>
     </View>
   );
 }
@@ -41,6 +48,7 @@ export function RootTabs() {
         headerShown: false,
         tabBarShowLabel: false,
         tabBarStyle: styles.tabBar,
+        tabBarItemStyle: styles.tabBarItem,
       }}
     >
       <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarIcon: ({ focused }) => <TabIcon name="Home" label="Home" focused={focused} /> }} />
@@ -55,8 +63,9 @@ const styles = StyleSheet.create({
   tabBar: {
     backgroundColor: colors.card,
     borderTopWidth: 0,
-    height: 78,
-    paddingTop: spacing.sm,
+    height: 88,
+    paddingTop: 6,
+    paddingBottom: 8,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     shadowColor: '#000',
@@ -64,9 +73,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 8,
   },
+  tabBarItem: {
+    height: 72,
+  },
   tabItem: {
+    width: 76,
+    height: 64,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     gap: 4,
   },
   iconWrap: {
@@ -82,7 +96,10 @@ const styles = StyleSheet.create({
   tabLabel: {
     fontFamily: fonts.bodyMedium,
     fontSize: 11,
+    lineHeight: 14,
     color: colors.inkMuted,
+    textAlign: 'center',
+    width: 76,
   },
   tabLabelActive: {
     fontFamily: fonts.bodyBold,

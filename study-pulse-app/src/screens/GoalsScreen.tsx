@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -12,60 +13,93 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { Card } from '../components/Card';
 import { Pill } from '../components/Pill';
 import { ProgressBar } from '../components/ProgressBar';
 import { Button } from '../components/Button';
 import { colors, fonts, radius, spacing } from '../theme';
-import { activeGoals as initialGoals, consistencyWeeks, currentUser, Goal } from '../data/mockData';
+import { useAuth } from '../context/AuthContext';
+import { useGoals } from '../hooks/useGoals';
+import { useHeatmap } from '../hooks/useHeatmap';
+import { useStreak } from '../hooks/useStreak';
 
 export function GoalsScreen() {
-  const [goals, setGoals] = useState(initialGoals);
+  const { session, profile } = useAuth();
+  const { goals, loading: goalsLoading, error: goalsError, refresh: refreshGoals, createGoal, updateProgress, completeGoal } = useGoals();
+  const { heatmap, loading: heatmapLoading, error: heatmapError, refresh: refreshHeatmap } = useHeatmap(4);
+  const { streak, loading: streakLoading, error: streakError, refresh: refreshStreak } = useStreak();
   const [modalVisible, setModalVisible] = useState(false);
   const [category, setCategory] = useState('');
   const [title, setTitle] = useState('');
-  const [due, setDue] = useState('');
+  const [durationDays, setDurationDays] = useState('');
   const [titleError, setTitleError] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const displayName = profile?.name?.trim()
+    || (typeof session?.user.user_metadata?.name === 'string' ? session.user.user_metadata.name.trim() : '')
+    || 'Estudante';
 
   function openModal() {
     setCategory('');
     setTitle('');
-    setDue('');
+    setDurationDays('');
     setTitleError(false);
     setModalVisible(true);
   }
 
-  function handleSave() {
+  async function handleSave() {
     const trimmedTitle = title.trim();
     if (!trimmedTitle) {
       setTitleError(true);
       return;
     }
-    const newGoal: Goal = {
-      id: `goal-${Date.now()}`,
+    const trimmedDuration = durationDays.trim();
+    const duration = trimmedDuration ? Number(trimmedDuration) : null;
+    if (duration !== null && (!Number.isInteger(duration) || duration < 1 || duration > 3650)) {
+      setActionError('Informe uma duração entre 1 e 3650 dias.');
+      return;
+    }
+    setSaving(true);
+    setActionError(null);
+    const result = await createGoal({
       category: category.trim() || 'General',
       title: trimmedTitle,
-      due: due.trim() || 'No due date',
-      progress: 0,
+      due_date: duration === null ? null : dueDateFromDays(duration),
       icon: 'school-outline',
-      cta: 'Start Goal',
-      ctaVariant: 'primary',
-      ctaIcon: 'arrow-forward',
-    };
-    setGoals((current) => [newGoal, ...current]);
-    setModalVisible(false);
+    });
+    setSaving(false);
+    if (result.ok) setModalVisible(false);
+    else setActionError(result.error.message);
   }
+
+  async function handleGoalAction(id: number, progress: number) {
+    setActionError(null);
+    const result = progress >= 0.75
+      ? await completeGoal(id)
+      : await updateProgress(id, Math.min(progress + 0.25, 0.75));
+    if (!result.ok) setActionError(result.error.message);
+  }
+
+  function refreshAll() {
+    setActionError(null);
+    void Promise.all([refreshGoals(), refreshHeatmap(), refreshStreak()]);
+  }
+
+  useFocusEffect(useCallback(() => {
+    void Promise.all([refreshGoals(), refreshHeatmap(), refreshStreak()]);
+  }, [refreshGoals, refreshHeatmap, refreshStreak]));
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      <ScreenHeader userInitial={currentUser.initial} />
+      <ScreenHeader userInitial={displayName.charAt(0).toUpperCase() || '?'} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Text style={styles.sectionTitle}>Consistency</Text>
         <Card>
           <Text style={styles.streakLabel}>Current Streak</Text>
           <View style={styles.streakRow}>
-            <Text style={styles.streakValue}>{currentUser.streak} Days</Text>
+            <Text style={styles.streakValue}>{streakLoading ? '...' : `${streak} Days`}</Text>
             <View style={styles.legend}>
               <Text style={styles.legendLabel}>Less</Text>
               {[0, 1, 2, 3, 4].map((_, i) => (
@@ -75,7 +109,7 @@ export function GoalsScreen() {
             </View>
           </View>
           <View style={styles.heatmap}>
-            {consistencyWeeks.map((week, wi) => (
+            {heatmap.map((week, wi) => (
               <View key={wi} style={styles.heatmapRow}>
                 {week.map((level, di) => (
                   <View key={di} style={[styles.heatmapCell, getIntensityStyle(level)]} />
@@ -83,22 +117,32 @@ export function GoalsScreen() {
               </View>
             ))}
           </View>
+          {!heatmapLoading && heatmap.length === 0 && !heatmapError && <Text style={styles.stateText}>No study activity yet.</Text>}
         </Card>
 
         <Text style={styles.sectionTitle}>Active Goals</Text>
+        {(goalsLoading || heatmapLoading) && <ActivityIndicator color={colors.primary} accessibilityLabel="Loading goals" />}
+        {(goalsError || heatmapError || streakError || actionError) && (
+          <Pressable onPress={refreshAll} accessibilityRole="button" accessibilityLabel="Try loading goals again" style={styles.stateAction}>
+            <Text style={styles.errorLabel}>{actionError || goalsError?.message || heatmapError?.message || streakError?.message} · Tap to try again</Text>
+          </Pressable>
+        )}
+        {!goalsLoading && goals.length === 0 && !goalsError && (
+          <Text style={styles.stateText}>No active goals. Tap + to create your first one.</Text>
+        )}
         <View style={styles.goalsList}>
           {goals.map((goal) => (
             <Card key={goal.id}>
               <View style={styles.goalHeader}>
                 <Pill label={goal.category} variant="secondary" />
                 <View style={styles.goalIcon}>
-                  <Ionicons name={goal.icon} size={20} color={colors.primary} />
+                  <Ionicons name={toIconName(goal.icon)} size={20} color={colors.primary} />
                 </View>
               </View>
               <Text style={styles.goalTitle}>{goal.title}</Text>
               <View style={styles.dueRow}>
                 <Ionicons name="time-outline" size={14} color={colors.inkMuted} />
-                <Text style={styles.dueLabel}>{goal.due}</Text>
+                <Text style={styles.dueLabel}>{formatDueDate(goal.due_date)}</Text>
               </View>
               <View style={styles.progressRow}>
                 <Text style={styles.progressLabel}>Progress</Text>
@@ -106,7 +150,12 @@ export function GoalsScreen() {
               </View>
               <ProgressBar progress={goal.progress} />
               <View style={styles.goalAction}>
-                <Button label={goal.cta} variant={goal.ctaVariant} icon={goal.ctaIcon} />
+                <Button
+                  label={goal.progress >= 0.75 ? 'Complete Goal' : goal.progress > 0 ? 'Continue Study' : 'Start Goal'}
+                  variant={goal.progress > 0 ? 'primary' : 'muted'}
+                  icon={goal.progress >= 0.75 ? 'checkmark' : 'arrow-forward'}
+                  onPress={() => { void handleGoalAction(goal.id, goal.progress); }}
+                />
               </View>
             </Card>
           ))}
@@ -114,7 +163,7 @@ export function GoalsScreen() {
       </ScrollView>
       <Pressable
         style={styles.fab}
-        onPress={openModal}
+        onPress={() => { setActionError(null); openModal(); }}
         accessibilityRole="button"
         accessibilityLabel="Add new goal"
       >
@@ -162,23 +211,30 @@ export function GoalsScreen() {
               />
               {titleError && <Text style={styles.errorLabel}>Title is required</Text>}
 
-              <Text style={styles.fieldLabel}>Due</Text>
+              <Text style={styles.fieldLabel}>Duração em dias</Text>
               <TextInput
                 style={styles.input}
-                value={due}
-                onChangeText={setDue}
-                placeholder="e.g. Due in 5 days"
+                value={durationDays}
+                onChangeText={(value) => {
+                  setDurationDays(value.replace(/\D/g, ''));
+                  setActionError(null);
+                }}
+                placeholder="Ex.: 30"
                 placeholderTextColor={colors.inkFaint}
-                accessibilityLabel="Goal due date"
+                accessibilityLabel="Duração da meta em dias"
+                keyboardType="number-pad"
+                inputMode="numeric"
+                maxLength={4}
                 returnKeyType="done"
               />
+              {actionError && <Text style={styles.errorLabel} accessibilityRole="alert">{actionError}</Text>}
 
               <View style={styles.modalActions}>
                 <View style={styles.modalAction}>
                   <Button label="Cancel" variant="muted" onPress={() => setModalVisible(false)} />
                 </View>
                 <View style={styles.modalAction}>
-                  <Button label="Save" variant="primary" onPress={handleSave} />
+                  <Button label={saving ? 'Saving...' : 'Save'} variant="primary" onPress={() => { void handleSave(); }} disabled={saving} />
                 </View>
               </View>
               </ScrollView>
@@ -371,6 +427,16 @@ const styles = StyleSheet.create({
     color: colors.danger,
     marginTop: 4,
   },
+  stateText: {
+    fontFamily: fonts.bodyRegular,
+    fontSize: 13,
+    color: colors.inkMuted,
+    textAlign: 'center',
+  },
+  stateAction: {
+    minHeight: 44,
+    justifyContent: 'center',
+  },
   modalActions: {
     flexDirection: 'row',
     gap: spacing.md,
@@ -385,5 +451,38 @@ const styles = StyleSheet.create({
 });
 
 function getIntensityStyle(level: number) {
-  return [styles.intensity0, styles.intensity1, styles.intensity2, styles.intensity3, styles.intensity4][level];
+  return [styles.intensity0, styles.intensity1, styles.intensity2, styles.intensity3, styles.intensity4][Math.max(0, Math.min(4, level))];
+}
+
+function formatDueDate(value: string | null) {
+  if (!value) return 'Sem prazo definido';
+  const due = parseIsoDate(value);
+  const today = parseIsoDate(todayInSaoPaulo());
+  if (!due || !today) return value;
+  const days = Math.ceil((due.getTime() - today.getTime()) / 86_400_000);
+  if (days < 0) return `Atrasada há ${Math.abs(days)} dia${days === -1 ? '' : 's'}`;
+  if (days === 0) return 'Vence hoje';
+  return `${days} dia${days === 1 ? '' : 's'} restante${days === 1 ? '' : 's'}`;
+}
+
+function parseIsoDate(value: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
+  const [year, month, day] = value.split('-').map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day ? date : null;
+}
+
+function todayInSaoPaulo() {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(new Date());
+}
+
+function dueDateFromDays(days: number) {
+  const today = parseIsoDate(todayInSaoPaulo());
+  if (!today) throw new Error('Não foi possível calcular a data de vencimento.');
+  today.setUTCDate(today.getUTCDate() + days);
+  return today.toISOString().slice(0, 10);
+}
+
+function toIconName(icon: string | null): keyof typeof Ionicons.glyphMap {
+  return icon && icon in Ionicons.glyphMap ? icon as keyof typeof Ionicons.glyphMap : 'school-outline';
 }
