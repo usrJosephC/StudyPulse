@@ -69,9 +69,22 @@ $lanAddress = Get-ActiveLanAddress
 Update-LocalEnvironment $lanAddress
 Start-DockerIfNeeded
 
-Write-Host 'Iniciando Supabase local...' -ForegroundColor Cyan
-npx supabase start
-if ($LASTEXITCODE -ne 0) { throw 'Não foi possível iniciar o Supabase local.' }
+$localHealthUrl = 'http://127.0.0.1:54321/health'
+$composeRunning = $false
+try {
+  $localHealth = Invoke-WebRequest -UseBasicParsing -Uri $localHealthUrl -TimeoutSec 3
+  $composeRunning = $localHealth.StatusCode -eq 200
+} catch {
+  $composeRunning = $false
+}
+
+if ($composeRunning) {
+  Write-Host 'Backend Docker Compose já está em execução.' -ForegroundColor Cyan
+} else {
+  Write-Host 'Iniciando Supabase local pela CLI...' -ForegroundColor Cyan
+  npx supabase start
+  if ($LASTEXITCODE -ne 0) { throw 'Não foi possível iniciar o Supabase local.' }
+}
 
 $healthUrl = "http://${lanAddress}:54321/auth/v1/health"
 $health = Invoke-WebRequest -UseBasicParsing -Uri $healthUrl -TimeoutSec 10

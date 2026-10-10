@@ -38,6 +38,10 @@
   "scripts": {
     "start": "expo start",
     "start:local": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/start-local.ps1",
+    "db:start": "docker-compose up -d",
+    "db:stop": "docker-compose down",
+    "db:status": "docker-compose ps",
+    "db:logs": "docker-compose logs -f",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web"

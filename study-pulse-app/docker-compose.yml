@@ -1,0 +1,111 @@
+name: studypulse
+
+services:
+  db:
+    image: public.ecr.aws/supabase/postgres:15.8.1.085
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:54322:5432"
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+      PGPASSWORD: postgres
+      JWT_EXP: 3600
+    volumes:
+      - studypulse-db:/var/lib/postgresql/data
+      - ./supabase/docker/roles.sql:/docker-entrypoint-initdb.d/init-scripts/99-study-pulse-roles.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -h localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  auth:
+    image: public.ecr.aws/supabase/gotrue:v2.196.0
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      GOTRUE_API_HOST: 0.0.0.0
+      GOTRUE_API_PORT: 9999
+      API_EXTERNAL_URL: http://localhost:54321/auth/v1
+      GOTRUE_SITE_URL: http://localhost:8081
+      GOTRUE_URI_ALLOW_LIST: "http://localhost:8081/**,exp://**"
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: postgres://supabase_auth_admin:postgres@db:5432/postgres
+      GOTRUE_DISABLE_SIGNUP: "false"
+      GOTRUE_JWT_ADMIN_ROLES: service_role
+      GOTRUE_JWT_AUD: authenticated
+      GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
+      GOTRUE_JWT_EXP: 3600
+      GOTRUE_JWT_SECRET: super-secret-jwt-token-with-at-least-32-characters-long
+      GOTRUE_EXTERNAL_EMAIL_ENABLED: "true"
+      GOTRUE_MAILER_AUTOCONFIRM: "true"
+      GOTRUE_EXTERNAL_PHONE_ENABLED: "false"
+      GOTRUE_SMS_AUTOCONFIRM: "true"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9999/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  migrations:
+    image: public.ecr.aws/supabase/postgres:15.8.1.085
+    restart: "no"
+    depends_on:
+      auth:
+        condition: service_healthy
+    environment:
+      PGHOST: db
+      PGPORT: 5432
+      PGDATABASE: postgres
+      PGUSER: postgres
+      PGPASSWORD: postgres
+    volumes:
+      - ./supabase/migrations:/migrations:ro
+      - ./supabase/seed.sql:/seed/seed.sql:ro
+      - ./supabase/docker/apply-migrations.sh:/usr/local/bin/apply-migrations:ro
+    entrypoint: ["/bin/sh", "/usr/local/bin/apply-migrations"]
+
+  rest:
+    image: public.ecr.aws/supabase/postgrest:v16.2
+    restart: unless-stopped
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+    environment:
+      PGRST_DB_URI: postgres://authenticator:postgres@db:5432/postgres
+      PGRST_DB_SCHEMAS: public
+      PGRST_DB_EXTRA_SEARCH_PATH: public,extensions
+      PGRST_DB_ANON_ROLE: anon
+      PGRST_JWT_SECRET: super-secret-jwt-token-with-at-least-32-characters-long
+      PGRST_DB_MAX_ROWS: 1000
+      PGRST_ADMIN_SERVER_PORT: 3001
+      PGRST_ADMIN_SERVER_HOST: localhost
+    healthcheck:
+      test: ["CMD", "postgrest", "--ready"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  gateway:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    depends_on:
+      auth:
+        condition: service_healthy
+      rest:
+        condition: service_healthy
+    ports:
+      - "54321:8000"
+    volumes:
+      - ./supabase/docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:8000/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  studypulse-db:
