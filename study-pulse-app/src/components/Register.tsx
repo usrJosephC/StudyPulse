@@ -2,15 +2,19 @@ import { useRef, useState } from 'react';
 
 import {
   Alert,
+  Modal,
+  Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
 
-import { useTranslation } from 'react-i18next';
+import { Ionicons } from '@expo/vector-icons';
 
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from './Button';
 import { EmailInput } from './EmailInput';
@@ -21,11 +25,17 @@ import { BirthDateInput } from './BirthDateInput';
 import { GenderInput } from './GenderInput';
 
 import {
+  colors,
+  fonts,
+  radius,
+  spacing,
+} from '../theme';
+
+import {
   signUpSchema,
   type RegisterFormData,
 } from '../validation/schemas';
 
-import { colors, fonts, spacing } from '../theme';
 import { useAuth } from '../context/AuthContext';
 
 type Props = {
@@ -36,18 +46,18 @@ export function Register({ onRegisterSuccess }: Props) {
   const { t } = useTranslation();
   const { signUp } = useAuth();
 
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [termsError, setTermsError] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
   const submitInProgress = useRef(false);
 
   const {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<
-    RegisterFormData,
-    unknown,
-    RegisterFormData
-  >({
+  } = useForm<RegisterFormData, unknown, RegisterFormData>({
     resolver: yupResolver(signUpSchema),
     mode: 'onSubmit',
     defaultValues: {
@@ -129,22 +139,28 @@ export function Register({ onRegisterSuccess }: Props) {
     }
   }
 
+  function handleRegister() {
+    if (!acceptedTerms) {
+      setTermsError(true);
+      return;
+    }
+
+    setTermsError(false);
+    handleSubmit(onSubmit)();
+  }
+
+  function handleTermsToggle() {
+    setAcceptedTerms((current) => !current);
+    setTermsError(false);
+  }
+
   return (
     <View style={styles.container}>
-      <NameInput
-        control={control}
-        errors={errors}
-      />
+      <NameInput control={control} errors={errors} />
 
-      <EmailInput
-        control={control}
-        errors={errors}
-      />
+      <EmailInput control={control} errors={errors} />
 
-      <PasswordInput
-        control={control}
-        errors={errors}
-      />
+      <PasswordInput control={control} errors={errors} />
 
       <ConfirmPasswordInput
         control={control}
@@ -155,27 +171,94 @@ export function Register({ onRegisterSuccess }: Props) {
         {t('register.birthDate')}
       </Text>
 
-      <BirthDateInput
-        control={control}
-        errors={errors}
-      />
+      <BirthDateInput control={control} errors={errors} />
 
       <Text style={styles.sectionTitle}>
         {t('register.gender')}
       </Text>
 
-      <GenderInput
-        control={control}
-        errors={errors}
-      />
+      <GenderInput control={control} errors={errors} />
 
+      {/* Terms of Service */}
+      <View>
+        <Pressable
+          style={styles.termsContainer}
+          disabled={isLoading}
+          onPress={handleTermsToggle}
+          accessibilityRole="checkbox"
+          accessibilityState={{
+            checked: acceptedTerms,
+          }}
+        >
+          <Ionicons
+            name={acceptedTerms ? 'checkbox' : 'square-outline'}
+            size={18}
+            color={termsError ? colors.danger : colors.secondary}
+          />
+
+          <Text style={styles.termsText}>
+            {t('login.termsAgreementStart')}{' '}
+
+            <Text
+              style={styles.termsLink}
+              onPress={() => setModalVisible(true)}
+            >
+              {t('login.termsOfService')}
+            </Text>
+
+            {t('login.termsAgreementEnd')}
+          </Text>
+        </Pressable>
+
+        {termsError && (
+          <Text
+            accessibilityRole="alert"
+            style={styles.termsError}
+          >
+            {t('login.acceptTermsRequired')}
+          </Text>
+        )}
+      </View>
+
+      {/* Terms modal */}
+      <Modal
+        animationType="fade"
+        transparent
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              <Text style={styles.modalTitle}>
+                {t('login.termsTitle')}
+              </Text>
+
+              <Text style={styles.modalText}>
+                {t('login.termsContent.paragraph1')}
+              </Text>
+
+              <Text style={styles.modalText}>
+                {t('login.termsContent.paragraph2')}
+              </Text>
+            </ScrollView>
+
+            <Button
+              label={t('common.close')}
+              onPress={() => setModalVisible(false)}
+            />
+          </View>
+        </View>
+      </Modal>
+
+      {/* Register button */}
       <Button
         label={
           isLoading
             ? t('register.creatingAccount')
             : t('register.createAccountButton')
         }
-        onPress={handleSubmit(onSubmit)}
+        onPress={handleRegister}
         disabled={isLoading}
       />
     </View>
@@ -192,5 +275,66 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bodyBold,
     fontSize: 14,
     color: colors.ink,
+  },
+
+  termsContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.xs,
+  },
+
+  termsText: {
+    flex: 1,
+    fontFamily: fonts.bodyRegular,
+    fontSize: 12,
+    color: colors.inkMuted,
+    lineHeight: 17,
+  },
+
+  termsLink: {
+    fontFamily: fonts.bodyBold,
+    color: colors.secondary,
+    textDecorationLine: 'underline',
+  },
+
+  termsError: {
+    fontFamily: fonts.bodyMedium,
+    fontSize: 12,
+    color: colors.danger,
+    marginTop: spacing.xs,
+    marginLeft: spacing.xl,
+  },
+
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.45)',
+    padding: spacing.xl,
+  },
+
+  modalContent: {
+    width: '100%',
+    maxWidth: 500,
+    maxHeight: '80%',
+    backgroundColor: colors.card,
+    borderRadius: radius.lg,
+    padding: spacing.xl,
+    gap: spacing.lg,
+  },
+
+  modalTitle: {
+    fontFamily: fonts.headlineBold,
+    fontSize: 20,
+    color: colors.ink,
+    marginBottom: spacing.sm,
+  },
+
+  modalText: {
+    fontFamily: fonts.bodyRegular,
+    fontSize: 14,
+    lineHeight: 21,
+    color: colors.inkMuted,
+    marginBottom: spacing.md,
   },
 });
