@@ -63,6 +63,7 @@
       "female": "Feminino",
       "male": "Masculino",
       "other": "Outro"
-    }
+    },
+    "name": "Nome"
   }
 }

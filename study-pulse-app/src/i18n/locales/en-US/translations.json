@@ -63,6 +63,7 @@
       "female": "Female",
       "male": "Male",
       "other": "Other"
-    }
+    },
+    "name": "Name"
   }
 }
