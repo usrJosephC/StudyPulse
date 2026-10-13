@@ -55,6 +55,9 @@
       "year": "Ano"
     },
     "birthDateError": "Informe sua data de nascimento completa.",
-    "birthDateSelect": "Selecione {{field}}"
+    "birthDateSelect": "Selecione {{field}}",
+    "confirmPassword": "Confirmar senha",
+    "showPassword": "Mostrar senha",
+    "hidePassword": "Ocultar senha"
   }
 }

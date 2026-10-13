@@ -4,9 +4,8 @@ import {
   Control,
   FieldErrors,
 } from 'react-hook-form';
-import {
-  Ionicons,
-} from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import {
   Pressable,
   StyleSheet,
@@ -16,7 +15,6 @@ import {
 } from 'react-native';
 
 import { colors, fonts, radius, spacing } from '../theme';
-
 import type { RegisterFormData } from '../validation/schemas';
 
 type Props = {
@@ -29,6 +27,7 @@ export function ConfirmPasswordInput({
   errors,
 }: Props) {
   const [showPassword, setShowPassword] = useState(false);
+  const { t } = useTranslation();
 
   return (
     <Controller
@@ -46,7 +45,7 @@ export function ConfirmPasswordInput({
 
             <TextInput
               style={styles.input}
-              placeholder="Confirm password"
+              placeholder={t('register.confirmPassword')}
               placeholderTextColor={colors.inkFaint}
               value={value}
               onChangeText={onChange}
@@ -59,13 +58,15 @@ export function ConfirmPasswordInput({
             <Pressable
               onPress={() => setShowPassword((current) => !current)}
               hitSlop={8}
+              accessibilityRole="button"
+              accessibilityLabel={
+                showPassword
+                  ? t('register.hidePassword')
+                  : t('register.showPassword')
+              }
             >
               <Ionicons
-                name={
-                  showPassword
-                    ? 'eye-outline'
-                    : 'eye-off-outline'
-                }
+                name={showPassword ? 'eye-outline' : 'eye-off-outline'}
                 size={20}
                 color={colors.inkMuted}
               />

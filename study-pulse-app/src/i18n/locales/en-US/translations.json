@@ -55,6 +55,9 @@
       "year": "Year"
     },
     "birthDateError": "Please enter your complete date of birth.",
-    "birthDateSelect": "Select {{field}}"
+    "birthDateSelect": "Select {{field}}",
+    "confirmPassword": "Confirm password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
   }
 }
