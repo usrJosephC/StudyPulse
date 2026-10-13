@@ -3,7 +3,9 @@
     "close": "Fechar",
     "error": "Erro",
     "warning": "Aviso",
-    "loading": "Carregando..."
+    "loading": "Carregando...",
+    "cancel": "Cancelar",
+    "save": "Salvar"
   },
   "language": {
     "label": "Idioma",
@@ -92,5 +94,46 @@
       "other": "Outro"
     },
     "name": "Nome"
+  },
+  "goals": {
+    "defaultStudent": "Estudante",
+    "consistency": "Consistência",
+    "currentStreak": "Sequência atual",
+    "less": "Menos",
+    "more": "Mais",
+    "noStudyActivity": "Nenhuma atividade de estudo ainda.",
+    "activeGoals": "Metas ativas",
+    "loadingGoals": "Carregando metas",
+    "retryLoading": "Tentar carregar as metas novamente",
+    "tapToRetry": "Toque para tentar novamente",
+    "noActiveGoals": "Nenhuma meta ativa. Toque em + para criar sua primeira meta.",
+    "progress": "Progresso",
+    "completeGoal": "Concluir meta",
+    "continueStudy": "Continuar estudando",
+    "startGoal": "Iniciar meta",
+    "addNewGoal": "Adicionar nova meta",
+    "newGoal": "Nova meta",
+    "closeModal": "Fechar janela",
+    "category": "Categoria",
+    "categoryPlaceholder": "Ex.: Ciências",
+    "general": "Geral",
+    "title": "Título",
+    "titlePlaceholder": "Ex.: Concluir curso de React Native",
+    "titleRequired": "O título é obrigatório.",
+    "durationDays": "Duração em dias",
+    "durationPlaceholder": "Ex.: 30",
+    "durationAccessibility": "Duração da meta em dias",
+    "invalidDuration": "Informe uma duração entre 1 e 3650 dias.",
+    "saving": "Salvando...",
+    "createError": "Não foi possível criar a meta. Tente novamente.",
+    "dateCalculationError": "Não foi possível calcular a data de vencimento.",
+    "dayCount_one": "{{count}} dia",
+    "dayCount_other": "{{count}} dias",
+    "noDueDate": "Sem prazo definido",
+    "overdue_one": "Atrasada há {{count}} dia",
+    "overdue_other": "Atrasada há {{count}} dias",
+    "dueToday": "Vence hoje",
+    "remainingDays_one": "{{count}} dia restante",
+    "remainingDays_other": "{{count}} dias restantes"
   }
 }

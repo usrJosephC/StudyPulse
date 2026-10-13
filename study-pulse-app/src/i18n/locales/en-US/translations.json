@@ -3,7 +3,9 @@
     "close": "Close",
     "error": "Error",
     "warning": "Warning",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "cancel": "Cancel",
+    "save": "Save"
   },
   "language": {
     "label": "Language",
@@ -92,5 +94,46 @@
       "other": "Other"
     },
     "name": "Name"
+  },
+  "goals": {
+    "defaultStudent": "Student",
+    "consistency": "Consistency",
+    "currentStreak": "Current Streak",
+    "less": "Less",
+    "more": "More",
+    "noStudyActivity": "No study activity yet.",
+    "activeGoals": "Active Goals",
+    "loadingGoals": "Loading goals",
+    "retryLoading": "Try loading goals again",
+    "tapToRetry": "Tap to try again",
+    "noActiveGoals": "No active goals. Tap + to create your first one.",
+    "progress": "Progress",
+    "completeGoal": "Complete Goal",
+    "continueStudy": "Continue Study",
+    "startGoal": "Start Goal",
+    "addNewGoal": "Add new goal",
+    "newGoal": "New Goal",
+    "closeModal": "Close modal",
+    "category": "Category",
+    "categoryPlaceholder": "e.g. Science",
+    "general": "General",
+    "title": "Title",
+    "titlePlaceholder": "e.g. Finish React Native course",
+    "titleRequired": "Title is required.",
+    "durationDays": "Duration in days",
+    "durationPlaceholder": "e.g. 30",
+    "durationAccessibility": "Goal duration in days",
+    "invalidDuration": "Enter a duration between 1 and 3650 days.",
+    "saving": "Saving...",
+    "createError": "Unable to create the goal. Please try again.",
+    "dateCalculationError": "Unable to calculate the due date.",
+    "dayCount_one": "{{count}} day",
+    "dayCount_other": "{{count}} days",
+    "noDueDate": "No due date",
+    "overdue_one": "Overdue by {{count}} day",
+    "overdue_other": "Overdue by {{count}} days",
+    "dueToday": "Due today",
+    "remainingDays_one": "{{count}} day remaining",
+    "remainingDays_other": "{{count}} days remaining"
   }
 }
