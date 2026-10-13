@@ -58,7 +58,7 @@ export function Register({ onRegisterSuccess }: Props) {
     handleSubmit,
     formState: { errors },
   } = useForm<RegisterFormData, unknown, RegisterFormData>({
-    resolver: yupResolver(signUpSchema),
+    resolver: yupResolver(signUpSchema(t)),
     mode: 'onSubmit',
     defaultValues: {
       name: '',

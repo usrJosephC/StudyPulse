@@ -11,6 +11,23 @@
     "english": "English",
     "saveError": "Não foi possível salvar a preferência de idioma."
   },
+  "validation": {
+    "invalidEmail": "Informe um e-mail válido.",
+    "emailRequired": "O e-mail é obrigatório.",
+    "passwordMin": "A senha deve ter pelo menos {{min}} caracteres.",
+    "passwordRequired": "A senha é obrigatória.",
+    "nameRequired": "O nome é obrigatório.",
+    "passwordsMustMatch": "As senhas devem ser iguais.",
+    "confirmPasswordRequired": "Confirme sua senha.",
+    "dayRequired": "O dia é obrigatório.",
+    "invalidDay": "Informe um dia válido.",
+    "monthRequired": "O mês é obrigatório.",
+    "invalidMonth": "Informe um mês válido.",
+    "yearRequired": "O ano é obrigatório.",
+    "invalidYear": "Informe um ano válido.",
+    "genderRequired": "O gênero é obrigatório.",
+    "invalidGender": "Selecione um gênero válido."
+  },
   "loginPage": {
     "title": "Boas-vindas de volta!",
     "subtitle": "Entre para continuar sua jornada de estudos."

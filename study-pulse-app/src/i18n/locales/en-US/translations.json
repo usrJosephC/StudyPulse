@@ -11,6 +11,23 @@
     "english": "English",
     "saveError": "Unable to save the language preference."
   },
+  "validation": {
+    "invalidEmail": "Please enter a valid email.",
+    "emailRequired": "Email is required.",
+    "passwordMin": "Password must be at least {{min}} characters.",
+    "passwordRequired": "Password is required.",
+    "nameRequired": "Name is required.",
+    "passwordsMustMatch": "Passwords must match.",
+    "confirmPasswordRequired": "Please confirm your password.",
+    "dayRequired": "Day is required.",
+    "invalidDay": "Please enter a valid day.",
+    "monthRequired": "Month is required.",
+    "invalidMonth": "Please enter a valid month.",
+    "yearRequired": "Year is required.",
+    "invalidYear": "Please enter a valid year.",
+    "genderRequired": "Gender is required.",
+    "invalidGender": "Please select a valid gender."
+  },
   "loginPage": {
     "title": "Welcome back!",
     "subtitle": "Log in to continue your study journey."

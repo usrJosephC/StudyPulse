@@ -74,7 +74,7 @@ export function Login({ onCreateAccount }: Props) {
     formState: { errors },
     handleSubmit,
   } = useForm<LoginFormData>({
-    resolver: yupResolver(loginSchema),
+    resolver: yupResolver(loginSchema(t)),
     mode: 'onSubmit',
     defaultValues: {
       email: '',
