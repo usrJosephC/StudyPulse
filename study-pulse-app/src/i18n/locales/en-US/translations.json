@@ -58,6 +58,11 @@
     "birthDateSelect": "Select {{field}}",
     "confirmPassword": "Confirm password",
     "showPassword": "Show password",
-    "hidePassword": "Hide password"
+    "hidePassword": "Hide password",
+    "genderOptions": {
+      "female": "Female",
+      "male": "Male",
+      "other": "Other"
+    }
   }
 }
