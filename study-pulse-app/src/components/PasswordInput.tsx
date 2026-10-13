@@ -9,6 +9,7 @@ import {
 } from 'react-hook-form';
 
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 import {
   Pressable,
@@ -34,8 +35,8 @@ export function PasswordInput<T extends FieldValues>({
   control,
   errors,
 }: Props<T>) {
-  const [showPassword, setShowPassword] =
-    useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const { t } = useTranslation();
 
   return (
     <Controller
@@ -53,7 +54,7 @@ export function PasswordInput<T extends FieldValues>({
 
             <TextInput
               style={styles.input}
-              placeholder="Password"
+              placeholder={t('login.password')}
               placeholderTextColor={colors.inkFaint}
               value={value}
               onChangeText={onChange}
@@ -65,18 +66,18 @@ export function PasswordInput<T extends FieldValues>({
 
             <Pressable
               onPress={() =>
-                setShowPassword(
-                  (current) => !current
-                )
+                setShowPassword((current) => !current)
               }
               hitSlop={8}
+              accessibilityRole="button"
+              accessibilityLabel={
+                showPassword
+                  ? t('register.hidePassword')
+                  : t('register.showPassword')
+              }
             >
               <Ionicons
-                name={
-                  showPassword
-                    ? 'eye-outline'
-                    : 'eye-off-outline'
-                }
+                name={showPassword ? 'eye-outline' : 'eye-off-outline'}
                 size={20}
                 color={colors.inkMuted}
               />
