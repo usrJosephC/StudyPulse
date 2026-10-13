@@ -42,6 +42,12 @@
     "connectionError": "Não houve resposta do servidor.",
     "unexpectedError": "Ocorreu um erro ao tentar entrar."
   },
+  "registerPage": {
+    "title": "Criar conta",
+    "subtitle": "Crie sua conta e comece sua jornada de estudos.",
+    "footer": "Já tem uma conta?",
+    "loginLink": "Entrar"
+  },
   "register": {
     "birthDate": "Data de nascimento",
     "gender": "Gênero",
