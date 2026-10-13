@@ -48,6 +48,13 @@
     "registerErrorTitle": "Unable to create account",
     "confirmEmailTitle": "Confirm your email",
     "confirmEmailMessage": "We sent you a confirmation link. After confirming your email, return and log in.",
-    "unexpectedError": "Unable to create your account. Please try again."
+    "unexpectedError": "Unable to create your account. Please try again.",
+    "birthDateFields": {
+      "day": "Day",
+      "month": "Month",
+      "year": "Year"
+    },
+    "birthDateError": "Please enter your complete date of birth.",
+    "birthDateSelect": "Select {{field}}"
   }
 }

@@ -48,6 +48,13 @@
     "registerErrorTitle": "Não foi possível criar a conta",
     "confirmEmailTitle": "Confirme seu e-mail",
     "confirmEmailMessage": "Enviamos um link de confirmação. Depois de confirmar, volte e faça login.",
-    "unexpectedError": "Não foi possível criar sua conta. Tente novamente."
+    "unexpectedError": "Não foi possível criar sua conta. Tente novamente.",
+    "birthDateFields": {
+      "day": "Dia",
+      "month": "Mês",
+      "year": "Ano"
+    },
+    "birthDateError": "Informe sua data de nascimento completa.",
+    "birthDateSelect": "Selecione {{field}}"
   }
 }
