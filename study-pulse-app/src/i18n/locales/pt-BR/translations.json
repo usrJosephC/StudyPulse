@@ -1,0 +1,41 @@
+{
+  "common": {
+    "close": "Fechar",
+    "error": "Erro",
+    "warning": "Aviso",
+    "loading": "Carregando..."
+  },
+  "language": {
+    "label": "Idioma",
+    "portuguese": "Português",
+    "english": "English",
+    "saveError": "Não foi possível salvar a preferência de idioma."
+  },
+  "login": {
+    "email": "E-mail",
+    "password": "Senha",
+    "forgotPassword": "Esqueceu sua senha?",
+    "resetPasswordTitle": "Redefinir senha",
+    "resetPasswordMessage": "Esta funcionalidade ainda não está disponível.",
+    "loginButton": "Entrar",
+    "loggingIn": "Entrando...",
+    "createAccountButton": "Criar conta",
+    "termsOfService": "Termos de Uso",
+    "termsAgreementStart": "Li e aceito os",
+    "termsAgreementEnd": ".",
+    "acceptTermsRequired": "Você precisa aceitar os Termos de Uso para continuar.",
+    "termsTitle": "Termos de Uso",
+    "termsContent": {
+      "paragraph1": "Ao utilizar o StudyPulse, você concorda em usar o aplicativo de forma responsável e fornecer informações verdadeiras ao criar sua conta.",
+      "paragraph2": "As informações da sua conta devem ser mantidas em segurança, e você é responsável pelas atividades realizadas por meio dela."
+    },
+    "loginErrorTitle": "Não foi possível entrar",
+    "googleLoginTitle": "Login com Google",
+    "googleLoginButton": "Continuar com Google",
+    "googleLoginUnavailable": "Esta funcionalidade ainda não está disponível.",
+    "serverError": "Ocorreu um erro inesperado.",
+    "connectionErrorTitle": "Erro de conexão",
+    "connectionError": "Não houve resposta do servidor.",
+    "unexpectedError": "Ocorreu um erro ao tentar entrar."
+  }
+}

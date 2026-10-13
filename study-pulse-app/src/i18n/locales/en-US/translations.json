@@ -1,0 +1,41 @@
+{
+  "common": {
+    "close": "Close",
+    "error": "Error",
+    "warning": "Warning",
+    "loading": "Loading..."
+  },
+  "language": {
+    "label": "Language",
+    "portuguese": "Português",
+    "english": "English",
+    "saveError": "Unable to save the language preference."
+  },
+  "login": {
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot your password?",
+    "resetPasswordTitle": "Reset password",
+    "resetPasswordMessage": "This feature is not available yet.",
+    "loginButton": "Log In",
+    "loggingIn": "Logging in...",
+    "createAccountButton": "Create Account",
+    "termsOfService": "Terms of Service",
+    "termsAgreementStart": "I agree to the",
+    "termsAgreementEnd": ".",
+    "acceptTermsRequired": "You must accept the Terms of Service to continue.",
+    "termsTitle": "Terms of Service",
+    "termsContent": {
+      "paragraph1": "By using StudyPulse, you agree to use the application responsibly and provide accurate information when creating your account.",
+      "paragraph2": "Your account information should be kept secure, and you are responsible for the activity performed through your account."
+    },
+    "loginErrorTitle": "Unable to log in",
+    "googleLoginTitle": "Google Login",
+    "googleLoginButton": "Continue with Google",
+    "googleLoginUnavailable": "This feature is not available yet.",
+    "serverError": "An unexpected error occurred.",
+    "connectionErrorTitle": "Connection error",
+    "connectionError": "No response from the server.",
+    "unexpectedError": "An error occurred while trying to log in."
+  }
+}
