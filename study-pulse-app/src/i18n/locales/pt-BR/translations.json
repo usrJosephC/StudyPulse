@@ -11,6 +11,10 @@
     "english": "English",
     "saveError": "Não foi possível salvar a preferência de idioma."
   },
+  "loginPage": {
+    "title": "Boas-vindas de volta!",
+    "subtitle": "Entre para continuar sua jornada de estudos."
+  },
   "login": {
     "email": "E-mail",
     "password": "Senha",

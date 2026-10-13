@@ -11,6 +11,10 @@
     "english": "English",
     "saveError": "Unable to save the language preference."
   },
+  "loginPage": {
+    "title": "Welcome back!",
+    "subtitle": "Log in to continue your study journey."
+  },
   "login": {
     "email": "Email",
     "password": "Password",
