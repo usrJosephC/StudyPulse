@@ -37,5 +37,17 @@
     "connectionErrorTitle": "Connection error",
     "connectionError": "No response from the server.",
     "unexpectedError": "An error occurred while trying to log in."
+  },
+  "register": {
+    "birthDate": "Date of birth",
+    "gender": "Gender",
+    "creatingAccount": "Creating account...",
+    "createAccountButton": "Create Account",
+    "longNameTitle": "Name is too long",
+    "longNameMessage": "Use no more than 80 characters.",
+    "registerErrorTitle": "Unable to create account",
+    "confirmEmailTitle": "Confirm your email",
+    "confirmEmailMessage": "We sent you a confirmation link. After confirming your email, return and log in.",
+    "unexpectedError": "Unable to create your account. Please try again."
   }
 }

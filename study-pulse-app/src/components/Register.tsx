@@ -7,6 +7,8 @@ import {
   View,
 } from 'react-native';
 
+import { useTranslation } from 'react-i18next';
+
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 
@@ -18,8 +20,10 @@ import { ConfirmPasswordInput } from './ConfirmPasswordInput';
 import { BirthDateInput } from './BirthDateInput';
 import { GenderInput } from './GenderInput';
 
-import { signUpSchema } from '../validation/schemas';
-import type { RegisterFormData } from '../validation/schemas';
+import {
+  signUpSchema,
+  type RegisterFormData,
+} from '../validation/schemas';
 
 import { colors, fonts, spacing } from '../theme';
 import { useAuth } from '../context/AuthContext';
@@ -28,10 +32,10 @@ type Props = {
   onRegisterSuccess?: () => void;
 };
 
-export function Register({
-  onRegisterSuccess,
-}: Props) {
+export function Register({ onRegisterSuccess }: Props) {
+  const { t } = useTranslation();
   const { signUp } = useAuth();
+
   const [isLoading, setIsLoading] = useState(false);
   const submitInProgress = useRef(false);
 
@@ -62,12 +66,19 @@ export function Register({
 
   async function onSubmit(data: RegisterFormData) {
     if (submitInProgress.current) return;
+
     const normalizedName = data.name.trim();
+
     if (normalizedName.length > 80) {
-      Alert.alert('Nome muito longo', 'Use no máximo 80 caracteres.');
+      Alert.alert(
+        t('register.longNameTitle'),
+        t('register.longNameMessage')
+      );
       return;
     }
+
     submitInProgress.current = true;
+
     try {
       setIsLoading(true);
 
@@ -76,26 +87,41 @@ export function Register({
         String(data.birthDate.month).padStart(2, '0'),
         String(data.birthDate.day).padStart(2, '0'),
       ].join('-');
-      const result = await signUp(normalizedName, data.email, data.password, {
-        birthDate,
-        gender: data.gender,
-      });
+
+      const result = await signUp(
+        normalizedName,
+        data.email,
+        data.password,
+        {
+          birthDate,
+          gender: data.gender,
+        }
+      );
+
       if (!result.ok) {
-        Alert.alert('Não foi possível criar a conta', result.error.message);
-        return;
-      }
-      if (!result.data.session) {
         Alert.alert(
-          'Confirme seu e-mail',
-          'Enviamos um link de confirmação. Depois de confirmar, volte e faça login.'
+          t('register.registerErrorTitle'),
+          result.error.message ||
+            t('register.unexpectedError')
         );
         return;
       }
-      // O AuthProvider muda o navegador quando a sessão é emitida.
+
+      if (!result.data.session) {
+        Alert.alert(
+          t('register.confirmEmailTitle'),
+          t('register.confirmEmailMessage')
+        );
+        return;
+      }
+
+      // The AuthProvider handles navigation when the session is emitted.
     } catch (error) {
+      console.error('Registration error:', error);
+
       Alert.alert(
-        'Erro',
-        'Não foi possível criar sua conta. Tente novamente.'
+        t('common.error'),
+        t('register.unexpectedError')
       );
     } finally {
       submitInProgress.current = false;
@@ -126,7 +152,7 @@ export function Register({
       />
 
       <Text style={styles.sectionTitle}>
-        Date of birth
+        {t('register.birthDate')}
       </Text>
 
       <BirthDateInput
@@ -135,7 +161,7 @@ export function Register({
       />
 
       <Text style={styles.sectionTitle}>
-        Gender
+        {t('register.gender')}
       </Text>
 
       <GenderInput
@@ -144,7 +170,11 @@ export function Register({
       />
 
       <Button
-        label={isLoading ? 'Criando conta...' : 'Create Account'}
+        label={
+          isLoading
+            ? t('register.creatingAccount')
+            : t('register.createAccountButton')
+        }
         onPress={handleSubmit(onSubmit)}
         disabled={isLoading}
       />

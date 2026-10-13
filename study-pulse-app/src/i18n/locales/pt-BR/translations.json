@@ -37,5 +37,17 @@
     "connectionErrorTitle": "Erro de conexão",
     "connectionError": "Não houve resposta do servidor.",
     "unexpectedError": "Ocorreu um erro ao tentar entrar."
+  },
+  "register": {
+    "birthDate": "Data de nascimento",
+    "gender": "Gênero",
+    "creatingAccount": "Criando conta...",
+    "createAccountButton": "Criar conta",
+    "longNameTitle": "Nome muito longo",
+    "longNameMessage": "Use no máximo 80 caracteres.",
+    "registerErrorTitle": "Não foi possível criar a conta",
+    "confirmEmailTitle": "Confirme seu e-mail",
+    "confirmEmailMessage": "Enviamos um link de confirmação. Depois de confirmar, volte e faça login.",
+    "unexpectedError": "Não foi possível criar sua conta. Tente novamente."
   }
 }
