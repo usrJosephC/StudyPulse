@@ -11,7 +11,7 @@ Aplicativo de rotina de estudos com gamificação, desenvolvido para a disciplin
 | Integrante |
 |---|
 | Joseph Bartholomeu Cavalcante Rocha |
-| Letícya Beatriz dos Santos Medeiros |
+| Letícya Beatryz dos Santos Medeiros |
 | Mariana Pereira de Melo |
 
 ## Links do projeto
