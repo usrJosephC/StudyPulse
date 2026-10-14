@@ -613,6 +613,9 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.primary,
   },
+  goalAction: {
+    marginTop: spacing.lg,
+  },
   fab: {
     position: 'absolute',
     right: spacing.lg,
