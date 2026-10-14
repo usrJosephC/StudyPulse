@@ -3,6 +3,8 @@ import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, Text
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { Card } from '../components/Card';
 import { Pill } from '../components/Pill';
@@ -15,6 +17,7 @@ import { useSquadActivity } from '../hooks/useSquadActivity';
 import type { RankingEntry, SquadActivity } from '../types/domain';
 
 export function GroupsScreen() {
+  const { t } = useTranslation();
   const { session, profile } = useAuth();
   const { squad, loading: squadLoading, error: squadError, refresh: refreshSquad, joinSquad } = useSquad();
   const { ranking, loading: rankingLoading, error: rankingError, refresh: refreshRanking } = useRanking(squad?.id ?? null);
@@ -27,7 +30,7 @@ export function GroupsScreen() {
   const [joinError, setJoinError] = useState<string | null>(null);
   const displayName = profile?.name?.trim()
     || (typeof session?.user.user_metadata?.name === 'string' ? session.user.user_metadata.name.trim() : '')
-    || 'Estudante';
+    || t('groups.defaultStudent');
   const loading = squadLoading || (Boolean(squad) && (rankingLoading || activityLoading));
   const error = squadError || rankingError || activityError;
 
@@ -53,28 +56,28 @@ export function GroupsScreen() {
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScreenHeader userInitial={displayName.charAt(0).toUpperCase() || '?'} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        {loading && <ActivityIndicator color={colors.primary} accessibilityLabel="Loading study squad" />}
+        {loading && <ActivityIndicator color={colors.primary} accessibilityLabel={t('groups.loadingSquad')} />}
         {error && (
-          <Pressable onPress={refreshAll} accessibilityRole="button" accessibilityLabel="Try loading the study squad again" style={styles.stateAction}>
-            <Text style={styles.errorText}>{error.message} · Tap to try again</Text>
+          <Pressable onPress={refreshAll} accessibilityRole="button" accessibilityLabel={t('groups.retryLoading')} style={styles.stateAction}>
+            <Text style={styles.errorText}>{error.message} · {t('groups.tapToRetry')}</Text>
           </Pressable>
         )}
         {!squadLoading && !squad && !squadError && (
           <Card style={styles.emptyCard}>
             <Ionicons name="people-outline" size={32} color={colors.secondary} />
-            <Text style={styles.sectionTitle}>Você ainda não está em um grupo</Text>
-            <Text style={styles.stateText}>Informe o código de convite para acompanhar o ranking e as atividades.</Text>
+            <Text style={styles.sectionTitle}>{t('groups.notInGroup')}</Text>
+            <Text style={styles.stateText}>{t('groups.inviteInstructions')}</Text>
             <TextInput
               value={inviteCode}
               onChangeText={(value) => { setInviteCode(value.toUpperCase()); setJoinError(null); }}
-              placeholder="CÓDIGO DE CONVITE"
+              placeholder={t('groups.inviteCodePlaceholder')}
               placeholderTextColor={colors.inkMuted}
               autoCapitalize="characters"
               autoCorrect={false}
               editable={!joining}
               maxLength={12}
               style={styles.inviteInput}
-              accessibilityLabel="Código de convite do grupo"
+              accessibilityLabel={t('groups.inviteCodeAccessibility')}
             />
             {joinError && <Text style={styles.errorText}>{joinError}</Text>}
             <Pressable
@@ -84,114 +87,107 @@ export function GroupsScreen() {
               accessibilityRole="button"
               accessibilityState={{ disabled: !inviteCode.trim() || joining, busy: joining }}
             >
-              {joining ? <ActivityIndicator color="#fff" /> : <Text style={styles.joinButtonText}>Entrar no grupo</Text>}
+              {joining ? <ActivityIndicator color="#fff" /> : <Text style={styles.joinButtonText}>{t('groups.joinButton')}</Text>}
             </Pressable>
           </Card>
         )}
-
         {squad && <>
-        <View style={styles.centered}>
-          <Pill label="STUDY SQUAD" variant="secondary" icon={<Ionicons name="people" size={12} color="#fff" />} />
-          <Text style={styles.squadName}>{squad.name}</Text>
-          <Text style={styles.squadSubtitle}>{squad.subtitle || 'Study together and reach your goals'}</Text>
-        </View>
-
-        <Card>
-          <View style={styles.rankingHeader}>
-            <View style={styles.rankingHeaderLeft}>
-              <Ionicons name="bar-chart" size={18} color={colors.primary} />
-              <Text style={styles.rankingTitle}>Weekly Ranking</Text>
-            </View>
-            <Pill label={formatSeasonEnd(squad.season_ends_at)} variant="muted" />
+          <View style={styles.centered}>
+            <Pill label={t('groups.studySquad')} variant="secondary" icon={<Ionicons name="people" size={12} color="#fff" />} />
+            <Text style={styles.squadName}>{squad.name}</Text>
+            <Text style={styles.squadSubtitle}>{squad.subtitle || t('groups.defaultSubtitle')}</Text>
           </View>
-
-          {ranking.length >= 3 ? <View style={styles.podiumRow}>
-            {podium.map((member) => {
-              const rank = member.rank;
-              return (
-                <View key={member.user_id} style={styles.podiumMember}>
-                  {rank === 1 && <Ionicons name="star" size={16} color={colors.primary} style={styles.podiumStar} />}
-                  <Avatar label={getInitial(member.name)} size={rank === 1 ? 64 : 52} ringColor={rank === 1 ? colors.primary : undefined} />
-                  <View style={styles.streakBadge}>
-                    <Ionicons name="flame" size={10} color={colors.primary} />
-                    <Text style={styles.streakBadgeText}>{member.streak}</Text>
+          <Card>
+            <View style={styles.rankingHeader}>
+              <View style={styles.rankingHeaderLeft}>
+                <Ionicons name="bar-chart" size={18} color={colors.primary} />
+                <Text style={styles.rankingTitle}>{t('groups.weeklyRanking')}</Text>
+              </View>
+              <Pill label={formatSeasonEnd(squad.season_ends_at, t)} variant="muted" />
+            </View>
+            {ranking.length >= 3 ? <View style={styles.podiumRow}>
+              {podium.map((member) => {
+                const rank = member.rank;
+                return (
+                  <View key={member.user_id} style={styles.podiumMember}>
+                    {rank === 1 && <Ionicons name="star" size={16} color={colors.primary} style={styles.podiumStar} />}
+                    <Avatar label={getInitial(member.name)} size={rank === 1 ? 64 : 52} ringColor={rank === 1 ? colors.primary : undefined} />
+                    <View style={styles.streakBadge}>
+                      <Ionicons name="flame" size={10} color={colors.primary} />
+                      <Text style={styles.streakBadgeText}>{member.streak}</Text>
+                    </View>
+                    <Text style={styles.podiumName}>{member.name}</Text>
+                    <View
+                      style={[
+                        styles.podiumBar,
+                        rank === 1 ? styles.podiumBar1 : rank === 2 ? styles.podiumBar2 : styles.podiumBar3,
+                      ]}
+                    >
+                      <Text style={styles.podiumRank}>{rank}</Text>
+                      <Text style={styles.podiumPoints}>{formatPoints(member.weekly_points, t)}</Text>
+                    </View>
                   </View>
-                  <Text style={styles.podiumName}>{member.name}</Text>
-                  <View
-                    style={[
-                      styles.podiumBar,
-                      rank === 1 ? styles.podiumBar1 : rank === 2 ? styles.podiumBar2 : styles.podiumBar3,
-                    ]}
-                  >
-                    <Text style={styles.podiumRank}>{rank}</Text>
-                    <Text style={styles.podiumPoints}>{formatPoints(member.weekly_points)}</Text>
+                );
+              })}
+            </View> : !rankingLoading && ranking.length > 0 ? (
+              <View style={styles.restList}>
+                {ranking.map((member) => (
+                  <View key={member.user_id} style={[styles.restRow, member.user_id === session?.user.id && styles.restRowActive]}>
+                    <Text style={styles.restRank}>{member.rank}</Text>
+                    <Avatar label={getInitial(member.name)} size={36} />
+                    <View style={styles.flexFill}>
+                      <Text style={styles.restName}>{member.name}</Text>
+                      <Text style={styles.restStreakText}>{t('groups.streakDays', { count: member.streak })}</Text>
+                    </View>
+                    <Text style={styles.restPoints}>{formatPoints(member.weekly_points, t)}</Text>
                   </View>
-                </View>
-              );
-            })}
-          </View> : !rankingLoading && ranking.length > 0 ? (
+                ))}
+              </View>
+            ) : null}
             <View style={styles.restList}>
-              {ranking.map((member) => (
+              {rest.map((member) => (
                 <View key={member.user_id} style={[styles.restRow, member.user_id === session?.user.id && styles.restRowActive]}>
                   <Text style={styles.restRank}>{member.rank}</Text>
                   <Avatar label={getInitial(member.name)} size={36} />
                   <View style={styles.flexFill}>
                     <Text style={styles.restName}>{member.name}</Text>
-                    <Text style={styles.restStreakText}>{member.streak} days</Text>
+                    <View style={styles.restStreak}>
+                      <Ionicons name="flame" size={11} color={colors.primary} />
+                      <Text style={styles.restStreakText}>{t('groups.streakDays', { count: member.streak })}</Text>
+                    </View>
                   </View>
-                  <Text style={styles.restPoints}>{formatPoints(member.weekly_points)}</Text>
+                  <Text style={styles.restPoints}>{formatPoints(member.weekly_points, t)}</Text>
                 </View>
               ))}
             </View>
-          ) : null}
-
-          <View style={styles.restList}>
-            {rest.map((member) => (
-              <View key={member.user_id} style={[styles.restRow, member.user_id === session?.user.id && styles.restRowActive]}>
-                <Text style={styles.restRank}>{member.rank}</Text>
-                <Avatar label={getInitial(member.name)} size={36} />
-                <View style={styles.flexFill}>
-                  <Text style={styles.restName}>{member.name}</Text>
-                  <View style={styles.restStreak}>
-                    <Ionicons name="flame" size={11} color={colors.primary} />
-                    <Text style={styles.restStreakText}>{member.streak} days</Text>
-                  </View>
+            {ranking.length > 0 ? <View style={styles.viewAllWrap}>
+              <Pressable
+                style={styles.viewAllButton}
+                onPress={() => setLeaderboardVisible(true)}
+                accessibilityRole="button"
+                accessibilityLabel={t('groups.viewLeaderboardAccessibility')}
+              >
+                <Text style={styles.viewAllLabel}>{t('groups.viewFullLeaderboard')}</Text>
+              </Pressable>
+            </View> : !rankingLoading && !rankingError ? <Text style={styles.stateText}>{t('groups.emptyRanking')}</Text> : null}
+          </Card>
+          <Text style={styles.sectionTitle}>{t('groups.squadActivity')}</Text>
+          <View style={styles.activityList}>
+            {activities.map((item) => (
+              <Card key={item.id} style={styles.activityCard}>
+                <View style={styles.activityIcon}>
+                  <Ionicons name={getActivityIcon(item.action)} size={18} color={colors.secondary} />
                 </View>
-                <Text style={styles.restPoints}>{formatPoints(member.weekly_points)}</Text>
-              </View>
+                <View style={styles.flexFill}>
+                  <Text style={styles.activityMessage}>{formatActivity(item, ranking, t)}</Text>
+                  <Text style={styles.activityTime}>{formatRelativeTime(item.created_at, t)}</Text>
+                </View>
+              </Card>
             ))}
+            {!activityLoading && activities.length === 0 && !activityError && <Text style={styles.stateText}>{t('groups.noActivity')}</Text>}
           </View>
-
-          {ranking.length > 0 ? <View style={styles.viewAllWrap}>
-            <Pressable
-              style={styles.viewAllButton}
-              onPress={() => setLeaderboardVisible(true)}
-              accessibilityRole="button"
-              accessibilityLabel="View full leaderboard"
-            >
-              <Text style={styles.viewAllLabel}>View Full Leaderboard</Text>
-            </Pressable>
-          </View> : !rankingLoading && !rankingError ? <Text style={styles.stateText}>The weekly ranking is empty.</Text> : null}
-        </Card>
-
-        <Text style={styles.sectionTitle}>Squad Activity</Text>
-        <View style={styles.activityList}>
-          {activities.map((item) => (
-            <Card key={item.id} style={styles.activityCard}>
-              <View style={styles.activityIcon}>
-                <Ionicons name={getActivityIcon(item.action)} size={18} color={colors.secondary} />
-              </View>
-              <View style={styles.flexFill}>
-                <Text style={styles.activityMessage}>{formatActivity(item, ranking)}</Text>
-                <Text style={styles.activityTime}>{formatRelativeTime(item.created_at)}</Text>
-              </View>
-            </Card>
-          ))}
-          {!activityLoading && activities.length === 0 && !activityError && <Text style={styles.stateText}>No squad activity yet.</Text>}
-        </View>
         </>}
       </ScrollView>
-
       <Modal
         visible={leaderboardVisible}
         animationType="slide"
@@ -201,11 +197,11 @@ export function GroupsScreen() {
         <View style={styles.backdrop}>
           <SafeAreaView style={styles.leaderboardModal} edges={['bottom']}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Full Leaderboard</Text>
+              <Text style={styles.modalTitle}>{t('groups.fullLeaderboard')}</Text>
               <Pressable
                 onPress={() => setLeaderboardVisible(false)}
                 accessibilityRole="button"
-                accessibilityLabel="Close leaderboard"
+                accessibilityLabel={t('groups.closeLeaderboard')}
                 hitSlop={8}
                 style={styles.modalClose}
               >
@@ -219,13 +215,13 @@ export function GroupsScreen() {
                     <Text style={styles.restRank}>{member.rank}</Text>
                     <Avatar label={getInitial(member.name)} size={36} />
                     <View style={styles.flexFill}>
-                      <Text style={styles.restName}>{member.user_id === session?.user.id ? 'You' : member.name}</Text>
+                      <Text style={styles.restName}>{member.user_id === session?.user.id ? t('groups.you') : member.name}</Text>
                       <View style={styles.restStreak}>
                         <Ionicons name="flame" size={11} color={colors.primary} />
-                        <Text style={styles.restStreakText}>{member.streak} days</Text>
+                        <Text style={styles.restStreakText}>{t('groups.streakDays', { count: member.streak })}</Text>
                       </View>
                     </View>
-                    <Text style={styles.restPoints}>{formatPoints(member.weekly_points)}</Text>
+                    <Text style={styles.restPoints}>{formatPoints(member.weekly_points, t)}</Text>
                   </View>
                 ))}
               </View>
@@ -521,14 +517,14 @@ function getInitial(name: string) {
   return name.trim().charAt(0).toUpperCase() || '?';
 }
 
-function formatPoints(points: number) {
-  return `${points.toLocaleString()} pt`;
+function formatPoints(points: number, t: TFunction) {
+  return t('groups.points', { count: points, formattedCount: points.toLocaleString() });
 }
 
-function formatSeasonEnd(value: string | null) {
-  if (!value) return 'This week';
+function formatSeasonEnd(value: string | null, t: TFunction) {
+  if (!value) return t('groups.thisWeek');
   const days = Math.max(0, Math.ceil((new Date(value).getTime() - Date.now()) / 86_400_000));
-  return `Ends in ${days}d`;
+  return t('groups.endsInDays', { count: days });
 }
 
 function getActivityIcon(action: string): keyof typeof Ionicons.glyphMap {
@@ -537,19 +533,19 @@ function getActivityIcon(action: string): keyof typeof Ionicons.glyphMap {
   return 'book';
 }
 
-function formatActivity(item: SquadActivity, ranking: RankingEntry[]) {
-  const name = item.user_name || ranking.find((member) => member.user_id === item.user_id)?.name || 'A squad member';
-  if (item.action === 'check_in') return `${name} checked in and kept the momentum going.`;
-  if (item.action === 'goal_done') return `${name} completed a study goal.`;
-  if (item.action === 'task_done') return `${name} completed a task.`;
-  return `${name} shared new activity with the squad.`;
+function formatActivity(item: SquadActivity, ranking: RankingEntry[], t: TFunction) {
+  const name = item.user_name || ranking.find((member) => member.user_id === item.user_id)?.name || t('groups.squadMember');
+  if (item.action === 'check_in') return t('groups.activityCheckIn', { name });
+  if (item.action === 'goal_done') return t('groups.activityGoalDone', { name });
+  if (item.action === 'task_done') return t('groups.activityTaskDone', { name });
+  return t('groups.activityShared', { name });
 }
 
-function formatRelativeTime(value: string) {
+function formatRelativeTime(value: string, t: TFunction) {
   const elapsedMinutes = Math.max(0, Math.floor((Date.now() - new Date(value).getTime()) / 60_000));
-  if (elapsedMinutes < 1) return 'Just now';
-  if (elapsedMinutes < 60) return `${elapsedMinutes} min ago`;
+  if (elapsedMinutes < 1) return t('groups.justNow');
+  if (elapsedMinutes < 60) return t('groups.minutesAgo', { count: elapsedMinutes });
   const hours = Math.floor(elapsedMinutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  return `${Math.floor(hours / 24)}d ago`;
+  if (hours < 24) return t('groups.hoursAgo', { count: hours });
+  return t('groups.daysAgo', { count: Math.floor(hours / 24) });
 }
