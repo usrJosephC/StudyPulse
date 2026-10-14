@@ -20,7 +20,7 @@
 - **Grupos de estudo:** entrada por código de convite, ranking semanal e feed de atividades.
 - **Perfil integrado:** dados da conta, estatísticas reais e encerramento seguro da sessão.
 - **Gamificação consistente:** pontos registrados em ledger, bônus de sequência e operações idempotentes.
-- **Internacionalização (i18n):** interface de todas as páginas com suporte a Português (pt-BR) e Inglês (en-US), utilizando i18next e react-i18next.
+- **Internacionalização (i18n):** interface de todas as páginas com suporte a múltiplas línguas, utilizando i18next e react-i18next.
 - **Ambiente local reproduzível:** Docker Compose inicia banco, Auth, API, migrations e seed com um comando.
 
 ---
