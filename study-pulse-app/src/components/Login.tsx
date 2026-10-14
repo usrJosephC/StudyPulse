@@ -62,12 +62,16 @@ export function Login({ onCreateAccount }: Props) {
 
   const submitInProgress = useRef(false);
 
+  const currentLanguage = (
+    i18n.resolvedLanguage ?? i18n.language
+  ).toLowerCase();
+
   const selectedLanguage: AppLanguage =
-    (i18n.resolvedLanguage ?? i18n.language)
-      .toLowerCase()
-      .startsWith('en')
+    currentLanguage.startsWith('en')
       ? 'en-US'
-      : 'pt-BR';
+      : currentLanguage.startsWith('es')
+        ? 'es-ES'
+        : 'pt-BR';
 
   const {
     control,
@@ -165,11 +169,13 @@ export function Login({ onCreateAccount }: Props) {
             accessibilityRole="radiogroup"
             accessibilityLabel={t('language.label')}
           >
+            {/* Portuguese */}
             <Pressable
               accessibilityRole="radio"
               accessibilityState={{
                 selected: selectedLanguage === 'pt-BR',
               }}
+              accessibilityLabel={t('language.portuguese')}
               style={[
                 styles.languageOption,
                 selectedLanguage === 'pt-BR' &&
@@ -191,11 +197,13 @@ export function Login({ onCreateAccount }: Props) {
               </Text>
             </Pressable>
 
+            {/* English */}
             <Pressable
               accessibilityRole="radio"
               accessibilityState={{
                 selected: selectedLanguage === 'en-US',
               }}
+              accessibilityLabel={t('language.english')}
               style={[
                 styles.languageOption,
                 selectedLanguage === 'en-US' &&
@@ -214,6 +222,34 @@ export function Login({ onCreateAccount }: Props) {
                 ]}
               >
                 {t('language.english')}
+              </Text>
+            </Pressable>
+
+            {/* Spanish */}
+            <Pressable
+              accessibilityRole="radio"
+              accessibilityState={{
+                selected: selectedLanguage === 'es-ES',
+              }}
+              accessibilityLabel={t('language.spanish')}
+              style={[
+                styles.languageOption,
+                selectedLanguage === 'es-ES' &&
+                  styles.languageOptionSelected,
+              ]}
+              disabled={isLoading}
+              onPress={() =>
+                handleLanguageChange('es-ES')
+              }
+            >
+              <Text
+                style={[
+                  styles.languageOptionText,
+                  selectedLanguage === 'es-ES' &&
+                    styles.languageOptionTextSelected,
+                ]}
+              >
+                {t('language.spanish')}
               </Text>
             </Pressable>
           </View>
@@ -396,6 +432,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
+    flexWrap: 'wrap',
   },
 
   languageOption: {

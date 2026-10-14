@@ -11,6 +11,7 @@
     "label": "Language",
     "portuguese": "Português",
     "english": "English",
+    "spanish": "Español",
     "saveError": "Unable to save the language preference."
   },
   "validation": {

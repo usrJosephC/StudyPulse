@@ -5,43 +5,51 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import translationEn from './locales/en-US/translations.json';
 import translationPt from './locales/pt-BR/translations.json';
+import translationEs from './locales/es-ES/translations.json';
 
 const resources = {
   'en-US': { translation: translationEn },
   en: { translation: translationEn },
   'pt-BR': { translation: translationPt },
   pt: { translation: translationPt },
+  'es-ES': { translation: translationEs },
+  es: { translation: translationEs },
 };
 
 const LANGUAGE_KEY = '@app_Language';
 
-export type AppLanguage = 'en-US' | 'pt-BR';
+export type AppLanguage = 'en-US' | 'pt-BR' | 'es-ES';
 
 function normalizeLanguage(language: string): AppLanguage {
-  return language.toLowerCase().startsWith('en')
-    ? 'en-US'
-    : 'pt-BR';
+  const normalized = language.toLowerCase();
+
+  if (normalized.startsWith('en')) {
+    return 'en-US';
+  }
+
+  if (normalized.startsWith('es')) {
+    return 'es-ES';
+  }
+
+  return 'pt-BR';
 }
 
 async function getInitialLanguage(): Promise<AppLanguage> {
   try {
-    const savedLanguage = await AsyncStorage.getItem(
-      LANGUAGE_KEY
-    );
+    const savedLanguage = await AsyncStorage.getItem(LANGUAGE_KEY);
 
     if (
       savedLanguage === 'en-US' ||
       savedLanguage === 'en' ||
       savedLanguage === 'pt-BR' ||
-      savedLanguage === 'pt'
+      savedLanguage === 'pt' ||
+      savedLanguage === 'es-ES' ||
+      savedLanguage === 'es'
     ) {
       return normalizeLanguage(savedLanguage);
     }
   } catch (error) {
-    console.error(
-      'Error loading saved language:',
-      error
-    );
+    console.error('Error loading saved language:', error);
   }
 
   const deviceLocale =
@@ -60,6 +68,7 @@ async function initI18n(): Promise<void> {
       fallbackLng: {
         'en-*': ['en-US', 'en'],
         'pt-*': ['pt-BR', 'pt'],
+        'es-*': ['es-ES', 'es'],
         default: ['pt-BR'],
       },
       interpolation: {
@@ -71,10 +80,7 @@ async function initI18n(): Promise<void> {
       compatibilityJSON: 'v4',
     });
   } catch (error) {
-    console.error(
-      'Error initializing i18n:',
-      error
-    );
+    console.error('Error initializing i18n:', error);
 
     if (!i18n.isInitialized) {
       await i18n.use(initReactI18next).init({
@@ -100,7 +106,6 @@ export async function changeAppLanguage(
   await i18nReady;
 
   await i18n.changeLanguage(language);
-
   await AsyncStorage.setItem(LANGUAGE_KEY, language);
 }
 
