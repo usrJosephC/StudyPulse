@@ -4,6 +4,7 @@ import {
   FieldErrors,
 } from 'react-hook-form';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import {
   Pressable,
   StyleSheet,
@@ -25,25 +26,27 @@ type Props = {
   errors: FieldErrors<RegisterFormData>;
 };
 
-const options = [
-  {
-    label: 'Female',
-    value: 'F',
-  },
-  {
-    label: 'Male',
-    value: 'M',
-  },
-  {
-    label: 'Other',
-    value: 'Other',
-  },
-];
-
 export function GenderInput({
   control,
   errors,
 }: Props) {
+  const { t } = useTranslation();
+
+  const options = [
+    {
+      label: t('register.genderOptions.female'),
+      value: 'F',
+    },
+    {
+      label: t('register.genderOptions.male'),
+      value: 'M',
+    },
+    {
+      label: t('register.genderOptions.other'),
+      value: 'Other',
+    },
+  ];
+
   return (
     <Controller
       control={control}
@@ -52,26 +55,23 @@ export function GenderInput({
         <View style={styles.container}>
           <View style={styles.row}>
             {options.map((option) => {
-              const selected =
-                value === option.value;
+              const selected = value === option.value;
 
               return (
                 <Pressable
                   key={option.value}
-                  onPress={() =>
-                    onChange(option.value)
-                  }
+                  onPress={() => onChange(option.value)}
                   style={[
                     styles.option,
-                    selected &&
-                      styles.optionSelected,
+                    selected && styles.optionSelected,
                   ]}
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected }}
                 >
                   <Text
                     style={[
                       styles.label,
-                      selected &&
-                        styles.labelSelected,
+                      selected && styles.labelSelected,
                     ]}
                   >
                     {option.label}
@@ -80,8 +80,7 @@ export function GenderInput({
                   <View
                     style={[
                       styles.circle,
-                      selected &&
-                        styles.circleSelected,
+                      selected && styles.circleSelected,
                     ]}
                   >
                     {selected && (
@@ -99,7 +98,7 @@ export function GenderInput({
 
           {errors.gender && (
             <Text style={styles.error}>
-              {errors.gender.message}
+              {String(errors.gender.message)}
             </Text>
           )}
         </View>

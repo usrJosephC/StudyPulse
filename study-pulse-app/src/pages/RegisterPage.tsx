@@ -7,9 +7,8 @@ import {
 } from 'react-native';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {
-  NativeStackScreenProps,
-} from '@react-navigation/native-stack';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useTranslation } from 'react-i18next';
 
 import { Register } from '../components/Register';
 import { RootStackParamList } from '../navigation/RootStack';
@@ -23,6 +22,8 @@ type Props = NativeStackScreenProps<
 export function RegisterPage({
   navigation,
 }: Props) {
+  const { t } = useTranslation();
+
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView
@@ -40,11 +41,11 @@ export function RegisterPage({
 
           <View style={styles.header}>
             <Text style={styles.title}>
-              Create Account
+              {t('registerPage.title')}
             </Text>
 
             <Text style={styles.subtitle}>
-              Create your account and start your study journey.
+              {t('registerPage.subtitle')}
             </Text>
           </View>
 
@@ -53,13 +54,13 @@ export function RegisterPage({
           </View>
 
           <Text style={styles.footer}>
-            Already have an account?{' '}
+            {t('registerPage.footer')}{' '}
 
             <Text
               style={styles.footerLink}
               onPress={() => navigation.goBack()}
             >
-              Log in
+              {t('registerPage.loginLink')}
             </Text>
           </Text>
         </View>

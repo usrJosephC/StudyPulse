@@ -1,5 +1,6 @@
 import { Controller, Control, FieldErrors } from 'react-hook-form';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { colors, fonts, radius, spacing } from '../theme';
@@ -11,6 +12,8 @@ type Props = {
 };
 
 export function NameInput({ control, errors }: Props) {
+  const { t } = useTranslation();
+
   return (
     <Controller
       control={control}
@@ -27,7 +30,7 @@ export function NameInput({ control, errors }: Props) {
 
             <TextInput
               style={styles.input}
-              placeholder="Name"
+              placeholder={t('register.name')}
               placeholderTextColor={colors.inkFaint}
               value={value}
               onChangeText={onChange}
@@ -39,7 +42,7 @@ export function NameInput({ control, errors }: Props) {
 
           {errors.name && (
             <Text style={styles.error}>
-              {errors.name.message}
+              {String(errors.name.message)}
             </Text>
           )}
         </View>

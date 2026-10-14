@@ -7,6 +7,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useTranslation } from 'react-i18next';
 
 import { Login } from '../components/Login';
 import { RootStackParamList } from '../navigation/RootStack';
@@ -18,6 +19,8 @@ type Props = NativeStackScreenProps<
 >;
 
 export function LoginPage({ navigation }: Props) {
+  const { t } = useTranslation();
+
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView
@@ -36,11 +39,11 @@ export function LoginPage({ navigation }: Props) {
 
           <View style={styles.header}>
             <Text style={styles.title}>
-              Welcome back!
+              {t('loginPage.title')}
             </Text>
 
             <Text style={styles.subtitle}>
-              Log in to continue your study journey.
+              {t('loginPage.subtitle')}
             </Text>
           </View>
 

@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 
 import {
@@ -5,6 +6,8 @@ import {
   Control,
   FieldErrors,
 } from 'react-hook-form';
+
+import { useTranslation } from 'react-i18next';
 
 import { Ionicons } from '@expo/vector-icons';
 
@@ -50,18 +53,20 @@ const years = Array.from(
   (_, index) => currentYear - index
 );
 
-const fieldLabels = {
-  day: 'Day',
-  month: 'Month',
-  year: 'Year',
-};
-
 export function BirthDateInput({
   control,
   errors,
 }: Props) {
+  const { t } = useTranslation();
+
   const [pickerType, setPickerType] =
     useState<PickerType>(null);
+
+  const fieldLabels = {
+    day: t('register.birthDateFields.day'),
+    month: t('register.birthDateFields.month'),
+    year: t('register.birthDateFields.year'),
+  };
 
   return (
     <Controller
@@ -114,9 +119,9 @@ export function BirthDateInput({
                   return (
                     <Pressable
                       key={type}
-                      onPress={() =>
-                        setPickerType(type)
-                      }
+                      accessibilityRole="button"
+                      accessibilityLabel={fieldLabels[type]}
+                      onPress={() => setPickerType(type)}
                       style={({ pressed }) => [
                         styles.field,
                         pressed && styles.fieldPressed,
@@ -125,8 +130,7 @@ export function BirthDateInput({
                       <Text
                         style={[
                           styles.fieldText,
-                          !hasValue &&
-                            styles.placeholder,
+                          !hasValue && styles.placeholder,
                         ]}
                       >
                         {getValue(type)}
@@ -146,8 +150,11 @@ export function BirthDateInput({
             {(errors.birthDate?.day ||
               errors.birthDate?.month ||
               errors.birthDate?.year) && (
-              <Text style={styles.error}>
-                Please enter your complete date of birth.
+              <Text
+                accessibilityRole="alert"
+                style={styles.error}
+              >
+                {t('register.birthDateError')}
               </Text>
             )}
 
@@ -155,56 +162,46 @@ export function BirthDateInput({
               visible={pickerType !== null}
               transparent
               animationType="fade"
-              onRequestClose={() =>
-                setPickerType(null)
-              }
+              onRequestClose={() => setPickerType(null)}
             >
               <View style={styles.overlay}>
                 <Pressable
                   style={StyleSheet.absoluteFill}
-                  onPress={() =>
-                    setPickerType(null)
-                  }
+                  accessibilityRole="button"
+                  accessibilityLabel={t('common.close')}
+                  onPress={() => setPickerType(null)}
                 />
 
                 <View style={styles.modal}>
                   <Text style={styles.modalTitle}>
-                    Select{' '}
-                    {pickerType
-                      ? fieldLabels[pickerType]
-                      : ''}
+                    {t('register.birthDateSelect', {
+                      field: pickerType
+                        ? fieldLabels[pickerType]
+                        : '',
+                    })}
                   </Text>
 
                   <FlatList
                     data={options}
-                    keyExtractor={(item) =>
-                      String(item)
-                    }
+                    keyExtractor={(item) => String(item)}
                     showsVerticalScrollIndicator
                     persistentScrollbar
                     nestedScrollEnabled
-                    contentContainerStyle={
-                      styles.listContent
-                    }
+                    contentContainerStyle={styles.listContent}
                     renderItem={({ item }) => (
                       <Pressable
+                        accessibilityRole="button"
                         onPress={() => {
                           if (pickerType) {
-                            handleChange(
-                              pickerType,
-                              item
-                            );
+                            handleChange(pickerType, item);
                           }
                         }}
                         style={({ pressed }) => [
                           styles.option,
-                          pressed &&
-                            styles.optionPressed,
+                          pressed && styles.optionPressed,
                         ]}
                       >
-                        <Text
-                          style={styles.optionText}
-                        >
+                        <Text style={styles.optionText}>
                           {item}
                         </Text>
                       </Pressable>

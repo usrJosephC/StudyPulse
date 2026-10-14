@@ -14,6 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from './Button';
 import { EmailInput } from './EmailInput';
@@ -30,18 +31,23 @@ import {
   loginSchema,
   type LoginFormData,
 } from '../validation/schemas';
+
 import { useAuth } from '../context/AuthContext';
+
+import {
+  changeAppLanguage,
+  type AppLanguage,
+} from '../i18n';
 
 type Props = {
   onLoginSuccess?: () => void;
   onCreateAccount?: () => void;
 };
 
-export function Login({
-  onLoginSuccess,
-  onCreateAccount,
-}: Props) {
+export function Login({ onCreateAccount }: Props) {
+  const { t, i18n } = useTranslation();
   const { signIn } = useAuth();
+
   const [acceptedTerms, setAcceptedTerms] =
     useState(false);
 
@@ -53,14 +59,26 @@ export function Login({
 
   const [isLoading, setIsLoading] =
     useState(false);
+
   const submitInProgress = useRef(false);
+
+  const currentLanguage = (
+    i18n.resolvedLanguage ?? i18n.language
+  ).toLowerCase();
+
+  const selectedLanguage: AppLanguage =
+    currentLanguage.startsWith('en')
+      ? 'en-US'
+      : currentLanguage.startsWith('es')
+        ? 'es-ES'
+        : 'pt-BR';
 
   const {
     control,
     formState: { errors },
     handleSubmit,
   } = useForm<LoginFormData>({
-    resolver: yupResolver(loginSchema),
+    resolver: yupResolver(loginSchema(t)),
     mode: 'onSubmit',
     defaultValues: {
       email: '',
@@ -68,70 +86,59 @@ export function Login({
     },
   });
 
+  async function handleLanguageChange(
+    language: AppLanguage
+  ) {
+    if (language === selectedLanguage) return;
+
+    try {
+      await changeAppLanguage(language);
+    } catch (error) {
+      console.error('Error changing language:', error);
+
+      Alert.alert(
+        t('common.error'),
+        t('language.saveError')
+      );
+    }
+  }
+
   async function onSubmit(data: LoginFormData) {
     if (submitInProgress.current) return;
+
     submitInProgress.current = true;
+
     try {
       setIsLoading(true);
-      const result = await signIn(data.email, data.password);
+
+      const result = await signIn(
+        data.email,
+        data.password
+      );
+
       if (!result.ok) {
-        Alert.alert('Não foi possível entrar', result.error.message);
+        Alert.alert(
+          t('login.loginErrorTitle'),
+          result.error.message ||
+            t('login.unexpectedError')
+        );
+
         return;
       }
-      // O AuthProvider muda o navegador quando a sessão é emitida.
+
+      // The AuthProvider handles navigation when the session is emitted.
+    } catch (error) {
+      console.error('Login error:', error);
+
+      Alert.alert(
+        t('common.error'),
+        t('login.unexpectedError')
+      );
     } finally {
       submitInProgress.current = false;
       setIsLoading(false);
     }
   }
-
-  /*
-  // Quando o backend estiver pronto, o mock acima
-  // poderá ser substituído por esta implementação:
-
-  async function onSubmit(data: LoginFormData) {
-    try {
-      setIsLoading(true);
-
-      const response = await axios.post(
-        'http://localhost:3000/login',
-        {
-          email: data.email,
-          senha: data.password,
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      if (response.status === 200) {
-        onLoginSuccess?.();
-      }
-    } catch (error: any) {
-      if (error.response) {
-        Alert.alert(
-          'Login error',
-          error.response.data?.message ||
-            'Unable to log in.'
-        );
-      } else if (error.request) {
-        Alert.alert(
-          'Connection error',
-          'No response from the server.'
-        );
-      } else {
-        Alert.alert(
-          'Error',
-          'An error occurred while trying to log in.'
-        );
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  }
-  */
 
   function handleLogin() {
     if (!acceptedTerms) {
@@ -140,7 +147,6 @@ export function Login({
     }
 
     setTermsError(false);
-
     handleSubmit(onSubmit)();
   }
 
@@ -152,6 +158,103 @@ export function Login({
   return (
     <View style={styles.container}>
       <View style={styles.form}>
+        {/* Language selector */}
+        <View style={styles.languageContainer}>
+          <Text style={styles.languageLabel}>
+            {t('language.label')}
+          </Text>
+
+          <View
+            style={styles.languageOptions}
+            accessibilityRole="radiogroup"
+            accessibilityLabel={t('language.label')}
+          >
+            {/* Portuguese */}
+            <Pressable
+              accessibilityRole="radio"
+              accessibilityState={{
+                selected: selectedLanguage === 'pt-BR',
+              }}
+              accessibilityLabel={t('language.portuguese')}
+              style={[
+                styles.languageOption,
+                selectedLanguage === 'pt-BR' &&
+                  styles.languageOptionSelected,
+              ]}
+              disabled={isLoading}
+              onPress={() =>
+                handleLanguageChange('pt-BR')
+              }
+            >
+              <Text
+                style={[
+                  styles.languageOptionText,
+                  selectedLanguage === 'pt-BR' &&
+                    styles.languageOptionTextSelected,
+                ]}
+              >
+                {t('language.portuguese')}
+              </Text>
+            </Pressable>
+
+            {/* English */}
+            <Pressable
+              accessibilityRole="radio"
+              accessibilityState={{
+                selected: selectedLanguage === 'en-US',
+              }}
+              accessibilityLabel={t('language.english')}
+              style={[
+                styles.languageOption,
+                selectedLanguage === 'en-US' &&
+                  styles.languageOptionSelected,
+              ]}
+              disabled={isLoading}
+              onPress={() =>
+                handleLanguageChange('en-US')
+              }
+            >
+              <Text
+                style={[
+                  styles.languageOptionText,
+                  selectedLanguage === 'en-US' &&
+                    styles.languageOptionTextSelected,
+                ]}
+              >
+                {t('language.english')}
+              </Text>
+            </Pressable>
+
+            {/* Spanish */}
+            <Pressable
+              accessibilityRole="radio"
+              accessibilityState={{
+                selected: selectedLanguage === 'es-ES',
+              }}
+              accessibilityLabel={t('language.spanish')}
+              style={[
+                styles.languageOption,
+                selectedLanguage === 'es-ES' &&
+                  styles.languageOptionSelected,
+              ]}
+              disabled={isLoading}
+              onPress={() =>
+                handleLanguageChange('es-ES')
+              }
+            >
+              <Text
+                style={[
+                  styles.languageOptionText,
+                  selectedLanguage === 'es-ES' &&
+                    styles.languageOptionTextSelected,
+                ]}
+              >
+                {t('language.spanish')}
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+
         <EmailInput
           control={control}
           errors={errors}
@@ -166,21 +269,26 @@ export function Login({
           disabled={isLoading}
           onPress={() =>
             Alert.alert(
-              'Reset password',
-              'This feature is not available yet.'
+              t('login.resetPasswordTitle'),
+              t('login.resetPasswordMessage')
             )
           }
         >
           <Text style={styles.forgotPassword}>
-            Forgot your password?
+            {t('login.forgotPassword')}
           </Text>
         </Pressable>
 
+        {/* Terms of Service */}
         <View>
           <Pressable
             style={styles.termsContainer}
             disabled={isLoading}
             onPress={handleTermsToggle}
+            accessibilityRole="checkbox"
+            accessibilityState={{
+              checked: acceptedTerms,
+            }}
           >
             <Ionicons
               name={
@@ -197,35 +305,34 @@ export function Login({
             />
 
             <Text style={styles.termsText}>
-              I agree to the{' '}
+              {t('login.termsAgreementStart')}{' '}
 
               <Text
                 style={styles.termsLink}
-                onPress={() =>
-                  setModalVisible(true)
-                }
+                onPress={() => setModalVisible(true)}
               >
-                Terms of Service
+                {t('login.termsOfService')}
               </Text>
-              .
+              {t('login.termsAgreementEnd')}
             </Text>
           </Pressable>
 
           {termsError && (
-            <Text style={styles.termsError}>
-              You must accept the Terms of Service
-              to continue.
+            <Text
+              accessibilityRole="alert"
+              style={styles.termsError}
+            >
+              {t('login.acceptTermsRequired')}
             </Text>
           )}
         </View>
 
+        {/* Terms modal */}
         <Modal
           animationType="fade"
           transparent
           visible={modalVisible}
-          onRequestClose={() =>
-            setModalVisible(false)
-          }
+          onRequestClose={() => setModalVisible(false)}
         >
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
@@ -233,57 +340,53 @@ export function Login({
                 showsVerticalScrollIndicator={false}
               >
                 <Text style={styles.modalTitle}>
-                  Terms of Service
+                  {t('login.termsTitle')}
                 </Text>
 
                 <Text style={styles.modalText}>
-                  By using StudyPulse, you agree to use
-                  the application responsibly and provide
-                  accurate information when creating your
-                  account.
+                  {t('login.termsContent.paragraph1')}
                 </Text>
 
                 <Text style={styles.modalText}>
-                  Your account information should be kept
-                  secure, and you are responsible for the
-                  activity performed through your account.
+                  {t('login.termsContent.paragraph2')}
                 </Text>
               </ScrollView>
 
               <Button
-                label="Close"
-                onPress={() =>
-                  setModalVisible(false)
-                }
+                label={t('common.close')}
+                onPress={() => setModalVisible(false)}
               />
             </View>
           </View>
         </Modal>
 
+        {/* Login button */}
         <Button
           label={
             isLoading
-              ? 'Logging in...'
-              : 'Log In'
+              ? t('login.loggingIn')
+              : t('login.loginButton')
           }
           onPress={handleLogin}
           disabled={isLoading}
         />
 
+        {/* Create account button */}
         <Button
-          label="Create Account"
+          label={t('login.createAccountButton')}
           onPress={onCreateAccount}
           variant="outline"
           disabled={isLoading}
         />
 
+        {/* Google login */}
         <Pressable
           style={styles.googleButton}
           disabled={isLoading}
           onPress={() =>
             Alert.alert(
-              'Google Login',
-              'This feature is not available yet.'
+              t('login.googleLoginTitle'),
+              t('login.googleLoginUnavailable')
             )
           }
         >
@@ -294,7 +397,7 @@ export function Login({
           />
 
           <Text style={styles.googleText}>
-            Continue with Google
+            {t('login.googleLoginButton')}
           </Text>
         </Pressable>
       </View>
@@ -309,6 +412,52 @@ const styles = StyleSheet.create({
 
   form: {
     gap: spacing.md,
+  },
+
+  languageContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+    marginBottom: spacing.xs,
+  },
+
+  languageLabel: {
+    fontFamily: fonts.bodyMedium,
+    fontSize: 13,
+    color: colors.inkMuted,
+  },
+
+  languageOptions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    flexWrap: 'wrap',
+  },
+
+  languageOption: {
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.card,
+  },
+
+  languageOptionSelected: {
+    backgroundColor: colors.secondary,
+    borderColor: colors.secondary,
+  },
+
+  languageOptionText: {
+    fontFamily: fonts.bodyMedium,
+    fontSize: 12,
+    color: colors.inkMuted,
+  },
+
+  languageOptionTextSelected: {
+    fontFamily: fonts.bodyBold,
+    color: colors.card,
   },
 
   forgotPassword: {

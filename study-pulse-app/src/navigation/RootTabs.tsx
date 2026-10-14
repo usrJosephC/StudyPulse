@@ -1,11 +1,13 @@
+
 import { StyleSheet, Text, View } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { HomeScreen } from '../screens/HomeScreen';
 import { GoalsScreen } from '../screens/GoalsScreen';
 import { GroupsScreen } from '../screens/GroupsScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
-import { colors, fonts, spacing } from '../theme';
+import { colors, fonts } from '../theme';
 
 export type TabParamList = {
   Home: undefined;
@@ -23,11 +25,23 @@ const icons: Record<keyof TabParamList, keyof typeof Ionicons.glyphMap> = {
   Profile: 'person',
 };
 
-function TabIcon({ name, label, focused }: { name: keyof TabParamList; label: string; focused: boolean }) {
+function TabIcon({
+  name,
+  label,
+  focused,
+}: {
+  name: keyof TabParamList;
+  label: string;
+  focused: boolean;
+}) {
   return (
     <View style={styles.tabItem}>
       <View style={[styles.iconWrap, focused && styles.iconWrapActive]}>
-        <Ionicons name={icons[name]} size={20} color={focused ? colors.ink : colors.inkMuted} />
+        <Ionicons
+          name={icons[name]}
+          size={20}
+          color={focused ? colors.ink : colors.inkMuted}
+        />
       </View>
       <Text
         style={[styles.tabLabel, focused && styles.tabLabelActive]}
@@ -42,6 +56,8 @@ function TabIcon({ name, label, focused }: { name: keyof TabParamList; label: st
 }
 
 export function RootTabs() {
+  const { t } = useTranslation();
+
   return (
     <Tab.Navigator
       screenOptions={{
@@ -51,10 +67,58 @@ export function RootTabs() {
         tabBarItemStyle: styles.tabBarItem,
       }}
     >
-      <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarIcon: ({ focused }) => <TabIcon name="Home" label="Home" focused={focused} /> }} />
-      <Tab.Screen name="Goals" component={GoalsScreen} options={{ tabBarIcon: ({ focused }) => <TabIcon name="Goals" label="Goals" focused={focused} /> }} />
-      <Tab.Screen name="Groups" component={GroupsScreen} options={{ tabBarIcon: ({ focused }) => <TabIcon name="Groups" label="Groups" focused={focused} /> }} />
-      <Tab.Screen name="Profile" component={ProfileScreen} options={{ tabBarIcon: ({ focused }) => <TabIcon name="Profile" label="Profile" focused={focused} /> }} />
+      <Tab.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabIcon
+              name="Home"
+              label={t('navigation.tabs.home')}
+              focused={focused}
+            />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Goals"
+        component={GoalsScreen}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabIcon
+              name="Goals"
+              label={t('navigation.tabs.goals')}
+              focused={focused}
+            />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Groups"
+        component={GroupsScreen}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabIcon
+              name="Groups"
+              label={t('navigation.tabs.groups')}
+              focused={focused}
+            />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabIcon
+              name="Profile"
+              label={t('navigation.tabs.profile')}
+              focused={focused}
+            />
+          ),
+        }}
+      />
     </Tab.Navigator>
   );
 }

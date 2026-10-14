@@ -7,6 +7,7 @@ import {
 } from 'react-hook-form';
 
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 import {
   StyleSheet,
@@ -31,6 +32,8 @@ export function EmailInput<T extends FieldValues>({
   control,
   errors,
 }: Props<T>) {
+  const { t } = useTranslation();
+
   return (
     <Controller
       control={control}
@@ -47,7 +50,7 @@ export function EmailInput<T extends FieldValues>({
 
             <TextInput
               style={styles.input}
-              placeholder="Email"
+              placeholder={t('login.email')}
               placeholderTextColor={colors.inkFaint}
               value={value}
               onChangeText={onChange}

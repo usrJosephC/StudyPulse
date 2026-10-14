@@ -1,5 +1,7 @@
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+
 import {
   NavigationContainer,
   DefaultTheme,
@@ -18,6 +20,7 @@ import {
   Quicksand_700Bold,
 } from '@expo-google-fonts/quicksand';
 
+import { i18nReady } from './src/i18n';
 import { RootStack } from './src/navigation/RootStack';
 import { AuthProvider } from './src/context/AuthContext';
 import { colors } from './src/theme';
@@ -43,7 +46,34 @@ export default function App() {
     Quicksand_700Bold,
   });
 
-  if (!fontsLoaded) {
+  const [i18nLoaded, setI18nLoaded] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+
+    i18nReady
+      .then(() => {
+        if (mounted) {
+          setI18nLoaded(true);
+        }
+      })
+      .catch((error) => {
+        console.error(
+          'Failed to initialize translations:',
+          error
+        );
+
+        if (mounted) {
+          setI18nLoaded(true);
+        }
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  if (!fontsLoaded || !i18nLoaded) {
     return (
       <View
         style={{

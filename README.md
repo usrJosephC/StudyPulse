@@ -20,6 +20,7 @@
 - **Grupos de estudo:** entrada por código de convite, ranking semanal e feed de atividades.
 - **Perfil integrado:** dados da conta, estatísticas reais e encerramento seguro da sessão.
 - **Gamificação consistente:** pontos registrados em ledger, bônus de sequência e operações idempotentes.
+- **Internacionalização (i18n):** interface de todas as páginas com suporte a múltiplas línguas, utilizando i18next e react-i18next.
 - **Ambiente local reproduzível:** Docker Compose inicia banco, Auth, API, migrations e seed com um comando.
 
 ---
@@ -42,7 +43,7 @@
 - **Supabase JS** como cliente tipado do front-end.
 - **PostgreSQL 15**, RLS, views, triggers e funções RPC para dados e regras protegidas.
 - **Docker Compose** para reproduzir PostgreSQL, Auth, PostgREST e gateway localmente.
-
+- **i18next** e **react-i18next** para internacionalização e gerenciamento das traduções da interface.
 ---
 
 ## 🎨 Sistema de design
@@ -105,6 +106,7 @@ study-pulse-app/
 │   ├── components/         # componentes reutilizáveis
 │   ├── context/            # sessão e perfil autenticado
 │   ├── hooks/              # estado e operações consumidos pelas telas
+│   ├── i18n/               # configuração i18n e traduções por idioma
 │   ├── lib/                # cliente Supabase e Result<T>
 │   ├── navigation/         # Root Stack e Bottom Tabs
 │   ├── pages/              # composição de login e cadastro
