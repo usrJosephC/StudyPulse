@@ -1,8 +1,10 @@
+
 import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { Card } from '../components/Card';
 import { Pill } from '../components/Pill';
@@ -14,12 +16,13 @@ import { useStreak } from '../hooks/useStreak';
 import { useTasks } from '../hooks/useTasks';
 
 const profileSettings = [
-  { id: 'account', icon: 'person-outline' as const, label: 'Account' },
-  { id: 'notifications', icon: 'notifications-outline' as const, label: 'Notifications' },
-  { id: 'squad', icon: 'people-outline' as const, label: 'Study Squad' },
+  { id: 'account', icon: 'person-outline' as const, labelKey: 'profile.settings.account' },
+  { id: 'notifications', icon: 'notifications-outline' as const, labelKey: 'profile.settings.notifications' },
+  { id: 'squad', icon: 'people-outline' as const, labelKey: 'profile.settings.studySquad' },
 ];
 
 export function ProfileScreen() {
+  const { t, i18n } = useTranslation();
   const { session, profile, loading: authLoading, error: authError, signOut } = useAuth();
   const streak = useStreak();
   const points = usePoints();
@@ -29,7 +32,7 @@ export function ProfileScreen() {
   const metadataName = session?.user.user_metadata?.name;
   const displayName = profile?.name?.trim()
     || (typeof metadataName === 'string' ? metadataName.trim() : '')
-    || 'Estudante';
+    || t('profile.defaultName');
   const email = session?.user.email ?? '';
   const userInitial = displayName.charAt(0).toUpperCase() || '?';
   const profileLoading = authLoading || streak.loading || points.loading || tasks.loading;
@@ -37,12 +40,13 @@ export function ProfileScreen() {
   const [dataError, setDataError] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const profileStats = [
-    { id: 'streak', icon: 'flame' as const, value: String(streak.streak), label: 'Day Streak', tint: '#FCE4E4' },
-    { id: 'goals', icon: 'checkmark-circle' as const, value: String(tasks.tasks.filter((task) => task.done).length), label: 'Tasks Done', tint: '#EAEAEA' },
-    { id: 'points', icon: 'star' as const, value: points.total.toLocaleString(), label: 'Total Points', tint: '#FDF6D3' },
+    { id: 'streak', icon: 'flame' as const, value: String(streak.streak), labelKey: 'profile.stats.dayStreak', tint: '#FCE4E4' },
+    { id: 'goals', icon: 'checkmark-circle' as const, value: String(tasks.tasks.filter((task) => task.done).length), labelKey: 'profile.stats.tasksDone', tint: '#EAEAEA' },
+    { id: 'points', icon: 'star' as const, value: points.total.toLocaleString(), labelKey: 'profile.stats.totalPoints', tint: '#FDF6D3' },
   ];
+  const dateLocale = i18n.language.startsWith('pt') ? 'pt-BR' : 'en-US';
   const since = profile?.created_at
-    ? new Date(profile.created_at).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })
+    ? new Date(profile.created_at).toLocaleDateString(dateLocale, { month: 'short', year: 'numeric' })
     : '—';
 
   async function handleSignOut() {
@@ -75,24 +79,60 @@ export function ProfileScreen() {
             <Avatar label={userInitial} size={96} ringColor={colors.secondarySoft} />
             <View style={styles.streakBadge}>
               <Ionicons name="flame" size={12} color={colors.primary} />
-              <Text style={styles.streakBadgeText}>{streak.loading ? '…' : streak.streak}</Text>
+              <Text style={styles.streakBadgeText}>
+                {streak.loading ? '…' : streak.streak}
+              </Text>
             </View>
           </View>
-          <Text style={styles.name} numberOfLines={1} ellipsizeMode="tail">{displayName}</Text>
-          <Text style={styles.email} numberOfLines={1} ellipsizeMode="tail">{email}</Text>
-          <Text style={styles.since}>Studying since {since}</Text>
-          {profile?.badge ? <Pill label={profile.badge} variant="secondary" icon={<Ionicons name="ribbon" size={12} color="#fff" />} /> : null}
+          <Text style={styles.name} numberOfLines={1} ellipsizeMode="tail">
+            {displayName}
+          </Text>
+          <Text style={styles.email} numberOfLines={1} ellipsizeMode="tail">
+            {email}
+          </Text>
+          <Text style={styles.since}>
+            {t('profile.studyingSince', { date: since })}
+          </Text>
+          {profile?.badge ? (
+            <Pill
+              label={profile.badge}
+              variant="secondary"
+              icon={<Ionicons name="ribbon" size={12} color="#fff" />}
+            />
+          ) : null}
         </View>
 
-        <Text style={styles.sectionTitle}>Your Stats</Text>
-        {profileLoading && <Text style={styles.loadingText}>Carregando perfil…</Text>}
+        <Text style={styles.sectionTitle}>{t('profile.yourStats')}</Text>
+        {profileLoading && (
+          <Text style={styles.loadingText}>{t('profile.loading')}</Text>
+        )}
         {loadError && !dataError && (
-          <Pressable onPress={() => { void refreshProfileData(); }} accessibilityRole="button" disabled={isRefreshing}>
-            <Text style={styles.errorText}>{loadError.message} · Toque para tentar novamente</Text>
+          <Pressable
+            onPress={() => { void refreshProfileData(); }}
+            accessibilityRole="button"
+            disabled={isRefreshing}
+          >
+            <Text style={styles.errorText}>
+              {loadError.message} · {t('profile.tapToRetry')}
+            </Text>
           </Pressable>
         )}
-        {dataError && <Pressable onPress={() => { void refreshProfileData(); }} accessibilityRole="button" disabled={isRefreshing}><Text style={styles.errorText}>{dataError} · Toque para tentar novamente</Text></Pressable>}
-        {!profileLoading && !dataError && !loadError && tasks.tasks.length === 0 && <Text style={styles.loadingText}>Nenhuma tarefa registrada ainda.</Text>}
+        {dataError && (
+          <Pressable
+            onPress={() => { void refreshProfileData(); }}
+            accessibilityRole="button"
+            disabled={isRefreshing}
+          >
+            <Text style={styles.errorText}>
+              {dataError} · {t('profile.tapToRetry')}
+            </Text>
+          </Pressable>
+        )}
+        {!profileLoading && !dataError && !loadError && tasks.tasks.length === 0 && (
+          <Text style={styles.loadingText}>
+            {t('profile.noTasks')}
+          </Text>
+        )}
         <View style={styles.statsRow}>
           {profileStats.map((stat) => (
             <Card key={stat.id} style={styles.statCard}>
@@ -100,19 +140,19 @@ export function ProfileScreen() {
                 <Ionicons name={stat.icon} size={18} color={colors.secondary} />
               </View>
               <Text style={styles.statValue}>{stat.value}</Text>
-              <Text style={styles.statLabel}>{stat.label}</Text>
+              <Text style={styles.statLabel}>{t(stat.labelKey)}</Text>
             </Card>
           ))}
         </View>
 
-        <Text style={styles.sectionTitle}>Settings</Text>
+        <Text style={styles.sectionTitle}>{t('profile.settings.title')}</Text>
         <View style={{ gap: spacing.sm }}>
           {profileSettings.map((item) => (
             <Pressable key={item.id} style={styles.settingRow}>
               <View style={styles.settingIcon}>
                 <Ionicons name={item.icon} size={18} color={colors.secondary} />
               </View>
-              <Text style={styles.settingLabel}>{item.label}</Text>
+              <Text style={styles.settingLabel}>{t(item.labelKey)}</Text>
               <Ionicons name="chevron-forward" size={18} color={colors.inkFaint} />
             </Pressable>
           ))}
@@ -121,16 +161,22 @@ export function ProfileScreen() {
             onPress={handleSignOut}
             disabled={isSigningOut}
             accessibilityRole="button"
-            accessibilityLabel="Sair"
+            accessibilityLabel={t('profile.signOut')}
             accessibilityState={{ disabled: isSigningOut, busy: isSigningOut }}
           >
             <View style={styles.settingIcon}>
               <Ionicons name="log-out-outline" size={18} color={colors.danger} />
             </View>
-            <Text style={styles.signOutLabel}>{isSigningOut ? 'Saindo...' : 'Sair'}</Text>
-            {isSigningOut && <Text style={styles.loadingText}>Aguarde</Text>}
+            <Text style={styles.signOutLabel}>
+              {isSigningOut ? t('profile.signingOut') : t('profile.signOut')}
+            </Text>
+            {isSigningOut && (
+              <Text style={styles.loadingText}>{t('profile.pleaseWait')}</Text>
+            )}
           </Pressable>
-          {signOutError && <Text style={styles.errorText}>{signOutError}</Text>}
+          {signOutError && (
+            <Text style={styles.errorText}>{signOutError}</Text>
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>

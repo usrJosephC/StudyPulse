@@ -200,5 +200,27 @@
     "pointsShort_other": "{{formattedCount}} pt",
     "totalPoints_one": "Total points: {{formattedCount}}",
     "totalPoints_other": "Total points: {{formattedCount}}"
+  },
+  "profile": {
+    "defaultName": "Student",
+    "studyingSince": "Studying since {{date}}",
+    "yourStats": "Your Stats",
+    "loading": "Loading profile...",
+    "tapToRetry": "Tap to try again",
+    "noTasks": "No tasks recorded yet.",
+    "stats": {
+      "dayStreak": "Day Streak",
+      "tasksDone": "Tasks Done",
+      "totalPoints": "Total Points"
+    },
+    "settings": {
+      "title": "Settings",
+      "account": "Account",
+      "notifications": "Notifications",
+      "studySquad": "Study Squad"
+    },
+    "signOut": "Sign Out",
+    "signingOut": "Signing out...",
+    "pleaseWait": "Please wait"
   }
 }
