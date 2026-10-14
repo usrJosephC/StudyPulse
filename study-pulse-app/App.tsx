@@ -24,6 +24,7 @@ import { i18nReady } from './src/i18n';
 import { RootStack } from './src/navigation/RootStack';
 import { AuthProvider } from './src/context/AuthContext';
 import { colors } from './src/theme';
+import { logSafeError } from './src/lib/logger';
 
 const navigationTheme = {
   ...DefaultTheme,
@@ -57,11 +58,8 @@ export default function App() {
           setI18nLoaded(true);
         }
       })
-      .catch((error) => {
-        console.error(
-          'Failed to initialize translations:',
-          error
-        );
+      .catch(() => {
+        logSafeError('translations.initialization_failed');
 
         if (mounted) {
           setI18nLoaded(true);

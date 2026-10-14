@@ -33,6 +33,7 @@ import {
 } from '../validation/schemas';
 
 import { useAuth } from '../context/AuthContext';
+import { logSafeError } from '../lib/logger';
 
 import {
   changeAppLanguage,
@@ -93,8 +94,8 @@ export function Login({ onCreateAccount }: Props) {
 
     try {
       await changeAppLanguage(language);
-    } catch (error) {
-      console.error('Error changing language:', error);
+    } catch {
+      logSafeError('language.change_failed');
 
       Alert.alert(
         t('common.error'),
@@ -127,8 +128,8 @@ export function Login({ onCreateAccount }: Props) {
       }
 
       // The AuthProvider handles navigation when the session is emitted.
-    } catch (error) {
-      console.error('Login error:', error);
+    } catch {
+      logSafeError('auth.login_failed');
 
       Alert.alert(
         t('common.error'),
