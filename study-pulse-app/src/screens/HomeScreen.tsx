@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -16,17 +17,19 @@ import { useStreak } from '../hooks/useStreak';
 import { useTasks } from '../hooks/useTasks';
 
 export function HomeScreen() {
+  const { t } = useTranslation();
   const { session, profile } = useAuth();
   const streak = useStreak();
   const points = usePoints();
   const { tasks, loading: tasksLoading, error: tasksError, refresh: refreshTasks, toggleTask } = useTasks();
   const [taskError, setTaskError] = useState<string | null>(null);
   const [updatingTaskId, setUpdatingTaskId] = useState<number | null>(null);
+
   const displayName = profile?.name?.trim()
     || (typeof session?.user.user_metadata?.name === 'string' ? session.user.user_metadata.name.trim() : '')
-    || 'Estudante';
-  const userInitial = displayName.charAt(0).toUpperCase() || '?';
+    || t('home.defaultStudent');
 
+  const userInitial = displayName.charAt(0).toUpperCase() || '?';
   const nextTaskId = useMemo(() => tasks.find((task) => !task.done)?.id, [tasks]);
   const tasksDone = tasks.filter((task) => task.done).length;
   const tasksTotal = tasks.length;
@@ -34,23 +37,30 @@ export function HomeScreen() {
 
   async function handleToggleTask(id: number) {
     if (updatingTaskId !== null) return;
+
     setUpdatingTaskId(id);
     setTaskError(null);
+
     const result = await toggleTask(id);
+
     if (!result.ok) {
       setTaskError(result.error.message);
     } else {
       const refreshed = await Promise.all([refreshTasks(), points.refresh(), streak.refresh()]);
       const failedRefresh = refreshed.find((item) => !item.ok);
+
       if (failedRefresh && !failedRefresh.ok) setTaskError(failedRefresh.error.message);
     }
+
     setUpdatingTaskId(null);
   }
 
   async function refreshHomeData() {
     setTaskError(null);
+
     const refreshed = await Promise.all([refreshTasks(), points.refresh(), streak.refresh()]);
     const failed = refreshed.find((item) => !item.ok);
+
     if (failed && !failed.ok) setTaskError(failed.error.message);
   }
 
@@ -61,6 +71,7 @@ export function HomeScreen() {
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScreenHeader userInitial={userInitial} />
+
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <LinearGradient
           colors={[colors.primary, colors.primarySoft]}
@@ -71,9 +82,12 @@ export function HomeScreen() {
           <View style={styles.streakIcon}>
             <Ionicons name="flame" size={22} color={colors.primary} />
           </View>
+
           <View>
-            <Text style={styles.streakLabel}>ON FIRE!</Text>
-            <Text style={styles.streakValue}>{streak.loading ? 'Carregando…' : `${streak.streak} Day Streak`}</Text>
+            <Text style={styles.streakLabel}>{t('home.onFire')}</Text>
+            <Text style={styles.streakValue}>
+              {streak.loading ? t('home.loading') : t('home.dayStreak', { count: streak.streak })}
+            </Text>
           </View>
         </LinearGradient>
 
@@ -82,31 +96,52 @@ export function HomeScreen() {
             <Text style={styles.ringValue}>
               {tasksDone}/{tasksTotal}
             </Text>
-            <Text style={styles.ringLabel}>Tasks</Text>
+            <Text style={styles.ringLabel}>{t('home.tasks')}</Text>
           </ProgressRing>
-          <Text style={styles.encourageTitle}>Almost there, {displayName}!</Text>
-          <Text style={styles.encourageBody}>
-            You're over halfway through today's goals. Keep that momentum going!
+
+          <Text style={styles.encourageTitle}>
+            {t('home.almostThere', { name: displayName })}
           </Text>
+
+          <Text style={styles.encourageBody}>
+            {t('home.goalsEncouragement')}
+          </Text>
+
           <View style={styles.ctaWrap}>
-            <Button label="Continue Studying" />
+            <Button label={t('home.continueStudying')} />
           </View>
         </Card>
 
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Today's Tasks</Text>
-          <Text style={styles.seeAll}>See All</Text>
+          <Text style={styles.sectionTitle}>{t('home.todaysTasks')}</Text>
+          <Text style={styles.seeAll}>{t('home.seeAll')}</Text>
         </View>
-        {points.loading && <Text style={styles.loadingText}>Carregando seus pontos…</Text>}
-        {tasksLoading && <Text style={styles.loadingText}>Carregando tarefas…</Text>}
+
+        {points.loading && (
+          <Text style={styles.loadingText}>{t('home.loadingPoints')}</Text>
+        )}
+
+        {tasksLoading && (
+          <Text style={styles.loadingText}>{t('home.loadingTasks')}</Text>
+        )}
+
         {(taskError || tasksError || points.error || streak.error) && (
-          <Pressable onPress={() => { void refreshHomeData(); }} accessibilityRole="button">
+          <Pressable
+            onPress={() => { void refreshHomeData(); }}
+            accessibilityRole="button"
+          >
             <Text style={styles.errorText}>
-              {taskError || tasksError?.message || points.error?.message || streak.error?.message} · Toque para tentar novamente
+              {taskError || tasksError?.message || points.error?.message || streak.error?.message}
+              {' · '}
+              {t('home.tapToRetry')}
             </Text>
           </Pressable>
         )}
-        {!tasksLoading && tasks.length === 0 && <Text style={styles.loadingText}>Nenhuma tarefa para hoje. Adicione uma pela aba Goals.</Text>}
+
+        {!tasksLoading && tasks.length === 0 && (
+          <Text style={styles.loadingText}>{t('home.noTasksToday')}</Text>
+        )}
+
         <View style={styles.taskList}>
           {tasks.map((task) => (
             <Pressable
@@ -115,7 +150,10 @@ export function HomeScreen() {
               disabled={updatingTaskId !== null}
               accessibilityRole="checkbox"
               accessibilityState={{ checked: task.done }}
-              accessibilityLabel={`${task.title}, ${task.category}`}
+              accessibilityLabel={t('home.taskAccessibility', {
+                title: task.title,
+                category: task.category,
+              })}
               hitSlop={4}
               style={({ pressed }) => [
                 styles.taskRow,
@@ -129,24 +167,47 @@ export function HomeScreen() {
                 size={24}
                 color={task.done ? colors.primary : colors.inkFaint}
               />
+
               <View style={styles.flexFill}>
-                <Text style={[styles.taskTitle, task.done && styles.taskTitleDone]}>{task.title}</Text>
+                <Text style={[styles.taskTitle, task.done && styles.taskTitleDone]}>
+                  {task.title}
+                </Text>
                 <Pill label={task.category} variant="muted" />
               </View>
             </Pressable>
           ))}
         </View>
 
-        <Text style={[styles.sectionTitle, styles.squadSectionTitle]}>Weekly Points</Text>
+        <Text style={[styles.sectionTitle, styles.squadSectionTitle]}>
+          {t('home.weeklyPoints')}
+        </Text>
+
         <Card>
           <View style={styles.squadHeaderRow}>
             <View style={styles.squadHeaderLeft}>
               <Ionicons name="trophy" size={18} color={colors.primary} />
-              <Text style={styles.squadTitle}>Your weekly total</Text>
+              <Text style={styles.squadTitle}>{t('home.yourWeeklyTotal')}</Text>
             </View>
-            <Pill label={points.loading ? '…' : `${points.weekly.toLocaleString()} pt`} variant="secondary" />
+
+            <Pill
+              label={
+                points.loading
+                  ? '…'
+                  : t('home.pointsShort', {
+                      count: points.weekly,
+                      formattedCount: points.weekly.toLocaleString(),
+                    })
+              }
+              variant="secondary"
+            />
           </View>
-          <Text style={styles.encourageBody}>Total points: {points.loading ? '…' : points.total.toLocaleString()}</Text>
+
+          <Text style={styles.encourageBody}>
+            {t('home.totalPoints', {
+              count: points.total,
+              formattedCount: points.loading ? '…' : points.total.toLocaleString(),
+            })}
+          </Text>
         </Card>
       </ScrollView>
     </SafeAreaView>

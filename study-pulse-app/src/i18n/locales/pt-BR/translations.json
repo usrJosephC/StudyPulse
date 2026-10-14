@@ -176,5 +176,29 @@
     "hoursAgo_other": "Há {{count}} h",
     "daysAgo_one": "Há {{count}} dia",
     "daysAgo_other": "Há {{count}} dias"
+  },
+  "home": {
+    "defaultStudent": "Estudante",
+    "onFire": "A TODO VAPOR!",
+    "loading": "Carregando...",
+    "dayStreak_one": "{{count}} dia seguido",
+    "dayStreak_other": "{{count}} dias seguidos",
+    "tasks": "Tarefas",
+    "almostThere": "Quase lá, {{name}}!",
+    "goalsEncouragement": "Você já passou da metade das metas de hoje. Continue nesse ritmo!",
+    "continueStudying": "Continuar estudando",
+    "todaysTasks": "Tarefas de hoje",
+    "seeAll": "Ver todas",
+    "loadingPoints": "Carregando seus pontos...",
+    "loadingTasks": "Carregando tarefas...",
+    "tapToRetry": "Toque para tentar novamente",
+    "noTasksToday": "Nenhuma tarefa para hoje. Adicione uma pela aba Goals.",
+    "taskAccessibility": "{{title}}, {{category}}",
+    "weeklyPoints": "Pontos semanais",
+    "yourWeeklyTotal": "Seu total semanal",
+    "pointsShort_one": "{{formattedCount}} pt",
+    "pointsShort_other": "{{formattedCount}} pt",
+    "totalPoints_one": "Total de pontos: {{formattedCount}}",
+    "totalPoints_other": "Total de pontos: {{formattedCount}}"
   }
 }
