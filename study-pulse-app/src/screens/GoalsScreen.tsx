@@ -30,6 +30,7 @@ import { useAuth } from '../context/AuthContext';
 import { useGoals } from '../hooks/useGoals';
 import { useHeatmap } from '../hooks/useHeatmap';
 import { useStreak } from '../hooks/useStreak';
+import { logSafeError } from '../lib/logger';
 
 export function GoalsScreen() {
   const { t } = useTranslation();
@@ -119,8 +120,8 @@ export function GoalsScreen() {
       } else {
         setActionError(result.error.message);
       }
-    } catch (error) {
-      console.error('Error creating goal:', error);
+    } catch {
+      logSafeError('goal.create_failed');
       setActionError(t('goals.createError'));
     } finally {
       setSaving(false);

@@ -6,6 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import translationEn from './locales/en-US/translations.json';
 import translationPt from './locales/pt-BR/translations.json';
 import translationEs from './locales/es-ES/translations.json';
+import { logSafeError } from '../lib/logger';
 
 const resources = {
   'en-US': { translation: translationEn },
@@ -48,8 +49,8 @@ async function getInitialLanguage(): Promise<AppLanguage> {
     ) {
       return normalizeLanguage(savedLanguage);
     }
-  } catch (error) {
-    console.error('Error loading saved language:', error);
+  } catch {
+    logSafeError('language.load_failed');
   }
 
   const deviceLocale =
@@ -79,8 +80,8 @@ async function initI18n(): Promise<void> {
       },
       compatibilityJSON: 'v4',
     });
-  } catch (error) {
-    console.error('Error initializing i18n:', error);
+  } catch {
+    logSafeError('i18n.initialization_failed');
 
     if (!i18n.isInitialized) {
       await i18n.use(initReactI18next).init({

@@ -1,6 +1,11 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { mapAuthError, toAppError } from '../src/lib/result.ts'
+import { logSafeError } from '../src/lib/logger.ts'
+
+test('logger seguro aceita apenas evento estático', () => {
+  assert.doesNotThrow(() => logSafeError('auth.login_failed'))
+})
 
 test('traduz credenciais inválidas para erro acionável em PT-BR', () => {
   assert.deepEqual(mapAuthError({ message: 'Invalid login credentials' }), { code: 'auth', message: 'E-mail ou senha incorretos.' })

@@ -37,6 +37,7 @@ import {
 } from '../validation/schemas';
 
 import { useAuth } from '../context/AuthContext';
+import { logSafeError } from '../lib/logger';
 
 type Props = {
   onRegisterSuccess?: () => void;
@@ -126,8 +127,8 @@ export function Register({ onRegisterSuccess }: Props) {
       }
 
       // The AuthProvider handles navigation when the session is emitted.
-    } catch (error) {
-      console.error('Registration error:', error);
+    } catch {
+      logSafeError('auth.registration_failed');
 
       Alert.alert(
         t('common.error'),
