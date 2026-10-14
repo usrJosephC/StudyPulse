@@ -95,6 +95,14 @@
     },
     "name": "Nome"
   },
+  "navigation": {
+    "tabs": {
+      "home": "Início",
+      "goals": "Metas",
+      "groups": "Grupos",
+      "profile": "Perfil"
+    }
+  },
   "goals": {
     "defaultStudent": "Estudante",
     "consistency": "Consistência",
