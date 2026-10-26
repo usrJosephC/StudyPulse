@@ -14,6 +14,7 @@ import { useAuth } from '../context/AuthContext';
 import { useRanking } from '../hooks/useRanking';
 import { useSquad } from '../hooks/useSquad';
 import { useSquadActivity } from '../hooks/useSquadActivity';
+import { useSquadCreation } from '../hooks/useSquadCreation';
 import type { RankingEntry, SquadActivity } from '../types/domain';
 
 export function GroupsScreen() {
@@ -22,12 +23,15 @@ export function GroupsScreen() {
   const { squad, loading: squadLoading, error: squadError, refresh: refreshSquad, joinSquad } = useSquad();
   const { ranking, loading: rankingLoading, error: rankingError, refresh: refreshRanking } = useRanking(squad?.id ?? null);
   const { activities, loading: activityLoading, error: activityError, refresh: refreshActivity } = useSquadActivity(squad?.id ?? null);
+  const { createSquad, loading: creating, error: createError } = useSquadCreation();
   const podium = [ranking[1], ranking[0], ranking[2]].filter((member): member is RankingEntry => Boolean(member));
   const rest = ranking.slice(3);
   const [leaderboardVisible, setLeaderboardVisible] = useState(false);
   const [inviteCode, setInviteCode] = useState('');
   const [joining, setJoining] = useState(false);
   const [joinError, setJoinError] = useState<string | null>(null);
+  const [createVisible, setCreateVisible] = useState(false);
+  const [groupName, setGroupName] = useState('');
   const displayName = profile?.name?.trim()
     || (typeof session?.user.user_metadata?.name === 'string' ? session.user.user_metadata.name.trim() : '')
     || t('groups.defaultStudent');
@@ -46,6 +50,12 @@ export function GroupsScreen() {
     if (!result.ok) setJoinError(result.error.message);
     else setInviteCode('');
     setJoining(false);
+  }
+
+  async function handleCreate() {
+    if (!groupName.trim() || creating) return;
+    const result = await createSquad(groupName.trim());
+    if (result.ok) { setCreateVisible(false); setGroupName(''); refreshAll(); }
   }
 
   useFocusEffect(useCallback(() => {
@@ -88,6 +98,10 @@ export function GroupsScreen() {
               accessibilityState={{ disabled: !inviteCode.trim() || joining, busy: joining }}
             >
               {joining ? <ActivityIndicator color="#fff" /> : <Text style={styles.joinButtonText}>{t('groups.joinButton')}</Text>}
+            </Pressable>
+            <Pressable style={styles.createLink} onPress={() => setCreateVisible(true)} accessibilityRole="button" accessibilityLabel={t('groups.createGroup', { defaultValue: 'Criar grupo' })}>
+              <Ionicons name="add-circle-outline" size={18} color={colors.secondary} />
+              <Text style={styles.createLinkText}>{t('groups.createGroup', { defaultValue: 'Criar grupo' })}</Text>
             </Pressable>
           </Card>
         )}
@@ -228,6 +242,24 @@ export function GroupsScreen() {
             </ScrollView>
           </SafeAreaView>
         </View>
+      </Modal>
+      <Modal visible={createVisible} transparent animationType="slide" onRequestClose={() => setCreateVisible(false)}>
+        <Pressable style={styles.backdrop} onPress={() => setCreateVisible(false)} accessibilityLabel={t('common.close')}>
+          <Pressable style={styles.createModal} onPress={(event) => event.stopPropagation()}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>{t('groups.createGroup', { defaultValue: 'Criar grupo' })}</Text>
+              <Pressable onPress={() => setCreateVisible(false)} accessibilityRole="button" accessibilityLabel={t('common.close')}>
+                <Ionicons name="close" size={22} color={colors.ink} />
+              </Pressable>
+            </View>
+            <Text style={styles.stateText}>{t('groups.createGroupHint', { defaultValue: 'Defina um nome para organizar seus estudos com outras pessoas.' })}</Text>
+            <TextInput value={groupName} onChangeText={setGroupName} placeholder={t('groups.groupNamePlaceholder', { defaultValue: 'Nome do grupo' })} placeholderTextColor={colors.inkMuted} style={styles.inviteInput} accessibilityLabel={t('groups.groupNamePlaceholder', { defaultValue: 'Nome do grupo' })} />
+            {createError && <Text style={styles.errorText}>{createError.message}</Text>}
+            <Pressable style={[styles.joinButton, (!groupName.trim() || creating) && styles.disabledButton]} onPress={() => void handleCreate()} disabled={!groupName.trim() || creating} accessibilityRole="button" accessibilityState={{ disabled: !groupName.trim() || creating, busy: creating }}>
+              {creating ? <ActivityIndicator color="#fff" /> : <Text style={styles.joinButtonText}>{t('groups.createGroup', { defaultValue: 'Criar grupo' })}</Text>}
+            </Pressable>
+          </Pressable>
+        </Pressable>
       </Modal>
     </SafeAreaView>
   );
@@ -511,6 +543,9 @@ const styles = StyleSheet.create({
   disabledButton: {
     opacity: 0.55,
   },
+  createLink: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, paddingVertical: spacing.sm },
+  createLinkText: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.secondary },
+  createModal: { backgroundColor: colors.card, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg, padding: spacing.lg, gap: spacing.md },
 });
 
 function getInitial(name: string) {

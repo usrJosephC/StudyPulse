@@ -135,6 +135,7 @@
     "invalidDuration": "Introduce una duración de entre 1 y 3650 días.",
     "saving": "Guardando...",
     "createError": "No se pudo crear el objetivo. Inténtalo de nuevo.",
+    "editGoal": "Editar objetivo", "updateGoal": "Actualizar objetivo", "archiveGoal": "Archivar objetivo", "archiveConfirm": "Este objetivo saldrá de tu lista activa. ¿Quieres archivarlo?",
     "dateCalculationError": "No se pudo calcular la fecha límite.",
     "dayCount_one": "{{count}} día",
     "dayCount_other": "{{count}} días",
@@ -154,7 +155,7 @@
     "inviteInstructions": "Introduce el código de invitación para consultar la clasificación y las actividades.",
     "inviteCodePlaceholder": "CÓDIGO DE INVITACIÓN",
     "inviteCodeAccessibility": "Código de invitación del grupo",
-    "joinButton": "Unirse al grupo",
+    "joinButton": "Unirse al grupo", "createGroup": "Crear grupo", "createGroupHint": "Elige un nombre para organizar tus estudios con otras personas.", "groupNamePlaceholder": "Nombre del grupo",
     "studySquad": "GRUPO DE ESTUDIO",
     "defaultSubtitle": "Estudiad juntos y alcanzad vuestros objetivos",
     "weeklyRanking": "Clasificación semanal",
@@ -226,9 +227,10 @@
       "title": "Configuración",
       "account": "Cuenta",
       "notifications": "Notificaciones",
-      "studySquad": "Grupo de estudio"
+      "studySquad": "Grupo de estudio",
+      "comingSoon": "Esta sección estará disponible pronto."
     },
-    "signOut": "Cerrar sesión",
+    "signOut": "Cerrar sesión", "achievements": { "title": "Logros", "empty": "Sigue estudiando para desbloquear tu primer logro.", "badge": "En progreso" }, "notifications": { "studyReminders": "Recordatorios de estudio", "hint": "Recibe un recordatorio para mantener tu racha." },
     "signingOut": "Cerrando sesión...",
     "pleaseWait": "Espera, por favor"
   }

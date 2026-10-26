@@ -44,6 +44,8 @@ export function GoalsScreen() {
     createGoal,
     updateProgress,
     completeGoal,
+    updateGoal,
+    archiveGoal,
   } = useGoals();
 
   const {
@@ -67,6 +69,7 @@ export function GoalsScreen() {
   const [titleError, setTitleError] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [editingGoalId, setEditingGoalId] = useState<number | null>(null);
 
   const displayName =
     profile?.name?.trim() ||
@@ -81,6 +84,17 @@ export function GoalsScreen() {
     setDurationDays('');
     setTitleError(false);
     setActionError(null);
+    setEditingGoalId(null);
+    setModalVisible(true);
+  }
+
+  function openEditModal(goal: (typeof goals)[number]) {
+    setCategory(goal.category);
+    setTitle(goal.title);
+    setDurationDays('');
+    setTitleError(false);
+    setActionError(null);
+    setEditingGoalId(goal.id);
     setModalVisible(true);
   }
 
@@ -107,13 +121,9 @@ export function GoalsScreen() {
     setActionError(null);
 
     try {
-      const result = await createGoal({
-        category: category.trim() || 'General',
-        title: trimmedTitle,
-        due_date:
-          duration === null ? null : dueDateFromDays(duration, t),
-        icon: 'school-outline',
-      });
+      const result = editingGoalId !== null
+        ? await updateGoal(editingGoalId, { category: category.trim() || 'General', title: trimmedTitle, due_date: duration === null ? null : dueDateFromDays(duration, t), icon: 'school-outline' })
+        : await createGoal({ category: category.trim() || 'General', title: trimmedTitle, due_date: duration === null ? null : dueDateFromDays(duration, t), icon: 'school-outline' });
 
       if (result.ok) {
         setModalVisible(false);
@@ -126,6 +136,13 @@ export function GoalsScreen() {
     } finally {
       setSaving(false);
     }
+  }
+
+  function handleArchive(id: number) {
+    Alert.alert(t('goals.archiveGoal'), t('goals.archiveConfirm'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('goals.archiveGoal'), style: 'destructive', onPress: () => { void (async () => { const result = await archiveGoal(id); if (!result.ok) setActionError(result.error.message); })(); } },
+    ]);
   }
 
   async function handleGoalAction(id: number, progress: number) {
@@ -284,6 +301,24 @@ export function GoalsScreen() {
                   variant="secondary"
                 />
 
+                <View style={styles.goalHeaderActions}>
+                  <Pressable
+                    onPress={() => openEditModal(goal)}
+                    accessibilityRole="button"
+                    accessibilityLabel={t('goals.editGoal', { defaultValue: 'Editar meta' })}
+                    hitSlop={8}
+                  >
+                    <Ionicons name="create-outline" size={20} color={colors.inkMuted} />
+                  </Pressable>
+                  <Pressable
+                    onPress={() => handleArchive(goal.id)}
+                    accessibilityRole="button"
+                    accessibilityLabel={t('goals.archiveGoal', { defaultValue: 'Arquivar meta' })}
+                    hitSlop={8}
+                  >
+                    <Ionicons name="archive-outline" size={20} color={colors.inkMuted} />
+                  </Pressable>
+                </View>
                 <View style={styles.goalIcon}>
                   <Ionicons
                     name={toIconName(goal.icon)}
@@ -392,7 +427,7 @@ export function GoalsScreen() {
                   style={styles.modalTitle}
                   accessibilityRole="header"
                 >
-                  {t('goals.newGoal')}
+                  {editingGoalId !== null ? t('goals.editGoal') : t('goals.newGoal')}
                 </Text>
 
                 <Text style={styles.fieldLabel}>
@@ -484,9 +519,7 @@ export function GoalsScreen() {
                   <View style={styles.modalAction}>
                     <Button
                       label={
-                        saving
-                          ? t('goals.saving')
-                          : t('common.save')
+                        saving ? t('goals.saving') : editingGoalId !== null ? t('goals.updateGoal') : t('common.save')
                       }
                       variant="primary"
                       onPress={() => {
@@ -580,6 +613,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  goalHeaderActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   goalTitle: {
     fontFamily: fonts.headlineBold,
     fontSize: 20,

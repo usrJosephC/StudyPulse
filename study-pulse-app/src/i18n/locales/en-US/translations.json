@@ -135,6 +135,7 @@
     "invalidDuration": "Enter a duration between 1 and 3650 days.",
     "saving": "Saving...",
     "createError": "Unable to create the goal. Please try again.",
+    "editGoal": "Edit goal", "updateGoal": "Update goal", "archiveGoal": "Archive goal", "archiveConfirm": "This goal will leave your active list. Archive it?",
     "dateCalculationError": "Unable to calculate the due date.",
     "dayCount_one": "{{count}} day",
     "dayCount_other": "{{count}} days",
@@ -154,7 +155,7 @@
     "inviteInstructions": "Enter the invitation code to follow the ranking and activities.",
     "inviteCodePlaceholder": "INVITATION CODE",
     "inviteCodeAccessibility": "Group invitation code",
-    "joinButton": "Join group",
+    "joinButton": "Join group", "createGroup": "Create group", "createGroupHint": "Choose a name to organize your studies with others.", "groupNamePlaceholder": "Group name",
     "studySquad": "STUDY SQUAD",
     "defaultSubtitle": "Study together and reach your goals",
     "weeklyRanking": "Weekly Ranking",
@@ -226,9 +227,10 @@
       "title": "Settings",
       "account": "Account",
       "notifications": "Notifications",
-      "studySquad": "Study Squad"
+      "studySquad": "Study Squad",
+      "comingSoon": "This section will be available soon."
     },
-    "signOut": "Sign Out",
+    "signOut": "Sign Out", "achievements": { "title": "Achievements", "empty": "Keep studying to unlock your first achievement.", "badge": "In progress" }, "notifications": { "studyReminders": "Study reminders", "hint": "Get a reminder to keep your streak going." },
     "signingOut": "Signing out...",
     "pleaseWait": "Please wait"
   }

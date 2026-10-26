@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { fail, ok, type Result } from '../lib/result';
 import type { Database } from '../types/database';
-import type { Goal, GoalInput } from '../types/domain';
+import type { Goal, GoalInput, GoalUpdate } from '../types/domain';
 import { client, guarded, unavailable } from './service.utils';
 
 function isValidDate(value: string): boolean {
@@ -21,7 +21,7 @@ export async function listActive(): Promise<Result<Goal[]>> {
   if (!db) return unavailable();
 
   try {
-    const { data, error } = await db.from('goals').select('*').is('completed_at', null).order('created_at', { ascending: false });
+    const { data, error } = await db.from('goals').select('*').is('completed_at', null).is('archived_at', null).order('created_at', { ascending: false });
     return error ? guarded(error, 'Não foi possível carregar suas metas.') : ok((data ?? []) as Goal[]);
   } catch (error) {
     return guarded(error, 'Não foi possível carregar suas metas.');
@@ -89,4 +89,27 @@ export async function completeGoal(id: number): Promise<Result<Goal>> {
   } catch (error) {
     return guarded(error, 'Não foi possível concluir a meta.');
   }
+}
+
+export async function updateGoal(id: number, input: GoalUpdate): Promise<Result<Goal>> {
+  if (!Number.isInteger(id) || id < 1) return fail({ code: 'validation', message: 'Meta inválida.' });
+  const title = input.title.trim();
+  if (!title || title.length > 160) return fail({ code: 'validation', message: 'Informe um título de até 160 caracteres.' });
+  if (input.due_date && !isValidDate(input.due_date)) return fail({ code: 'validation', message: 'Informe a data no formato AAAA-MM-DD.' });
+  const db = client();
+  if (!db) return unavailable();
+  try {
+    const { data, error } = await db.rpc('rpc_update_goal', { goal_id: id, goal_title: title, goal_category: input.category?.trim() || null, goal_due_date: input.due_date ?? null, goal_icon: input.icon ?? null });
+    return error ? guarded(error, 'Não foi possível editar a meta.') : ok(data as Goal);
+  } catch (error) { return guarded(error, 'Não foi possível editar a meta.'); }
+}
+
+export async function archiveGoal(id: number, archived = true): Promise<Result<boolean>> {
+  if (!Number.isInteger(id) || id < 1) return fail({ code: 'validation', message: 'Meta inválida.' });
+  const db = client();
+  if (!db) return unavailable();
+  try {
+    const { data, error } = await db.rpc('rpc_archive_goal', { goal_id: id, archived });
+    return error ? guarded(error, 'Não foi possível arquivar a meta.') : ok(Boolean(data));
+  } catch (error) { return guarded(error, 'Não foi possível arquivar a meta.'); }
 }
