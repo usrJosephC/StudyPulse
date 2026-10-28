@@ -25,7 +25,8 @@ import { Pill } from '../components/Pill';
 import { ProgressBar } from '../components/ProgressBar';
 import { Button } from '../components/Button';
 
-import { colors, fonts, radius, spacing } from '../theme';
+import { fonts, radius, spacing } from '../theme';
+import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useGoals } from '../hooks/useGoals';
 import { useHeatmap } from '../hooks/useHeatmap';
@@ -34,6 +35,7 @@ import { logSafeError } from '../lib/logger';
 
 export function GoalsScreen() {
   const { t } = useTranslation();
+  const { temaAtual } = useTheme();
   const { session, profile } = useAuth();
 
   const {
@@ -121,9 +123,16 @@ export function GoalsScreen() {
     setActionError(null);
 
     try {
+      const goalData = {
+        category: category.trim() || 'General',
+        title: trimmedTitle,
+        due_date: duration === null ? null : dueDateFromDays(duration, t),
+        icon: 'school-outline',
+      };
+
       const result = editingGoalId !== null
-        ? await updateGoal(editingGoalId, { category: category.trim() || 'General', title: trimmedTitle, due_date: duration === null ? null : dueDateFromDays(duration, t), icon: 'school-outline' })
-        : await createGoal({ category: category.trim() || 'General', title: trimmedTitle, due_date: duration === null ? null : dueDateFromDays(duration, t), icon: 'school-outline' });
+        ? await updateGoal(editingGoalId, goalData)
+        : await createGoal(goalData);
 
       if (result.ok) {
         setModalVisible(false);
@@ -176,6 +185,220 @@ export function GoalsScreen() {
       ]);
     }, [refreshGoals, refreshHeatmap, refreshStreak])
   );
+
+  const styles = StyleSheet.create({
+  safe: {
+    flex: 1,
+    backgroundColor: temaAtual.background,
+  },
+  content: {
+    padding: spacing.lg,
+    gap: spacing.lg,
+    paddingBottom: spacing.xxl,
+  },
+  goalsList: {
+    gap: spacing.lg,
+  },
+  sectionTitle: {
+    fontFamily: fonts.headlineBold,
+    fontSize: 18,
+    color: temaAtual.ink,
+  },
+  streakLabel: {
+    fontFamily: fonts.bodyMedium,
+    fontSize: 13,
+    color: temaAtual.inkMuted,
+  },
+  streakRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    marginTop: 2,
+  },
+  streakValue: {
+    fontFamily: fonts.headlineExtraBold,
+    fontSize: 22,
+    color: temaAtual.primary,
+  },
+  legend: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  legendLabel: {
+    fontFamily: fonts.bodyRegular,
+    fontSize: 11,
+    color: temaAtual.inkMuted,
+  },
+  legendDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 3,
+  },
+  heatmap: {
+    marginTop: spacing.md,
+    gap: spacing.xs,
+  },
+  heatmapRow: {
+    flexDirection: 'row',
+    gap: spacing.xs,
+  },
+  heatmapCell: {
+    flex: 1,
+    aspectRatio: 1,
+    borderRadius: 6,
+  },
+  goalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  goalIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: temaAtual.primaryMuted,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  goalHeaderActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  goalTitle: {
+    fontFamily: fonts.headlineBold,
+    fontSize: 20,
+    color: temaAtual.ink,
+    marginTop: spacing.md,
+  },
+  dueRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: spacing.xs,
+  },
+  dueLabel: {
+    fontFamily: fonts.bodyRegular,
+    fontSize: 13,
+    color: temaAtual.inkMuted,
+  },
+  progressRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: spacing.lg,
+    marginBottom: spacing.xs,
+  },
+  progressLabel: {
+    fontFamily: fonts.bodyMedium,
+    fontSize: 13,
+    color: temaAtual.ink,
+  },
+  progressValue: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 13,
+    color: temaAtual.primary,
+  },
+  goalAction: {
+    marginTop: spacing.lg,
+  },
+  fab: {
+    position: 'absolute',
+    right: spacing.lg,
+    bottom: spacing.xl,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: temaAtual.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  backdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(33,33,33,0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalWrap: {
+    width: '100%',
+  },
+  modalCard: {
+    backgroundColor: temaAtual.card,
+    borderTopLeftRadius: radius.lg,
+    borderTopRightRadius: radius.lg,
+    padding: spacing.lg,
+    paddingBottom: spacing.xl,
+    maxHeight: '90%',
+  },
+  modalContent: {
+    gap: spacing.xs,
+  },
+  modalTitle: {
+    fontFamily: fonts.headlineBold,
+    fontSize: 20,
+    color: temaAtual.ink,
+    marginBottom: spacing.sm,
+  },
+  fieldLabel: {
+    fontFamily: fonts.bodyMedium,
+    fontSize: 13,
+    color: temaAtual.inkMuted,
+    marginTop: spacing.sm,
+  },
+  input: {
+    fontFamily: fonts.bodyMedium,
+    fontSize: 15,
+    color: temaAtual.ink,
+    backgroundColor: temaAtual.background,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    borderColor: temaAtual.border,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 10,
+    marginTop: 4,
+  },
+  inputError: {
+    borderColor: temaAtual.danger,
+  },
+  errorLabel: {
+    fontFamily: fonts.bodyRegular,
+    fontSize: 12,
+    color: temaAtual.danger,
+    marginTop: 4,
+  },
+  stateText: {
+    fontFamily: fonts.bodyRegular,
+    fontSize: 13,
+    color: temaAtual.inkMuted,
+    textAlign: 'center',
+  },
+  stateAction: {
+    minHeight: 44,
+    justifyContent: 'center',
+  },
+  modalActions: {
+    flexDirection: 'row',
+    gap: spacing.md,
+    marginTop: spacing.lg,
+  },
+  modalAction: {
+    flex: 1,
+  },
+});
+
+  function getIntensityStyle(level: number) {
+    const intensityColors = [
+      temaAtual.surface,
+      temaAtual.primaryMuted,
+      temaAtual.primarySoft,
+      temaAtual.primary,
+      temaAtual.secondary,
+    ];
+
+    return {
+      backgroundColor: intensityColors[Math.max(0, Math.min(4, level))],
+    };
+  }
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -255,7 +478,7 @@ export function GoalsScreen() {
 
         {(goalsLoading || heatmapLoading) && (
           <ActivityIndicator
-            color={colors.primary}
+            color={temaAtual.primary}
             accessibilityLabel={t('goals.loadingGoals')}
           />
         )}
@@ -308,7 +531,7 @@ export function GoalsScreen() {
                     accessibilityLabel={t('goals.editGoal', { defaultValue: 'Editar meta' })}
                     hitSlop={8}
                   >
-                    <Ionicons name="create-outline" size={20} color={colors.inkMuted} />
+                    <Ionicons name="create-outline" size={20} color={temaAtual.inkMuted} />
                   </Pressable>
                   <Pressable
                     onPress={() => handleArchive(goal.id)}
@@ -316,14 +539,14 @@ export function GoalsScreen() {
                     accessibilityLabel={t('goals.archiveGoal', { defaultValue: 'Arquivar meta' })}
                     hitSlop={8}
                   >
-                    <Ionicons name="archive-outline" size={20} color={colors.inkMuted} />
+                    <Ionicons name="archive-outline" size={20} color={temaAtual.inkMuted} />
                   </Pressable>
                 </View>
                 <View style={styles.goalIcon}>
                   <Ionicons
                     name={toIconName(goal.icon)}
                     size={20}
-                    color={colors.primary}
+                    color={temaAtual.primary}
                   />
                 </View>
               </View>
@@ -336,7 +559,7 @@ export function GoalsScreen() {
                 <Ionicons
                   name="time-outline"
                   size={14}
-                  color={colors.inkMuted}
+                  color={temaAtual.inkMuted}
                 />
 
                 <Text style={styles.dueLabel}>
@@ -395,7 +618,7 @@ export function GoalsScreen() {
         <Ionicons
           name="add"
           size={26}
-          color={colors.ink}
+          color={temaAtual.ink}
         />
       </Pressable>
 
@@ -439,7 +662,7 @@ export function GoalsScreen() {
                   value={category}
                   onChangeText={setCategory}
                   placeholder={t('goals.categoryPlaceholder')}
-                  placeholderTextColor={colors.inkFaint}
+                  placeholderTextColor={temaAtual.inkFaint}
                   accessibilityLabel={t('goals.category')}
                   returnKeyType="next"
                 />
@@ -462,7 +685,7 @@ export function GoalsScreen() {
                     }
                   }}
                   placeholder={t('goals.titlePlaceholder')}
-                  placeholderTextColor={colors.inkFaint}
+                  placeholderTextColor={temaAtual.inkFaint}
                   accessibilityLabel={t('goals.title')}
                   accessibilityHint={t('goals.titleRequired')}
                   returnKeyType="next"
@@ -489,7 +712,7 @@ export function GoalsScreen() {
                     setActionError(null);
                   }}
                   placeholder={t('goals.durationPlaceholder')}
-                  placeholderTextColor={colors.inkFaint}
+                  placeholderTextColor={temaAtual.inkFaint}
                   accessibilityLabel={t('goals.durationAccessibility')}
                   keyboardType="number-pad"
                   inputMode="numeric"
@@ -536,233 +759,6 @@ export function GoalsScreen() {
       </Modal>
     </SafeAreaView>
   );
-}
-
-const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  content: {
-    padding: spacing.lg,
-    gap: spacing.lg,
-    paddingBottom: spacing.xxl,
-  },
-  goalsList: {
-    gap: spacing.lg,
-  },
-  sectionTitle: {
-    fontFamily: fonts.headlineBold,
-    fontSize: 18,
-    color: colors.ink,
-  },
-  streakLabel: {
-    fontFamily: fonts.bodyMedium,
-    fontSize: 13,
-    color: colors.inkMuted,
-  },
-  streakRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    marginTop: 2,
-  },
-  streakValue: {
-    fontFamily: fonts.headlineExtraBold,
-    fontSize: 22,
-    color: colors.primary,
-  },
-  legend: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  legendLabel: {
-    fontFamily: fonts.bodyRegular,
-    fontSize: 11,
-    color: colors.inkMuted,
-  },
-  legendDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 3,
-  },
-  heatmap: {
-    marginTop: spacing.md,
-    gap: spacing.xs,
-  },
-  heatmapRow: {
-    flexDirection: 'row',
-    gap: spacing.xs,
-  },
-  heatmapCell: {
-    flex: 1,
-    aspectRatio: 1,
-    borderRadius: 6,
-  },
-  goalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  goalIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.primaryMuted,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  goalHeaderActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  goalTitle: {
-    fontFamily: fonts.headlineBold,
-    fontSize: 20,
-    color: colors.ink,
-    marginTop: spacing.md,
-  },
-  dueRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginTop: spacing.xs,
-  },
-  dueLabel: {
-    fontFamily: fonts.bodyRegular,
-    fontSize: 13,
-    color: colors.inkMuted,
-  },
-  progressRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: spacing.lg,
-    marginBottom: spacing.xs,
-  },
-  progressLabel: {
-    fontFamily: fonts.bodyMedium,
-    fontSize: 13,
-    color: colors.ink,
-  },
-  progressValue: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 13,
-    color: colors.primary,
-  },
-  goalAction: {
-    marginTop: spacing.lg,
-  },
-  fab: {
-    position: 'absolute',
-    right: spacing.lg,
-    bottom: spacing.xl,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(33,33,33,0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalWrap: {
-    width: '100%',
-  },
-  modalCard: {
-    backgroundColor: colors.card,
-    borderTopLeftRadius: radius.lg,
-    borderTopRightRadius: radius.lg,
-    padding: spacing.lg,
-    paddingBottom: spacing.xl,
-    maxHeight: '90%',
-  },
-  intensity0: {
-    backgroundColor: colors.surface,
-  },
-  intensity1: {
-    backgroundColor: '#FCE9A8',
-  },
-  intensity2: {
-    backgroundColor: '#F9DA55',
-  },
-  intensity3: {
-    backgroundColor: '#F5CC00',
-  },
-  intensity4: {
-    backgroundColor: '#C9A400',
-  },
-  modalContent: {
-    gap: spacing.xs,
-  },
-  modalTitle: {
-    fontFamily: fonts.headlineBold,
-    fontSize: 20,
-    color: colors.ink,
-    marginBottom: spacing.sm,
-  },
-  fieldLabel: {
-    fontFamily: fonts.bodyMedium,
-    fontSize: 13,
-    color: colors.inkMuted,
-    marginTop: spacing.sm,
-  },
-  input: {
-    fontFamily: fonts.bodyMedium,
-    fontSize: 15,
-    color: colors.ink,
-    backgroundColor: colors.background,
-    borderRadius: radius.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingHorizontal: spacing.md,
-    paddingVertical: 10,
-    marginTop: 4,
-  },
-  inputError: {
-    borderColor: colors.danger,
-  },
-  errorLabel: {
-    fontFamily: fonts.bodyRegular,
-    fontSize: 12,
-    color: colors.danger,
-    marginTop: 4,
-  },
-  stateText: {
-    fontFamily: fonts.bodyRegular,
-    fontSize: 13,
-    color: colors.inkMuted,
-    textAlign: 'center',
-  },
-  stateAction: {
-    minHeight: 44,
-    justifyContent: 'center',
-  },
-  modalActions: {
-    flexDirection: 'row',
-    gap: spacing.md,
-    marginTop: spacing.lg,
-  },
-  modalAction: {
-    flex: 1,
-  },
-});
-
-function getIntensityStyle(level: number) {
-  const intensityStyles = [
-    styles.intensity0,
-    styles.intensity1,
-    styles.intensity2,
-    styles.intensity3,
-    styles.intensity4,
-  ];
-
-  return intensityStyles[Math.max(0, Math.min(4, level))];
 }
 
 function formatDueDate(
