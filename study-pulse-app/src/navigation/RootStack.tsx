@@ -4,7 +4,7 @@ import { ActivityIndicator, View } from 'react-native';
 import { LoginPage } from '../pages/LoginPage';
 import { RegisterPage } from '../pages/RegisterPage';
 import { RootTabs } from './RootTabs';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 import { colors } from '../theme';
 
 export type RootStackParamList = {

@@ -32,7 +32,7 @@ import {
   type LoginFormData,
 } from '../validation/schemas';
 
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 import { logSafeError } from '../lib/logger';
 
 import {

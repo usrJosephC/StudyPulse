@@ -26,7 +26,7 @@ import { ProgressBar } from '../components/ProgressBar';
 import { Button } from '../components/Button';
 
 import { colors, fonts, radius, spacing } from '../theme';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 import { useGoals } from '../hooks/useGoals';
 import { useHeatmap } from '../hooks/useHeatmap';
 import { useStreak } from '../hooks/useStreak';

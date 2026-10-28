@@ -11,7 +11,7 @@ import { ProgressRing } from '../components/ProgressRing';
 import { Button } from '../components/Button';
 import { Pill } from '../components/Pill';
 import { colors, fonts, radius, spacing } from '../theme';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 import { usePoints } from '../hooks/usePoints';
 import { useStreak } from '../hooks/useStreak';
 import { useTasks } from '../hooks/useTasks';

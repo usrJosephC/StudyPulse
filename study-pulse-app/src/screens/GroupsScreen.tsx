@@ -10,7 +10,7 @@ import { Card } from '../components/Card';
 import { Pill } from '../components/Pill';
 import { Avatar } from '../components/Avatar';
 import { colors, fonts, radius, spacing } from '../theme';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 import { useRanking } from '../hooks/useRanking';
 import { useSquad } from '../hooks/useSquad';
 import { useSquadActivity } from '../hooks/useSquadActivity';

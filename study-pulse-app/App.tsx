@@ -22,7 +22,7 @@ import {
 
 import { i18nReady } from './src/i18n';
 import { RootStack } from './src/navigation/RootStack';
-import { AuthProvider } from './src/context/AuthContext';
+import { AuthProvider } from './src/contexts/AuthContext';
 import { colors } from './src/theme';
 import { logSafeError } from './src/lib/logger';
 
