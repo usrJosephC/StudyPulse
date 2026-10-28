@@ -1,7 +1,7 @@
 import {
   Controller,
-  Control,
-  FieldErrors,
+  type Control,
+  type FieldErrors,
 } from 'react-hook-form';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -12,13 +12,8 @@ import {
   View,
 } from 'react-native';
 
-import {
-  colors,
-  fonts,
-  radius,
-  spacing,
-} from '../theme';
-
+import { fonts, radius, spacing } from '../theme';
+import { useTheme } from '../contexts/ThemeContext';
 import type { RegisterFormData } from '../validation/schemas';
 
 type Props = {
@@ -26,11 +21,64 @@ type Props = {
   errors: FieldErrors<RegisterFormData>;
 };
 
-export function GenderInput({
-  control,
-  errors,
-}: Props) {
+export function GenderInput({ control, errors }: Props) {
   const { t } = useTranslation();
+  const { temaAtual } = useTheme();
+
+  const styles = StyleSheet.create({
+    container: {
+      marginBottom: spacing.lg,
+    },
+    row: {
+      flexDirection: 'row',
+      gap: spacing.sm,
+    },
+    option: {
+      flex: 1,
+      minHeight: 44,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: spacing.md,
+      borderWidth: 1,
+      borderColor: temaAtual.border,
+      borderRadius: radius.sm,
+      backgroundColor: temaAtual.card,
+    },
+    optionSelected: {
+      borderColor: temaAtual.secondary,
+      backgroundColor: temaAtual.secondarySoft,
+    },
+    label: {
+      fontFamily: fonts.bodyMedium,
+      fontSize: 14,
+      color: temaAtual.inkFaint,
+    },
+    labelSelected: {
+      fontFamily: fonts.bodyBold,
+      color: temaAtual.secondary,
+    },
+    circle: {
+      width: 18,
+      height: 18,
+      borderRadius: 9,
+      borderWidth: 1,
+      borderColor: temaAtual.inkFaint,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    circleSelected: {
+      borderColor: temaAtual.secondary,
+      backgroundColor: temaAtual.secondary,
+    },
+    error: {
+      marginTop: spacing.xs,
+      marginLeft: spacing.sm,
+      fontFamily: fonts.bodyRegular,
+      fontSize: 12,
+      color: temaAtual.danger,
+    },
+  });
 
   const options = [
     {
@@ -87,7 +135,7 @@ export function GenderInput({
                       <Ionicons
                         name="checkmark"
                         size={12}
-                        color={colors.card}
+                        color={temaAtual.card}
                       />
                     )}
                   </View>
@@ -106,66 +154,3 @@ export function GenderInput({
     />
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: spacing.lg,
-  },
-
-  row: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-  },
-
-  option: {
-    flex: 1,
-    minHeight: 44,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.sm,
-    backgroundColor: colors.card,
-  },
-
-  optionSelected: {
-    borderColor: colors.secondary,
-    backgroundColor: colors.secondarySoft,
-  },
-
-  label: {
-    fontFamily: fonts.bodyMedium,
-    fontSize: 14,
-    color: colors.inkFaint,
-  },
-
-  labelSelected: {
-    fontFamily: fonts.bodyBold,
-    color: colors.secondary,
-  },
-
-  circle: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    borderWidth: 1,
-    borderColor: colors.inkFaint,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  circleSelected: {
-    borderColor: colors.secondary,
-    backgroundColor: colors.secondary,
-  },
-
-  error: {
-    marginTop: spacing.xs,
-    marginLeft: spacing.sm,
-    fontFamily: fonts.bodyRegular,
-    fontSize: 12,
-    color: colors.danger,
-  },
-});
