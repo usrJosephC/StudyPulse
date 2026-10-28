@@ -1,6 +1,7 @@
 
-import { useCallback, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { Modal, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
@@ -14,6 +15,7 @@ import { useAuth } from '../context/AuthContext';
 import { usePoints } from '../hooks/usePoints';
 import { useStreak } from '../hooks/useStreak';
 import { useTasks } from '../hooks/useTasks';
+import { useProgression } from '../hooks/useProgression';
 
 const profileSettings = [
   { id: 'account', icon: 'person-outline' as const, labelKey: 'profile.settings.account' },
@@ -27,6 +29,7 @@ export function ProfileScreen() {
   const streak = useStreak();
   const points = usePoints();
   const tasks = useTasks();
+  const progression = useProgression();
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [signOutError, setSignOutError] = useState<string | null>(null);
   const metadataName = session?.user.user_metadata?.name;
@@ -35,10 +38,17 @@ export function ProfileScreen() {
     || t('profile.defaultName');
   const email = session?.user.email ?? '';
   const userInitial = displayName.charAt(0).toUpperCase() || '?';
-  const profileLoading = authLoading || streak.loading || points.loading || tasks.loading;
-  const loadError = authError || streak.error || points.error || tasks.error;
+  const profileLoading = authLoading || streak.loading || points.loading || tasks.loading || progression.loading;
+  const loadError = authError || streak.error || points.error || tasks.error || progression.error;
   const [dataError, setDataError] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [settingsView, setSettingsView] = useState<string | null>(null);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  useEffect(() => {
+    void AsyncStorage.getItem('studypulse.notifications.enabled').then((value) => {
+      if (value !== null) setNotificationsEnabled(value === 'true');
+    });
+  }, []);
   const profileStats = [
     { id: 'streak', icon: 'flame' as const, value: String(streak.streak), labelKey: 'profile.stats.dayStreak', tint: '#FCE4E4' },
     { id: 'goals', icon: 'checkmark-circle' as const, value: String(tasks.tasks.filter((task) => task.done).length), labelKey: 'profile.stats.tasksDone', tint: '#EAEAEA' },
@@ -60,15 +70,15 @@ export function ProfileScreen() {
   async function refreshProfileData() {
     setIsRefreshing(true);
     setDataError(null);
-    const results = await Promise.all([streak.refresh(), points.refresh(), tasks.refresh()]);
+    const results = await Promise.all([streak.refresh(), points.refresh(), tasks.refresh(), progression.refresh()]);
     const failed = results.find((result) => !result.ok);
     if (failed && !failed.ok) setDataError(failed.error.message);
     setIsRefreshing(false);
   }
 
   useFocusEffect(useCallback(() => {
-    void Promise.all([streak.refresh(), points.refresh(), tasks.refresh()]);
-  }, [points.refresh, streak.refresh, tasks.refresh]));
+    void Promise.all([streak.refresh(), points.refresh(), tasks.refresh(), progression.refresh()]);
+  }, [points.refresh, progression.refresh, streak.refresh, tasks.refresh]));
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -145,10 +155,23 @@ export function ProfileScreen() {
           ))}
         </View>
 
+        <Card style={styles.achievementCard}>
+          <View style={styles.achievementIcon}>
+            <Ionicons name="trophy" size={22} color={colors.primary} />
+          </View>
+          <View style={styles.achievementCopy}>
+            <Text style={styles.achievementTitle}>{t('profile.achievements.title', { defaultValue: 'Conquistas' })}</Text>
+            <Text style={styles.achievementText}>
+              {progression.badges[0]?.badge?.name || profile?.badge || t('profile.achievements.empty', { defaultValue: 'Continue estudando para desbloquear sua primeira conquista.' })}
+            </Text>
+          </View>
+          <Pill label={t('profile.achievements.badge', { defaultValue: 'Em progresso' })} variant="secondary" />
+        </Card>
+
         <Text style={styles.sectionTitle}>{t('profile.settings.title')}</Text>
         <View style={{ gap: spacing.sm }}>
           {profileSettings.map((item) => (
-            <Pressable key={item.id} style={styles.settingRow}>
+            <Pressable key={item.id} style={styles.settingRow} onPress={() => setSettingsView(item.id)} accessibilityRole="button">
               <View style={styles.settingIcon}>
                 <Ionicons name={item.icon} size={18} color={colors.secondary} />
               </View>
@@ -179,6 +202,31 @@ export function ProfileScreen() {
           )}
         </View>
       </ScrollView>
+      <Modal visible={settingsView !== null} transparent animationType="fade" onRequestClose={() => setSettingsView(null)}>
+        <Pressable style={styles.modalBackdrop} onPress={() => setSettingsView(null)} accessibilityLabel={t('common.close')}>
+          <Pressable style={styles.settingsModal} onPress={(event) => event.stopPropagation()}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle} accessibilityRole="header">
+                {settingsView === 'notifications' ? t('profile.settings.notifications') : settingsView === 'squad' ? t('profile.settings.studySquad') : t('profile.settings.account')}
+              </Text>
+              <Pressable onPress={() => setSettingsView(null)} accessibilityRole="button" accessibilityLabel={t('common.close')} hitSlop={8}>
+                <Ionicons name="close" size={22} color={colors.ink} />
+              </Pressable>
+            </View>
+            {settingsView === 'notifications' ? (
+              <View style={styles.preferenceRow}>
+                <View style={styles.achievementCopy}>
+                  <Text style={styles.settingLabel}>{t('profile.notifications.studyReminders', { defaultValue: 'Lembretes de estudo' })}</Text>
+                  <Text style={styles.preferenceHint}>{t('profile.notifications.hint', { defaultValue: 'Receba um lembrete para manter sua sequência.' })}</Text>
+                </View>
+                <Switch value={notificationsEnabled} onValueChange={(value) => { setNotificationsEnabled(value); void AsyncStorage.setItem('studypulse.notifications.enabled', String(value)); }} accessibilityLabel={t('profile.notifications.studyReminders', { defaultValue: 'Lembretes de estudo' })} />
+              </View>
+            ) : (
+              <Text style={styles.preferenceHint}>{t('profile.settings.comingSoon', { defaultValue: 'Esta seção estará disponível em breve.' })}</Text>
+            )}
+          </Pressable>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -304,4 +352,15 @@ const styles = StyleSheet.create({
     color: colors.danger,
     paddingHorizontal: spacing.sm,
   },
+  achievementCard: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  achievementIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.primaryMuted, alignItems: 'center', justifyContent: 'center' },
+  achievementCopy: { flex: 1, gap: 3 },
+  achievementTitle: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.ink },
+  achievementText: { fontFamily: fonts.bodyRegular, fontSize: 12, color: colors.inkMuted },
+  modalBackdrop: { flex: 1, backgroundColor: 'rgba(33,33,33,0.5)', justifyContent: 'flex-end' },
+  settingsModal: { backgroundColor: colors.card, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg, padding: spacing.lg, gap: spacing.lg },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  modalTitle: { fontFamily: fonts.headlineBold, fontSize: 18, color: colors.ink },
+  preferenceRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  preferenceHint: { fontFamily: fonts.bodyRegular, fontSize: 13, color: colors.inkMuted, lineHeight: 19 },
 });

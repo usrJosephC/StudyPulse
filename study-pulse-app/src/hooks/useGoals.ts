@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { AppError } from '../lib/result';
-import { completeGoal, createGoal, listActive, updateProgress } from '../services/goals.service';
-import type { Goal, GoalInput } from '../types/domain';
+import { archiveGoal, completeGoal, createGoal, listActive, updateGoal, updateProgress } from '../services/goals.service';
+import type { Goal, GoalInput, GoalUpdate } from '../types/domain';
 
 export function useGoals() {
   const [goals, setGoals] = useState<Goal[]>([]);
@@ -42,6 +42,22 @@ export function useGoals() {
     return result;
   }, []);
 
+  const edit = useCallback(async (id: number, input: GoalUpdate) => {
+    setError(null);
+    const result = await updateGoal(id, input);
+    if (result.ok) setGoals((current) => current.map((goal) => goal.id === id ? result.data : goal));
+    else setError(result.error);
+    return result;
+  }, []);
+
+  const archive = useCallback(async (id: number) => {
+    setError(null);
+    const result = await archiveGoal(id);
+    if (result.ok) setGoals((current) => current.filter((goal) => goal.id !== id));
+    else setError(result.error);
+    return result;
+  }, []);
+
   useEffect(() => { void refresh(); }, [refresh]);
-  return { goals, loading, error, refresh, createGoal: add, updateProgress: progress, completeGoal: complete };
+  return { goals, loading, error, refresh, createGoal: add, updateProgress: progress, completeGoal: complete, updateGoal: edit, archiveGoal: archive };
 }

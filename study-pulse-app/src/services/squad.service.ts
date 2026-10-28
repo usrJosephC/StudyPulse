@@ -76,6 +76,17 @@ export async function joinSquad(inviteCode: string): Promise<Result<number>> {
   }
 }
 
+export async function createSquad(name: string, subtitle = '', seasonEndsAt: string | null = null): Promise<Result<number>> {
+  const squadName = name.trim();
+  if (!squadName || squadName.length > 100) return fail({ code: 'validation', message: 'Informe um nome de squad de até 100 caracteres.' });
+  const db = client();
+  if (!db) return unavailable();
+  try {
+    const { data, error } = await db.rpc('rpc_create_squad', { squad_name: squadName, squad_subtitle: subtitle.trim(), ...(seasonEndsAt ? { season_end: seasonEndsAt } : {}) });
+    return error ? guarded(error, 'Não foi possível criar o squad.') : ok(Number(data));
+  } catch (error) { return guarded(error, 'Não foi possível criar o squad.'); }
+}
+
 export async function leaveSquad(id: number): Promise<Result<null>> {
   if (!Number.isInteger(id) || id < 1) return fail({ code: 'validation', message: 'Grupo inválido.' });
   const db = client();

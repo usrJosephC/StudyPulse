@@ -135,6 +135,7 @@
     "invalidDuration": "Informe uma duração entre 1 e 3650 dias.",
     "saving": "Salvando...",
     "createError": "Não foi possível criar a meta. Tente novamente.",
+    "editGoal": "Editar meta", "updateGoal": "Atualizar meta", "archiveGoal": "Arquivar meta", "archiveConfirm": "Esta meta sairá da sua lista ativa. Deseja arquivá-la?",
     "dateCalculationError": "Não foi possível calcular a data de vencimento.",
     "dayCount_one": "{{count}} dia",
     "dayCount_other": "{{count}} dias",
@@ -154,7 +155,7 @@
     "inviteInstructions": "Informe o código de convite para acompanhar o ranking e as atividades.",
     "inviteCodePlaceholder": "CÓDIGO DE CONVITE",
     "inviteCodeAccessibility": "Código de convite do grupo",
-    "joinButton": "Entrar no grupo",
+    "joinButton": "Entrar no grupo", "createGroup": "Criar grupo", "createGroupHint": "Defina um nome para organizar seus estudos com outras pessoas.", "groupNamePlaceholder": "Nome do grupo",
     "studySquad": "GRUPO DE ESTUDOS",
     "defaultSubtitle": "Estude em conjunto e alcance seus objetivos",
     "weeklyRanking": "Ranking semanal",
@@ -226,9 +227,10 @@
       "title": "Configurações",
       "account": "Conta",
       "notifications": "Notificações",
-      "studySquad": "Grupo de estudos"
+      "studySquad": "Grupo de estudos",
+      "comingSoon": "Esta seção estará disponível em breve."
     },
-    "signOut": "Sair",
+    "signOut": "Sair", "achievements": { "title": "Conquistas", "empty": "Continue estudando para desbloquear sua primeira conquista.", "badge": "Em progresso" }, "notifications": { "studyReminders": "Lembretes de estudo", "hint": "Receba um lembrete para manter sua sequência." },
     "signingOut": "Saindo...",
     "pleaseWait": "Aguarde"
   }

@@ -38,6 +38,7 @@ export type Database = {
         Row: {
           check_date: string
           created_at: string
+          archived_at: string | null
           id: number
           minutes: number
           user_id: string
@@ -52,6 +53,7 @@ export type Database = {
         Update: {
           check_date?: string
           created_at?: string
+          archived_at?: string | null
           id?: never
           minutes?: number
           user_id?: string
@@ -372,6 +374,11 @@ export type Database = {
           },
         ]
       }
+      points_reversals: { Row: { id: number; user_id: string; original_event_id: number; points: number; reason: string; created_at: string }; Insert: never; Update: never; Relationships: [] }
+      streak_history: { Row: { user_id: string; streak_date: string; streak: number; is_record: boolean; was_broken: boolean; created_at: string }; Insert: never; Update: never; Relationships: [] }
+      badges: { Row: { code: string; name: string; description: string; requirement: number }; Insert: never; Update: never; Relationships: [] }
+      user_badges: { Row: { user_id: string; badge_code: string; awarded_at: string }; Insert: never; Update: never; Relationships: [] }
+      weekly_resets: { Row: { user_id: string; week_start: string; reset_at: string }; Insert: never; Update: never; Relationships: [] }
     }
     Views: {
       v_user_points: {
@@ -422,6 +429,10 @@ export type Database = {
         Args: { goal_id: number; new_progress: number }
         Returns: number
       }
+      rpc_update_goal: { Args: { goal_id: number; goal_title: string; goal_category?: string | null; goal_due_date?: string | null; goal_icon?: string | null }; Returns: Database['public']['Tables']['goals']['Row'] }
+      rpc_archive_goal: { Args: { goal_id: number; archived?: boolean }; Returns: boolean }
+      rpc_reverse_points: { Args: { event_id: number; reversal_reason?: string }; Returns: number }
+      rpc_reset_weekly: { Args: never; Returns: boolean }
       shares_squad: { Args: { target_user: string }; Returns: boolean }
     }
     Enums: {
