@@ -1,16 +1,11 @@
-
 import { useState } from 'react';
-
 import {
   Controller,
-  Control,
-  FieldErrors,
+  type Control,
+  type FieldErrors,
 } from 'react-hook-form';
-
 import { useTranslation } from 'react-i18next';
-
 import { Ionicons } from '@expo/vector-icons';
-
 import {
   FlatList,
   Modal,
@@ -19,14 +14,8 @@ import {
   Text,
   View,
 } from 'react-native';
-
-import {
-  colors,
-  fonts,
-  radius,
-  spacing,
-} from '../theme';
-
+import { fonts, radius, spacing } from '../theme';
+import { useTheme } from '../contexts/ThemeContext';
 import type { RegisterFormData } from '../validation/schemas';
 
 type Props = {
@@ -36,37 +25,101 @@ type Props = {
 
 type PickerType = 'day' | 'month' | 'year' | null;
 
-const days = Array.from(
-  { length: 31 },
-  (_, index) => index + 1
-);
-
-const months = Array.from(
-  { length: 12 },
-  (_, index) => index + 1
-);
-
+const days = Array.from({ length: 31 }, (_, index) => index + 1);
+const months = Array.from({ length: 12 }, (_, index) => index + 1);
 const currentYear = new Date().getFullYear();
+const years = Array.from({ length: 100 }, (_, index) => currentYear - index);
 
-const years = Array.from(
-  { length: 100 },
-  (_, index) => currentYear - index
-);
-
-export function BirthDateInput({
-  control,
-  errors,
-}: Props) {
+export function BirthDateInput({ control, errors }: Props) {
   const { t } = useTranslation();
-
-  const [pickerType, setPickerType] =
-    useState<PickerType>(null);
+  const { temaAtual } = useTheme();
+  const [pickerType, setPickerType] = useState<PickerType>(null);
 
   const fieldLabels = {
     day: t('register.birthDateFields.day'),
     month: t('register.birthDateFields.month'),
     year: t('register.birthDateFields.year'),
   };
+
+  const styles = StyleSheet.create({
+    container: {
+      width: '100%',
+    },
+    row: {
+      flexDirection: 'row',
+      gap: spacing.sm,
+    },
+    field: {
+      flex: 1,
+      height: 50,
+      paddingHorizontal: spacing.md,
+      borderWidth: 1,
+      borderColor: temaAtual.border,
+      borderRadius: radius.sm,
+      backgroundColor: temaAtual.card,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    fieldPressed: {
+      opacity: 0.7,
+    },
+    fieldText: {
+      fontFamily: fonts.bodyRegular,
+      fontSize: 15,
+      color: temaAtual.ink,
+    },
+    placeholder: {
+      color: temaAtual.inkFaint,
+    },
+    error: {
+      marginTop: spacing.xs,
+      marginLeft: spacing.sm,
+      fontFamily: fonts.bodyRegular,
+      fontSize: 12,
+      color: temaAtual.danger,
+    },
+    overlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.4)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: spacing.xl,
+    },
+    modal: {
+      width: '100%',
+      maxWidth: 360,
+      height: 480,
+      backgroundColor: temaAtual.card,
+      borderRadius: radius.lg,
+      padding: spacing.lg,
+    },
+    modalTitle: {
+      marginBottom: spacing.md,
+      fontFamily: fonts.headlineBold,
+      fontSize: 18,
+      color: temaAtual.ink,
+      textAlign: 'center',
+    },
+    listContent: {
+      paddingBottom: spacing.sm,
+    },
+    option: {
+      minHeight: 46,
+      borderRadius: radius.sm,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: spacing.xs,
+    },
+    optionPressed: {
+      backgroundColor: temaAtual.primaryMuted,
+    },
+    optionText: {
+      fontFamily: fonts.bodyMedium,
+      fontSize: 14,
+      color: temaAtual.ink,
+    },
+  });
 
   return (
     <Controller
@@ -88,7 +141,6 @@ export function BirthDateInput({
             ...value,
             [key]: selectedValue,
           });
-
           setPickerType(null);
         }
 
@@ -110,41 +162,38 @@ export function BirthDateInput({
         return (
           <View style={styles.container}>
             <View style={styles.row}>
-              {(['day', 'month', 'year'] as const).map(
-                (type) => {
-                  const hasValue =
-                    value?.[type] !== null &&
-                    value?.[type] !== undefined;
+              {(['day', 'month', 'year'] as const).map((type) => {
+                const hasValue =
+                  value?.[type] !== null &&
+                  value?.[type] !== undefined;
 
-                  return (
-                    <Pressable
-                      key={type}
-                      accessibilityRole="button"
-                      accessibilityLabel={fieldLabels[type]}
-                      onPress={() => setPickerType(type)}
-                      style={({ pressed }) => [
-                        styles.field,
-                        pressed && styles.fieldPressed,
+                return (
+                  <Pressable
+                    key={type}
+                    accessibilityRole="button"
+                    accessibilityLabel={fieldLabels[type]}
+                    onPress={() => setPickerType(type)}
+                    style={({ pressed }) => [
+                      styles.field,
+                      pressed && styles.fieldPressed,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.fieldText,
+                        !hasValue && styles.placeholder,
                       ]}
                     >
-                      <Text
-                        style={[
-                          styles.fieldText,
-                          !hasValue && styles.placeholder,
-                        ]}
-                      >
-                        {getValue(type)}
-                      </Text>
-
-                      <Ionicons
-                        name="chevron-down"
-                        size={18}
-                        color={colors.inkMuted}
-                      />
-                    </Pressable>
-                  );
-                }
-              )}
+                      {getValue(type)}
+                    </Text>
+                    <Ionicons
+                      name="chevron-down"
+                      size={18}
+                      color={temaAtual.inkMuted}
+                    />
+                  </Pressable>
+                );
+              })}
             </View>
 
             {(errors.birthDate?.day ||
@@ -216,96 +265,3 @@ export function BirthDateInput({
     />
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    width: '100%',
-  },
-
-  row: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-  },
-
-  field: {
-    flex: 1,
-    height: 50,
-    paddingHorizontal: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.sm,
-    backgroundColor: colors.card,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-
-  fieldPressed: {
-    opacity: 0.7,
-  },
-
-  fieldText: {
-    fontFamily: fonts.bodyRegular,
-    fontSize: 15,
-    color: colors.ink,
-  },
-
-  placeholder: {
-    color: colors.inkFaint,
-  },
-
-  error: {
-    marginTop: spacing.xs,
-    marginLeft: spacing.sm,
-    fontFamily: fonts.bodyRegular,
-    fontSize: 12,
-    color: colors.danger,
-  },
-
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: spacing.xl,
-  },
-
-  modal: {
-    width: '100%',
-    maxWidth: 360,
-    height: 480,
-    backgroundColor: colors.card,
-    borderRadius: radius.lg,
-    padding: spacing.lg,
-  },
-
-  modalTitle: {
-    marginBottom: spacing.md,
-    fontFamily: fonts.headlineBold,
-    fontSize: 18,
-    color: colors.ink,
-    textAlign: 'center',
-  },
-
-  listContent: {
-    paddingBottom: spacing.sm,
-  },
-
-  option: {
-    minHeight: 46,
-    borderRadius: radius.sm,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing.xs,
-  },
-
-  optionPressed: {
-    backgroundColor: colors.primaryMuted,
-  },
-
-  optionText: {
-    fontFamily: fonts.bodyMedium,
-    fontSize: 14,
-    color: colors.ink,
-  },
-});
