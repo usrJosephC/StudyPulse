@@ -1,5 +1,4 @@
 import { useRef, useState } from 'react';
-
 import {
   Alert,
   Modal,
@@ -9,9 +8,7 @@ import {
   Text,
   View,
 } from 'react-native';
-
 import { Ionicons } from '@expo/vector-icons';
-
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useTranslation } from 'react-i18next';
@@ -19,26 +16,13 @@ import { useTranslation } from 'react-i18next';
 import { Button } from './Button';
 import { EmailInput } from './EmailInput';
 import { PasswordInput } from './PasswordInput';
-
-import {
-  colors,
-  fonts,
-  radius,
-  spacing,
-} from '../theme';
-
-import {
-  loginSchema,
-  type LoginFormData,
-} from '../validation/schemas';
-
+import { fonts, radius, spacing } from '../theme';
+import { type Colors } from '../theme/colors';
+import { useTheme } from '../contexts/ThemeContext';
+import { loginSchema, type LoginFormData } from '../validation/schemas';
 import { useAuth } from '../contexts/AuthContext';
 import { logSafeError } from '../lib/logger';
-
-import {
-  changeAppLanguage,
-  type AppLanguage,
-} from '../i18n';
+import { changeAppLanguage, type AppLanguage } from '../i18n';
 
 type Props = {
   onLoginSuccess?: () => void;
@@ -48,32 +32,26 @@ type Props = {
 export function Login({ onCreateAccount }: Props) {
   const { t, i18n } = useTranslation();
   const { signIn } = useAuth();
-
+  const { tema, temaAtual, alternarTema } = useTheme();
+  const styles = createStyles(temaAtual);
   const [acceptedTerms, setAcceptedTerms] =
     useState(false);
-
   const [termsError, setTermsError] =
     useState(false);
-
   const [modalVisible, setModalVisible] =
     useState(false);
-
   const [isLoading, setIsLoading] =
     useState(false);
-
   const submitInProgress = useRef(false);
-
   const currentLanguage = (
     i18n.resolvedLanguage ?? i18n.language
   ).toLowerCase();
-
   const selectedLanguage: AppLanguage =
     currentLanguage.startsWith('en')
       ? 'en-US'
       : currentLanguage.startsWith('es')
         ? 'es-ES'
         : 'pt-BR';
-
   const {
     control,
     formState: { errors },
@@ -91,12 +69,10 @@ export function Login({ onCreateAccount }: Props) {
     language: AppLanguage
   ) {
     if (language === selectedLanguage) return;
-
     try {
       await changeAppLanguage(language);
     } catch {
       logSafeError('language.change_failed');
-
       Alert.alert(
         t('common.error'),
         t('language.saveError')
@@ -106,31 +82,24 @@ export function Login({ onCreateAccount }: Props) {
 
   async function onSubmit(data: LoginFormData) {
     if (submitInProgress.current) return;
-
     submitInProgress.current = true;
-
     try {
       setIsLoading(true);
-
       const result = await signIn(
         data.email,
         data.password
       );
-
       if (!result.ok) {
         Alert.alert(
           t('login.loginErrorTitle'),
           result.error.message ||
             t('login.unexpectedError')
         );
-
         return;
       }
-
       // The AuthProvider handles navigation when the session is emitted.
     } catch {
       logSafeError('auth.login_failed');
-
       Alert.alert(
         t('common.error'),
         t('login.unexpectedError')
@@ -146,7 +115,6 @@ export function Login({ onCreateAccount }: Props) {
       setTermsError(true);
       return;
     }
-
     setTermsError(false);
     handleSubmit(onSubmit)();
   }
@@ -155,7 +123,6 @@ export function Login({ onCreateAccount }: Props) {
     setAcceptedTerms((current) => !current);
     setTermsError(false);
   }
-
   return (
     <View style={styles.container}>
       <View style={styles.form}>
@@ -164,7 +131,6 @@ export function Login({ onCreateAccount }: Props) {
           <Text style={styles.languageLabel}>
             {t('language.label')}
           </Text>
-
           <View
             style={styles.languageOptions}
             accessibilityRole="radiogroup"
@@ -197,7 +163,6 @@ export function Login({ onCreateAccount }: Props) {
                 {t('language.portuguese')}
               </Text>
             </Pressable>
-
             {/* English */}
             <Pressable
               accessibilityRole="radio"
@@ -225,7 +190,6 @@ export function Login({ onCreateAccount }: Props) {
                 {t('language.english')}
               </Text>
             </Pressable>
-
             {/* Spanish */}
             <Pressable
               accessibilityRole="radio"
@@ -255,17 +219,32 @@ export function Login({ onCreateAccount }: Props) {
             </Pressable>
           </View>
         </View>
-
+        {/* Theme toggle */}
+        <Pressable
+          style={styles.themeToggle}
+          onPress={alternarTema}
+          accessibilityRole="button"
+          accessibilityLabel={
+            tema === 'light' ? 'Ativar tema escuro' : 'Ativar tema claro'
+          }
+        >
+          <Ionicons
+            name={tema === 'light' ? 'moon-outline' : 'sunny-outline'}
+            size={20}
+            color={temaAtual.secondary}
+          />
+          <Text style={styles.themeToggleText}>
+            {tema === 'light' ? 'Tema escuro' : 'Tema claro'}
+          </Text>
+        </Pressable>
         <EmailInput
           control={control}
           errors={errors}
         />
-
         <PasswordInput
           control={control}
           errors={errors}
         />
-
         <Pressable
           disabled={isLoading}
           onPress={() =>
@@ -279,7 +258,6 @@ export function Login({ onCreateAccount }: Props) {
             {t('login.forgotPassword')}
           </Text>
         </Pressable>
-
         {/* Terms of Service */}
         <View>
           <Pressable
@@ -300,14 +278,12 @@ export function Login({ onCreateAccount }: Props) {
               size={18}
               color={
                 termsError
-                  ? colors.danger
-                  : colors.secondary
+                  ? temaAtual.danger
+                  : temaAtual.secondary
               }
             />
-
             <Text style={styles.termsText}>
               {t('login.termsAgreementStart')}{' '}
-
               <Text
                 style={styles.termsLink}
                 onPress={() => setModalVisible(true)}
@@ -317,7 +293,6 @@ export function Login({ onCreateAccount }: Props) {
               {t('login.termsAgreementEnd')}
             </Text>
           </Pressable>
-
           {termsError && (
             <Text
               accessibilityRole="alert"
@@ -327,7 +302,6 @@ export function Login({ onCreateAccount }: Props) {
             </Text>
           )}
         </View>
-
         {/* Terms modal */}
         <Modal
           animationType="fade"
@@ -343,16 +317,13 @@ export function Login({ onCreateAccount }: Props) {
                 <Text style={styles.modalTitle}>
                   {t('login.termsTitle')}
                 </Text>
-
                 <Text style={styles.modalText}>
                   {t('login.termsContent.paragraph1')}
                 </Text>
-
                 <Text style={styles.modalText}>
                   {t('login.termsContent.paragraph2')}
                 </Text>
               </ScrollView>
-
               <Button
                 label={t('common.close')}
                 onPress={() => setModalVisible(false)}
@@ -360,7 +331,6 @@ export function Login({ onCreateAccount }: Props) {
             </View>
           </View>
         </Modal>
-
         {/* Login button */}
         <Button
           label={
@@ -371,7 +341,6 @@ export function Login({ onCreateAccount }: Props) {
           onPress={handleLogin}
           disabled={isLoading}
         />
-
         {/* Create account button */}
         <Button
           label={t('login.createAccountButton')}
@@ -379,7 +348,6 @@ export function Login({ onCreateAccount }: Props) {
           variant="outline"
           disabled={isLoading}
         />
-
         {/* Google login */}
         <Pressable
           style={styles.googleButton}
@@ -394,9 +362,8 @@ export function Login({ onCreateAccount }: Props) {
           <Ionicons
             name="logo-google"
             size={20}
-            color={colors.secondary}
+            color={temaAtual.secondary}
           />
-
           <Text style={styles.googleText}>
             {t('login.googleLoginButton')}
           </Text>
@@ -406,15 +373,13 @@ export function Login({ onCreateAccount }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: Colors) => StyleSheet.create({
   container: {
     width: '100%',
   },
-
   form: {
     gap: spacing.md,
   },
-
   languageContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -422,20 +387,34 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     marginBottom: spacing.xs,
   },
-
+  themeToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-end',
+    gap: spacing.xs,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.card,
+  },
+  themeToggleText: {
+    fontFamily: fonts.bodyMedium,
+    fontSize: 12,
+    color: colors.secondary,
+  },
   languageLabel: {
     fontFamily: fonts.bodyMedium,
     fontSize: 13,
     color: colors.inkMuted,
   },
-
   languageOptions: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
     flexWrap: 'wrap',
   },
-
   languageOption: {
     paddingVertical: spacing.xs,
     paddingHorizontal: spacing.sm,
@@ -444,23 +423,19 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     backgroundColor: colors.card,
   },
-
   languageOptionSelected: {
     backgroundColor: colors.secondary,
     borderColor: colors.secondary,
   },
-
   languageOptionText: {
     fontFamily: fonts.bodyMedium,
     fontSize: 12,
     color: colors.inkMuted,
   },
-
   languageOptionTextSelected: {
     fontFamily: fonts.bodyBold,
     color: colors.card,
   },
-
   forgotPassword: {
     fontFamily: fonts.bodyBold,
     fontSize: 13,
@@ -469,13 +444,11 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
     marginTop: -spacing.xs,
   },
-
   termsContainer: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: spacing.xs,
   },
-
   termsText: {
     flex: 1,
     fontFamily: fonts.bodyRegular,
@@ -483,13 +456,11 @@ const styles = StyleSheet.create({
     color: colors.inkMuted,
     lineHeight: 17,
   },
-
   termsLink: {
     fontFamily: fonts.bodyBold,
     color: colors.secondary,
     textDecorationLine: 'underline',
   },
-
   termsError: {
     fontFamily: fonts.bodyMedium,
     fontSize: 12,
@@ -497,7 +468,6 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
     marginLeft: spacing.xl,
   },
-
   modalOverlay: {
     flex: 1,
     justifyContent: 'center',
@@ -505,7 +475,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.45)',
     padding: spacing.xl,
   },
-
   modalContent: {
     width: '100%',
     maxWidth: 500,
@@ -515,14 +484,12 @@ const styles = StyleSheet.create({
     padding: spacing.xl,
     gap: spacing.lg,
   },
-
   modalTitle: {
     fontFamily: fonts.headlineBold,
     fontSize: 20,
     color: colors.ink,
     marginBottom: spacing.sm,
   },
-
   modalText: {
     fontFamily: fonts.bodyRegular,
     fontSize: 14,
@@ -530,7 +497,6 @@ const styles = StyleSheet.create({
     color: colors.inkMuted,
     marginBottom: spacing.md,
   },
-
   googleButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -538,7 +504,6 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     paddingVertical: spacing.md,
   },
-
   googleText: {
     fontFamily: fonts.bodyBold,
     fontSize: 14,
