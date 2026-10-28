@@ -1,16 +1,13 @@
 import { useState } from 'react';
-
 import {
   Controller,
-  Control,
-  FieldErrors,
-  FieldValues,
-  Path,
+  type Control,
+  type FieldErrors,
+  type FieldValues,
+  type Path,
 } from 'react-hook-form';
-
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-
 import {
   Pressable,
   StyleSheet,
@@ -19,12 +16,8 @@ import {
   View,
 } from 'react-native';
 
-import {
-  colors,
-  fonts,
-  radius,
-  spacing,
-} from '../theme';
+import { fonts, radius, spacing } from '../theme';
+import { useTheme } from '../contexts/ThemeContext';
 
 type Props<T extends FieldValues> = {
   control: Control<T>;
@@ -37,6 +30,37 @@ export function PasswordInput<T extends FieldValues>({
 }: Props<T>) {
   const [showPassword, setShowPassword] = useState(false);
   const { t } = useTranslation();
+  const { temaAtual } = useTheme();
+
+  const styles = StyleSheet.create({
+    wrapper: {
+      width: '100%',
+    },
+    inputContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: temaAtual.surface,
+      borderRadius: radius.pill,
+      paddingHorizontal: spacing.lg,
+      height: 48,
+    },
+    icon: {
+      marginRight: spacing.sm,
+    },
+    input: {
+      flex: 1,
+      fontFamily: fonts.bodyRegular,
+      fontSize: 14,
+      color: temaAtual.ink,
+    },
+    error: {
+      fontFamily: fonts.bodyMedium,
+      fontSize: 12,
+      color: temaAtual.danger,
+      marginTop: spacing.xs,
+      marginLeft: spacing.lg,
+    },
+  });
 
   return (
     <Controller
@@ -48,14 +72,14 @@ export function PasswordInput<T extends FieldValues>({
             <Ionicons
               name="lock-closed-outline"
               size={20}
-              color={colors.inkMuted}
+              color={temaAtual.inkMuted}
               style={styles.icon}
             />
 
             <TextInput
               style={styles.input}
               placeholder={t('login.password')}
-              placeholderTextColor={colors.inkFaint}
+              placeholderTextColor={temaAtual.inkFaint}
               value={value}
               onChangeText={onChange}
               onBlur={onBlur}
@@ -79,7 +103,7 @@ export function PasswordInput<T extends FieldValues>({
               <Ionicons
                 name={showPassword ? 'eye-outline' : 'eye-off-outline'}
                 size={20}
-                color={colors.inkMuted}
+                color={temaAtual.inkMuted}
               />
             </Pressable>
           </View>
@@ -94,37 +118,3 @@ export function PasswordInput<T extends FieldValues>({
     />
   );
 }
-
-const styles = StyleSheet.create({
-  wrapper: {
-    width: '100%',
-  },
-
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderRadius: radius.pill,
-    paddingHorizontal: spacing.lg,
-    height: 48,
-  },
-
-  icon: {
-    marginRight: spacing.sm,
-  },
-
-  input: {
-    flex: 1,
-    fontFamily: fonts.bodyRegular,
-    fontSize: 14,
-    color: colors.ink,
-  },
-
-  error: {
-    fontFamily: fonts.bodyMedium,
-    fontSize: 12,
-    color: colors.danger,
-    marginTop: spacing.xs,
-    marginLeft: spacing.lg,
-  },
-});
