@@ -1,28 +1,34 @@
 import { StyleSheet, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
-import { colors } from '../theme';
+import type { ReactNode } from 'react';
+import { useTheme } from '../contexts/ThemeContext';
 
 type Props = {
-  progress: number; // 0..1
+  progress: number;
   size?: number;
   strokeWidth?: number;
   color?: string;
   trackColor?: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
 };
 
 export function ProgressRing({
   progress,
   size = 160,
   strokeWidth = 14,
-  color = colors.primary,
-  trackColor = colors.surface,
+  color,
+  trackColor,
   children,
 }: Props) {
+  const { temaAtual } = useTheme();
+
   const radiusPx = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radiusPx;
   const clamped = Math.max(0, Math.min(1, progress));
   const dashOffset = circumference * (1 - clamped);
+
+  const ringColor = color ?? temaAtual.primary;
+  const backgroundColor = trackColor ?? temaAtual.surface;
 
   return (
     <View style={{ width: size, height: size }}>
@@ -31,7 +37,7 @@ export function ProgressRing({
           cx={size / 2}
           cy={size / 2}
           r={radiusPx}
-          stroke={trackColor}
+          stroke={backgroundColor}
           strokeWidth={strokeWidth}
           fill="none"
         />
@@ -39,7 +45,7 @@ export function ProgressRing({
           cx={size / 2}
           cy={size / 2}
           r={radiusPx}
-          stroke={color}
+          stroke={ringColor}
           strokeWidth={strokeWidth}
           fill="none"
           strokeLinecap="round"
@@ -49,6 +55,7 @@ export function ProgressRing({
           origin={`${size / 2}, ${size / 2}`}
         />
       </Svg>
+
       <View style={StyleSheet.absoluteFill}>
         <View style={styles.center}>{children}</View>
       </View>
