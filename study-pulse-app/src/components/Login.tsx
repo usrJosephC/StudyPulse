@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import {
   Alert,
+  Animated,
   Modal,
   Pressable,
   ScrollView,
@@ -23,6 +24,7 @@ import { loginSchema, type LoginFormData } from '../validation/schemas';
 import { useAuth } from '../contexts/AuthContext';
 import { logSafeError } from '../lib/logger';
 import { changeAppLanguage, type AppLanguage } from '../i18n';
+import { useErrorShake } from '../hooks/useErrorShake';
 
 type Props = {
   onLoginSuccess?: () => void;
@@ -34,6 +36,7 @@ export function Login({ onCreateAccount }: Props) {
   const { signIn } = useAuth();
   const { tema, temaAtual, alternarTema } = useTheme();
   const styles = createStyles(temaAtual);
+  const { shake, shakeStyle } = useErrorShake();
   const [acceptedTerms, setAcceptedTerms] =
     useState(false);
   const [termsError, setTermsError] =
@@ -90,6 +93,7 @@ export function Login({ onCreateAccount }: Props) {
         data.password
       );
       if (!result.ok) {
+        shake(result.error.message || t('login.unexpectedError'));
         Alert.alert(
           t('login.loginErrorTitle'),
           result.error.message ||
@@ -100,6 +104,7 @@ export function Login({ onCreateAccount }: Props) {
       // The AuthProvider handles navigation when the session is emitted.
     } catch {
       logSafeError('auth.login_failed');
+      shake(t('login.unexpectedError'));
       Alert.alert(
         t('common.error'),
         t('login.unexpectedError')
@@ -113,10 +118,13 @@ export function Login({ onCreateAccount }: Props) {
   function handleLogin() {
     if (!acceptedTerms) {
       setTermsError(true);
+      shake(t('login.acceptTermsRequired'));
       return;
     }
     setTermsError(false);
-    handleSubmit(onSubmit)();
+    void handleSubmit(onSubmit, () => {
+      shake(t('common.formInvalid'));
+    })();
   }
 
   function handleTermsToggle() {
@@ -125,7 +133,7 @@ export function Login({ onCreateAccount }: Props) {
   }
   return (
     <View style={styles.container}>
-      <View style={styles.form}>
+      <Animated.View style={[styles.form, shakeStyle]}>
         {/* Language selector */}
         <View style={styles.languageContainer}>
           <Text style={styles.languageLabel}>
@@ -225,7 +233,7 @@ export function Login({ onCreateAccount }: Props) {
           onPress={alternarTema}
           accessibilityRole="button"
           accessibilityLabel={
-            tema === 'light' ? 'Ativar tema escuro' : 'Ativar tema claro'
+            tema === 'light' ? t('theme.enableDark') : t('theme.enableLight')
           }
         >
           <Ionicons
@@ -234,7 +242,7 @@ export function Login({ onCreateAccount }: Props) {
             color={temaAtual.secondary}
           />
           <Text style={styles.themeToggleText}>
-            {tema === 'light' ? 'Tema escuro' : 'Tema claro'}
+            {tema === 'light' ? t('theme.dark') : t('theme.light')}
           </Text>
         </Pressable>
         <EmailInput
@@ -368,7 +376,7 @@ export function Login({ onCreateAccount }: Props) {
             {t('login.googleLoginButton')}
           </Text>
         </Pressable>
-      </View>
+      </Animated.View>
     </View>
   );
 }
