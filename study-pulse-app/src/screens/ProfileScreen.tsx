@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { ScreenHeader } from '../components/ScreenHeader';
@@ -24,6 +24,7 @@ const profileSettings = [
 ];
 
 export function ProfileScreen() {
+  const insets = useSafeAreaInsets();
   const { t, i18n } = useTranslation();
   const { temaAtual } = useTheme();
   const { session, profile, loading: authLoading, error: authError, signOut } = useAuth();
@@ -113,9 +114,14 @@ export function ProfileScreen() {
     setIsRefreshing(false);
   }
 
+  const refreshStreak = streak.refresh;
+  const refreshPoints = points.refresh;
+  const refreshTasks = tasks.refresh;
+  const refreshProgression = progression.refresh;
+
   useFocusEffect(useCallback(() => {
-    void Promise.all([streak.refresh(), points.refresh(), tasks.refresh(), progression.refresh()]);
-  }, [points.refresh, progression.refresh, streak.refresh, tasks.refresh]));
+    void Promise.all([refreshStreak(), refreshPoints(), refreshTasks(), refreshProgression()]);
+  }, [refreshPoints, refreshProgression, refreshStreak, refreshTasks]));
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -188,7 +194,10 @@ export function ProfileScreen() {
       </ScrollView>
       <Modal visible={settingsView !== null} transparent animationType="fade" onRequestClose={() => setSettingsView(null)}>
         <Pressable style={styles.modalBackdrop} onPress={() => setSettingsView(null)} accessibilityLabel={t('common.close')}>
-          <Pressable style={styles.settingsModal} onPress={(event) => event.stopPropagation()}>
+          <Pressable
+            style={[styles.settingsModal, { paddingBottom: spacing.lg + insets.bottom }]}
+            onPress={(event) => event.stopPropagation()}
+          >
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle} accessibilityRole="header">
                 {settingsView === 'notifications' ? t('profile.settings.notifications') : settingsView === 'squad' ? t('profile.settings.studySquad') : t('profile.settings.account')}

@@ -28,6 +28,24 @@ export async function listActive(): Promise<Result<Goal[]>> {
   }
 }
 
+export async function listArchived(): Promise<Result<Goal[]>> {
+  const db = client();
+  if (!db) return unavailable();
+
+  try {
+    const { data, error } = await db
+      .from('goals')
+      .select('*')
+      .not('archived_at', 'is', null)
+      .order('archived_at', { ascending: false });
+    return error
+      ? guarded(error, 'Não foi possível carregar o histórico de metas.')
+      : ok((data ?? []) as Goal[]);
+  } catch (error) {
+    return guarded(error, 'Não foi possível carregar o histórico de metas.');
+  }
+}
+
 export async function createGoal(input: GoalInput): Promise<Result<Goal>> {
   const title = input.title.trim();
   if (!title || title.length > 160) return fail({ code: 'validation', message: 'Informe um título de até 160 caracteres.' });
