@@ -260,7 +260,31 @@
       "studySquad": "Study Squad",
       "comingSoon": "This section will be available soon."
     },
-    "signOut": "Sign Out", "achievements": { "title": "Achievements", "empty": "Keep studying to unlock your first achievement.", "badge": "In progress" }, "notifications": { "studyReminders": "Study reminders", "hint": "Get a reminder to keep your streak going." },
+    "signOut": "Sign Out",
+    "achievements": {
+      "title": "Achievements",
+      "empty": "Keep studying to unlock your first achievement.",
+      "open": "Open achievements",
+      "loading": "Loading achievements",
+      "count_one": "{{count}} achievement",
+      "count_other": "{{count}} achievements",
+      "earnedAt": "Earned on {{date}}",
+      "streakHistory": "Recent streak history",
+      "streakEntry_one": "{{date}} · {{count}} day",
+      "streakEntry_other": "{{date}} · {{count}} days"
+    },
+    "notifications": {
+      "studyReminders": "Study reminders",
+      "hint": "Get a reminder to keep your streak going.",
+      "enabled": "Reminders enabled",
+      "disabled": "Reminders disabled"
+    },
+    "account": {
+      "name": "Name",
+      "email": "Email",
+      "memberSince": "Member since",
+      "unavailable": "Not provided"
+    },
     "signingOut": "Signing out...",
     "pleaseWait": "Please wait"
   }

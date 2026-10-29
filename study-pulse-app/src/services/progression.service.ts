@@ -17,7 +17,19 @@ export async function listBadges(): Promise<Result<Badge[]>> {
 
 export async function listMyBadges(): Promise<Result<UserBadge[]>> {
   const db = client(); if (!db) return unavailable();
-  try { const { data, error } = await db.from('user_badges').select('*').order('awarded_at', { ascending: false }); return error ? guarded(error, 'Não foi possível carregar suas conquistas.') : ok((data ?? []) as UserBadge[]); }
+  try {
+    const [userBadges, badges] = await Promise.all([
+      db.from('user_badges').select('*').order('awarded_at', { ascending: false }),
+      db.from('badges').select('*').order('requirement'),
+    ]);
+    if (userBadges.error) return guarded(userBadges.error, 'Não foi possível carregar suas conquistas.');
+    if (badges.error) return guarded(badges.error, 'Não foi possível carregar suas conquistas.');
+    const badgeByCode = new Map((badges.data ?? []).map((badge) => [badge.code, badge]));
+    return ok((userBadges.data ?? []).map((item) => ({
+      ...item,
+      badge: badgeByCode.get(item.badge_code),
+    })) as UserBadge[]);
+  }
   catch (error) { return guarded(error, 'Não foi possível carregar suas conquistas.'); }
 }
 

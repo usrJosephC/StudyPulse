@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -89,12 +89,23 @@ export function ProfileScreen() {
     achievementCopy: { flex: 1, gap: 3 },
     achievementTitle: { fontFamily: fonts.bodyBold, fontSize: 14, color: temaAtual.ink },
     achievementText: { fontFamily: fonts.bodyRegular, fontSize: 12, color: temaAtual.inkMuted },
+    achievementButton: { borderRadius: radius.md },
     modalBackdrop: { flex: 1, backgroundColor: 'rgba(33,33,33,0.5)', justifyContent: 'flex-end' },
     settingsModal: { backgroundColor: temaAtual.card, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg, padding: spacing.lg, gap: spacing.lg },
     modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     modalTitle: { fontFamily: fonts.headlineBold, fontSize: 18, color: temaAtual.ink },
     preferenceRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
     preferenceHint: { fontFamily: fonts.bodyRegular, fontSize: 13, color: temaAtual.inkMuted, lineHeight: 19 },
+    modalScroll: { maxHeight: 430 },
+    modalScrollContent: { gap: spacing.md, paddingBottom: spacing.xs },
+    detailRow: { gap: 3, paddingVertical: spacing.sm, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: temaAtual.border },
+    detailLabel: { fontFamily: fonts.bodyMedium, fontSize: 12, color: temaAtual.inkMuted },
+    detailValue: { fontFamily: fonts.bodyBold, fontSize: 14, color: temaAtual.ink },
+    badgeCard: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, backgroundColor: temaAtual.background, borderRadius: radius.md, padding: spacing.md },
+    badgeCopy: { flex: 1, gap: 3 },
+    badgeDate: { fontFamily: fonts.bodyRegular, fontSize: 11, color: temaAtual.inkMuted },
+    historyRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.xs },
+    historyText: { flex: 1, fontFamily: fonts.bodyMedium, fontSize: 13, color: temaAtual.ink },
   });
 
   async function handleSignOut() {
@@ -166,14 +177,21 @@ export function ProfileScreen() {
           ))}
         </View>
 
-        <Card style={styles.achievementCard}>
-          <View style={styles.achievementIcon}><Ionicons name="trophy" size={22} color={temaAtual.primary} /></View>
-          <View style={styles.achievementCopy}>
-            <Text style={styles.achievementTitle}>{t('profile.achievements.title', { defaultValue: 'Conquistas' })}</Text>
-            <Text style={styles.achievementText}>{progression.badges[0]?.badge?.name || profile?.badge || t('profile.achievements.empty', { defaultValue: 'Continue estudando para desbloquear sua primeira conquista.' })}</Text>
-          </View>
-          <Pill label={t('profile.achievements.badge', { defaultValue: 'Em progresso' })} variant="secondary" />
-        </Card>
+        <Pressable
+          style={styles.achievementButton}
+          onPress={() => setSettingsView('achievements')}
+          accessibilityRole="button"
+          accessibilityLabel={t('profile.achievements.open')}
+        >
+          <Card style={styles.achievementCard}>
+            <View style={styles.achievementIcon}><Ionicons name="trophy" size={22} color={temaAtual.primary} /></View>
+            <View style={styles.achievementCopy}>
+              <Text style={styles.achievementTitle}>{t('profile.achievements.title')}</Text>
+              <Text style={styles.achievementText}>{progression.badges[0]?.badge?.name || profile?.badge || t('profile.achievements.empty')}</Text>
+            </View>
+            <Pill label={t('profile.achievements.count', { count: progression.badges.length })} variant="secondary" />
+          </Card>
+        </Pressable>
 
         <Text style={styles.sectionTitle}>{t('profile.settings.title')}</Text>
         <View style={{ gap: spacing.sm }}>
@@ -200,22 +218,73 @@ export function ProfileScreen() {
           >
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle} accessibilityRole="header">
-                {settingsView === 'notifications' ? t('profile.settings.notifications') : settingsView === 'squad' ? t('profile.settings.studySquad') : t('profile.settings.account')}
+                {settingsView === 'achievements'
+                  ? t('profile.achievements.title')
+                  : settingsView === 'notifications'
+                    ? t('profile.settings.notifications')
+                    : settingsView === 'squad'
+                      ? t('profile.settings.studySquad')
+                      : t('profile.settings.account')}
               </Text>
               <Pressable onPress={() => setSettingsView(null)} accessibilityRole="button" accessibilityLabel={t('common.close')} hitSlop={8}>
                 <Ionicons name="close" size={22} color={temaAtual.ink} />
               </Pressable>
             </View>
-            {settingsView === 'notifications' ? (
+            {settingsView === 'achievements' ? (
+              <ScrollView style={styles.modalScroll} contentContainerStyle={styles.modalScrollContent} showsVerticalScrollIndicator={false}>
+                {progression.loading && <ActivityIndicator color={temaAtual.primary} accessibilityLabel={t('profile.achievements.loading')} />}
+                {progression.error && (
+                  <Pressable onPress={() => void progression.refresh()} accessibilityRole="button">
+                    <Text style={styles.errorText}>{progression.error.message} · {t('profile.tapToRetry')}</Text>
+                  </Pressable>
+                )}
+                {!progression.loading && !progression.error && progression.badges.length === 0 && (
+                  <Text style={styles.preferenceHint}>{t('profile.achievements.empty')}</Text>
+                )}
+                {progression.badges.map((earned) => (
+                  <View key={earned.badge_code} style={styles.badgeCard}>
+                    <View style={styles.achievementIcon}><Ionicons name="ribbon" size={21} color={temaAtual.primary} /></View>
+                    <View style={styles.badgeCopy}>
+                      <Text style={styles.achievementTitle}>{earned.badge?.name || earned.badge_code}</Text>
+                      {earned.badge?.description ? <Text style={styles.achievementText}>{earned.badge.description}</Text> : null}
+                      <Text style={styles.badgeDate}>{t('profile.achievements.earnedAt', { date: new Date(earned.awarded_at).toLocaleDateString(dateLocale) })}</Text>
+                    </View>
+                  </View>
+                ))}
+                {progression.history.length > 0 && <Text style={styles.achievementTitle}>{t('profile.achievements.streakHistory')}</Text>}
+                {progression.history.slice(0, 7).map((record) => (
+                  <View key={record.streak_date} style={styles.historyRow}>
+                    <Ionicons name={record.was_broken ? 'remove-circle-outline' : record.is_record ? 'trophy-outline' : 'flame-outline'} size={18} color={record.was_broken ? temaAtual.danger : temaAtual.primary} />
+                    <Text style={styles.historyText}>{t('profile.achievements.streakEntry', { date: new Date(`${record.streak_date}T00:00:00`).toLocaleDateString(dateLocale), count: record.streak })}</Text>
+                  </View>
+                ))}
+              </ScrollView>
+            ) : settingsView === 'notifications' ? (
               <View style={styles.preferenceRow}>
                 <View style={styles.achievementCopy}>
-                  <Text style={styles.settingLabel}>{t('profile.notifications.studyReminders', { defaultValue: 'Lembretes de estudo' })}</Text>
-                  <Text style={styles.preferenceHint}>{t('profile.notifications.hint', { defaultValue: 'Receba um lembrete para manter sua sequência.' })}</Text>
+                  <Text style={styles.settingLabel}>{t('profile.notifications.studyReminders')}</Text>
+                  <Text style={styles.preferenceHint}>{t('profile.notifications.hint')}</Text>
+                  <Text style={styles.badgeDate}>{notificationsEnabled ? t('profile.notifications.enabled') : t('profile.notifications.disabled')}</Text>
                 </View>
                 <Switch value={notificationsEnabled} onValueChange={(value) => { setNotificationsEnabled(value); void AsyncStorage.setItem('studypulse.notifications.enabled', String(value)); }} accessibilityLabel={t('profile.notifications.studyReminders', { defaultValue: 'Lembretes de estudo' })} trackColor={{ false: temaAtual.border, true: temaAtual.primarySoft }} thumbColor={notificationsEnabled ? temaAtual.primary : temaAtual.surface} />
               </View>
+            ) : settingsView === 'account' ? (
+              <View>
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>{t('profile.account.name')}</Text>
+                  <Text style={styles.detailValue} selectable>{displayName}</Text>
+                </View>
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>{t('profile.account.email')}</Text>
+                  <Text style={styles.detailValue} selectable>{email || t('profile.account.unavailable')}</Text>
+                </View>
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>{t('profile.account.memberSince')}</Text>
+                  <Text style={styles.detailValue}>{since}</Text>
+                </View>
+              </View>
             ) : (
-              <Text style={styles.preferenceHint}>{t('profile.settings.comingSoon', { defaultValue: 'Esta seção estará disponível em breve.' })}</Text>
+              <Text style={styles.preferenceHint}>{t('profile.settings.comingSoon')}</Text>
             )}
           </Pressable>
         </Pressable>
