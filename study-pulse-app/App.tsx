@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
@@ -5,6 +6,7 @@ import { StatusBar } from 'expo-status-bar';
 import {
   NavigationContainer,
   DefaultTheme,
+  DarkTheme,
 } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -22,21 +24,12 @@ import {
 
 import { i18nReady } from './src/i18n';
 import { RootStack } from './src/navigation/RootStack';
-import { AuthProvider } from './src/context/AuthContext';
-import { colors } from './src/theme';
+import {
+  ThemeProvider,
+  useTheme,
+} from './src/contexts/ThemeContext';
+import { AuthProvider } from './src/contexts/AuthContext';
 import { logSafeError } from './src/lib/logger';
-
-const navigationTheme = {
-  ...DefaultTheme,
-  colors: {
-    ...DefaultTheme.colors,
-    background: colors.background,
-    primary: colors.primary,
-    card: colors.card,
-    text: colors.ink,
-    border: colors.border,
-  },
-};
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -78,26 +71,64 @@ export default function App() {
           flex: 1,
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: colors.background,
+          backgroundColor: '#FAFAFA',
         }}
       >
-        <ActivityIndicator
-          color={colors.primary}
-          size="large"
-        />
+        <ActivityIndicator color="#F5CC00" size="large" />
       </View>
     );
   }
 
   return (
     <SafeAreaProvider>
-      <AuthProvider>
-        <NavigationContainer theme={navigationTheme}>
-          <RootStack />
-        </NavigationContainer>
-      </AuthProvider>
-
-      <StatusBar style="dark" />
+      <ThemeProvider>
+        <AuthProvider>
+          <ThemedApp />
+        </AuthProvider>
+      </ThemeProvider>
     </SafeAreaProvider>
+  );
+}
+
+function ThemedApp() {
+  const { tema, temaAtual, carregandoTema } = useTheme();
+
+  if (carregandoTema) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: temaAtual.background,
+        }}
+      >
+        <ActivityIndicator color={temaAtual.primary} size="large" />
+      </View>
+    );
+  }
+
+  const baseTheme = tema === 'dark' ? DarkTheme : DefaultTheme;
+
+  const navigationTheme = {
+    ...baseTheme,
+    colors: {
+      ...baseTheme.colors,
+      background: temaAtual.background,
+      primary: temaAtual.primary,
+      card: temaAtual.card,
+      text: temaAtual.ink,
+      border: temaAtual.border,
+    },
+  };
+
+  return (
+    <>
+      <NavigationContainer theme={navigationTheme}>
+        <RootStack />
+      </NavigationContainer>
+
+      <StatusBar style={tema === 'dark' ? 'light' : 'dark'} />
+    </>
   );
 }

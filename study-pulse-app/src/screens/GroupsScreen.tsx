@@ -9,8 +9,9 @@ import { ScreenHeader } from '../components/ScreenHeader';
 import { Card } from '../components/Card';
 import { Pill } from '../components/Pill';
 import { Avatar } from '../components/Avatar';
-import { colors, fonts, radius, spacing } from '../theme';
-import { useAuth } from '../context/AuthContext';
+import { fonts, radius, spacing } from '../theme';
+import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
 import { useRanking } from '../hooks/useRanking';
 import { useSquad } from '../hooks/useSquad';
 import { useSquadActivity } from '../hooks/useSquadActivity';
@@ -19,6 +20,7 @@ import type { RankingEntry, SquadActivity } from '../types/domain';
 
 export function GroupsScreen() {
   const { t } = useTranslation();
+  const { temaAtual } = useTheme();
   const { session, profile } = useAuth();
   const { squad, loading: squadLoading, error: squadError, refresh: refreshSquad, joinSquad } = useSquad();
   const { ranking, loading: rankingLoading, error: rankingError, refresh: refreshRanking } = useRanking(squad?.id ?? null);
@@ -37,6 +39,289 @@ export function GroupsScreen() {
     || t('groups.defaultStudent');
   const loading = squadLoading || (Boolean(squad) && (rankingLoading || activityLoading));
   const error = squadError || rankingError || activityError;
+
+  const styles = StyleSheet.create({
+    safe: {
+      flex: 1,
+      backgroundColor: temaAtual.background,
+    },
+    content: {
+      padding: spacing.lg,
+      gap: spacing.lg,
+      paddingBottom: spacing.xxl,
+    },
+    centered: {
+      alignItems: 'center',
+      gap: spacing.xs,
+    },
+    squadName: {
+      fontFamily: fonts.headlineExtraBold,
+      fontSize: 24,
+      color: temaAtual.ink,
+    },
+    squadSubtitle: {
+      fontFamily: fonts.bodyRegular,
+      fontSize: 13,
+      color: temaAtual.inkMuted,
+    },
+    rankingHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    rankingHeaderLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs,
+    },
+    rankingTitle: {
+      fontFamily: fonts.headlineBold,
+      fontSize: 15,
+      color: temaAtual.ink,
+    },
+    podiumRow: {
+      flexDirection: 'row',
+      alignItems: 'flex-end',
+      justifyContent: 'space-around',
+      marginTop: spacing.xl,
+    },
+    podiumMember: {
+      alignItems: 'center',
+      gap: 4,
+      flex: 1,
+    },
+    podiumStar: {
+      marginBottom: spacing.xs,
+    },
+    streakBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 2,
+      backgroundColor: temaAtual.card,
+      borderRadius: radius.pill,
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      marginTop: -10,
+    },
+    streakBadgeText: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 10,
+      color: temaAtual.ink,
+    },
+    podiumName: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 13,
+      color: temaAtual.ink,
+    },
+    podiumBar: {
+      width: '90%',
+      borderRadius: radius.md,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: spacing.xs,
+    },
+    podiumBar1: {
+      height: 110,
+      backgroundColor: temaAtual.primarySoft,
+    },
+    podiumBar2: {
+      height: 84,
+      backgroundColor: temaAtual.surface,
+    },
+    podiumBar3: {
+      height: 70,
+      backgroundColor: temaAtual.surface,
+    },
+    podiumRank: {
+      fontFamily: fonts.headlineExtraBold,
+      fontSize: 18,
+      color: temaAtual.ink,
+    },
+    podiumPoints: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 11,
+      color: temaAtual.inkMuted,
+    },
+    restRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.md,
+      backgroundColor: temaAtual.background,
+      borderRadius: radius.pill,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+    },
+    restList: {
+      gap: spacing.sm,
+      marginTop: spacing.lg,
+    },
+    restRowActive: {
+      borderWidth: 1.5,
+      borderColor: temaAtual.primary,
+      backgroundColor: temaAtual.primaryMuted,
+    },
+    restRank: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 14,
+      color: temaAtual.inkMuted,
+      width: 16,
+    },
+    restName: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 14,
+      color: temaAtual.ink,
+    },
+    restStreak: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 3,
+    },
+    restStreakText: {
+      fontFamily: fonts.bodyRegular,
+      fontSize: 11,
+      color: temaAtual.inkMuted,
+    },
+    restPoints: {
+      fontFamily: fonts.headlineBold,
+      fontSize: 14,
+      color: temaAtual.ink,
+    },
+    viewAllButton: {
+      backgroundColor: temaAtual.surface,
+      borderRadius: radius.pill,
+      paddingVertical: 14,
+      alignItems: 'center',
+    },
+    viewAllWrap: {
+      marginTop: spacing.lg,
+    },
+    viewAllLabel: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 14,
+      color: temaAtual.ink,
+    },
+    sectionTitle: {
+      fontFamily: fonts.headlineBold,
+      fontSize: 18,
+      color: temaAtual.ink,
+    },
+    activityCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.md,
+    },
+    activityList: {
+      gap: spacing.sm,
+    },
+    flexFill: {
+      flex: 1,
+    },
+    activityIcon: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: temaAtual.secondarySoft,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    activityMessage: {
+      fontFamily: fonts.bodyMedium,
+      fontSize: 13,
+      color: temaAtual.ink,
+      lineHeight: 18,
+    },
+    activityTime: {
+      fontFamily: fonts.bodyRegular,
+      fontSize: 11,
+      color: temaAtual.inkMuted,
+      marginTop: 2,
+    },
+    backdrop: {
+      flex: 1,
+      backgroundColor: 'rgba(33,33,33,0.5)',
+      justifyContent: 'flex-end',
+    },
+    leaderboardModal: {
+      backgroundColor: temaAtual.card,
+      borderTopLeftRadius: radius.lg,
+      borderTopRightRadius: radius.lg,
+      padding: spacing.lg,
+      maxHeight: '75%',
+    },
+    modalHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: spacing.md,
+    },
+    modalTitle: {
+      fontFamily: fonts.headlineBold,
+      fontSize: 18,
+      color: temaAtual.ink,
+    },
+    modalClose: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      backgroundColor: temaAtual.surface,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    modalList: {
+      gap: spacing.sm,
+    },
+    stateAction: {
+      minHeight: 44,
+      justifyContent: 'center',
+    },
+    errorText: {
+      fontFamily: fonts.bodyRegular,
+      fontSize: 12,
+      color: temaAtual.danger,
+      textAlign: 'center',
+    },
+    stateText: {
+      fontFamily: fonts.bodyRegular,
+      fontSize: 13,
+      color: temaAtual.inkMuted,
+      textAlign: 'center',
+    },
+    emptyCard: {
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    inviteInput: {
+      width: '100%',
+      minHeight: 48,
+      borderWidth: 1,
+      borderColor: temaAtual.border,
+      borderRadius: radius.md,
+      paddingHorizontal: spacing.md,
+      fontFamily: fonts.bodyBold,
+      color: temaAtual.ink,
+      textAlign: 'center',
+      letterSpacing: 1,
+    },
+    joinButton: {
+      width: '100%',
+      minHeight: 48,
+      borderRadius: radius.pill,
+      backgroundColor: temaAtual.secondary,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    joinButtonText: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 14,
+      color: '#fff',
+    },
+    disabledButton: {
+      opacity: 0.55,
+    },
+    createLink: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, paddingVertical: spacing.sm },
+    createLinkText: { fontFamily: fonts.bodyBold, fontSize: 14, color: temaAtual.secondary },
+    createModal: { backgroundColor: temaAtual.card, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg, padding: spacing.lg, gap: spacing.md },
+  });
 
   function refreshAll() {
     void Promise.all([refreshSquad(), refreshRanking(), refreshActivity()]);
@@ -66,7 +351,7 @@ export function GroupsScreen() {
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScreenHeader userInitial={displayName.charAt(0).toUpperCase() || '?'} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        {loading && <ActivityIndicator color={colors.primary} accessibilityLabel={t('groups.loadingSquad')} />}
+        {loading && <ActivityIndicator color={temaAtual.primary} accessibilityLabel={t('groups.loadingSquad')} />}
         {error && (
           <Pressable onPress={refreshAll} accessibilityRole="button" accessibilityLabel={t('groups.retryLoading')} style={styles.stateAction}>
             <Text style={styles.errorText}>{error.message} · {t('groups.tapToRetry')}</Text>
@@ -74,14 +359,14 @@ export function GroupsScreen() {
         )}
         {!squadLoading && !squad && !squadError && (
           <Card style={styles.emptyCard}>
-            <Ionicons name="people-outline" size={32} color={colors.secondary} />
+            <Ionicons name="people-outline" size={32} color={temaAtual.secondary} />
             <Text style={styles.sectionTitle}>{t('groups.notInGroup')}</Text>
             <Text style={styles.stateText}>{t('groups.inviteInstructions')}</Text>
             <TextInput
               value={inviteCode}
               onChangeText={(value) => { setInviteCode(value.toUpperCase()); setJoinError(null); }}
               placeholder={t('groups.inviteCodePlaceholder')}
-              placeholderTextColor={colors.inkMuted}
+              placeholderTextColor={temaAtual.inkMuted}
               autoCapitalize="characters"
               autoCorrect={false}
               editable={!joining}
@@ -100,7 +385,7 @@ export function GroupsScreen() {
               {joining ? <ActivityIndicator color="#fff" /> : <Text style={styles.joinButtonText}>{t('groups.joinButton')}</Text>}
             </Pressable>
             <Pressable style={styles.createLink} onPress={() => setCreateVisible(true)} accessibilityRole="button" accessibilityLabel={t('groups.createGroup', { defaultValue: 'Criar grupo' })}>
-              <Ionicons name="add-circle-outline" size={18} color={colors.secondary} />
+              <Ionicons name="add-circle-outline" size={18} color={temaAtual.secondary} />
               <Text style={styles.createLinkText}>{t('groups.createGroup', { defaultValue: 'Criar grupo' })}</Text>
             </Pressable>
           </Card>
@@ -114,7 +399,7 @@ export function GroupsScreen() {
           <Card>
             <View style={styles.rankingHeader}>
               <View style={styles.rankingHeaderLeft}>
-                <Ionicons name="bar-chart" size={18} color={colors.primary} />
+                <Ionicons name="bar-chart" size={18} color={temaAtual.primary} />
                 <Text style={styles.rankingTitle}>{t('groups.weeklyRanking')}</Text>
               </View>
               <Pill label={formatSeasonEnd(squad.season_ends_at, t)} variant="muted" />
@@ -124,10 +409,10 @@ export function GroupsScreen() {
                 const rank = member.rank;
                 return (
                   <View key={member.user_id} style={styles.podiumMember}>
-                    {rank === 1 && <Ionicons name="star" size={16} color={colors.primary} style={styles.podiumStar} />}
-                    <Avatar label={getInitial(member.name)} size={rank === 1 ? 64 : 52} ringColor={rank === 1 ? colors.primary : undefined} />
+                    {rank === 1 && <Ionicons name="star" size={16} color={temaAtual.primary} style={styles.podiumStar} />}
+                    <Avatar label={getInitial(member.name)} size={rank === 1 ? 64 : 52} ringColor={rank === 1 ? temaAtual.primary : undefined} />
                     <View style={styles.streakBadge}>
-                      <Ionicons name="flame" size={10} color={colors.primary} />
+                      <Ionicons name="flame" size={10} color={temaAtual.primary} />
                       <Text style={styles.streakBadgeText}>{member.streak}</Text>
                     </View>
                     <Text style={styles.podiumName}>{member.name}</Text>
@@ -166,7 +451,7 @@ export function GroupsScreen() {
                   <View style={styles.flexFill}>
                     <Text style={styles.restName}>{member.name}</Text>
                     <View style={styles.restStreak}>
-                      <Ionicons name="flame" size={11} color={colors.primary} />
+                      <Ionicons name="flame" size={11} color={temaAtual.primary} />
                       <Text style={styles.restStreakText}>{t('groups.streakDays', { count: member.streak })}</Text>
                     </View>
                   </View>
@@ -190,7 +475,7 @@ export function GroupsScreen() {
             {activities.map((item) => (
               <Card key={item.id} style={styles.activityCard}>
                 <View style={styles.activityIcon}>
-                  <Ionicons name={getActivityIcon(item.action)} size={18} color={colors.secondary} />
+                  <Ionicons name={getActivityIcon(item.action)} size={18} color={temaAtual.secondary} />
                 </View>
                 <View style={styles.flexFill}>
                   <Text style={styles.activityMessage}>{formatActivity(item, ranking, t)}</Text>
@@ -219,7 +504,7 @@ export function GroupsScreen() {
                 hitSlop={8}
                 style={styles.modalClose}
               >
-                <Ionicons name="close" size={20} color={colors.ink} />
+                <Ionicons name="close" size={20} color={temaAtual.ink} />
               </Pressable>
             </View>
             <ScrollView showsVerticalScrollIndicator={false}>
@@ -231,7 +516,7 @@ export function GroupsScreen() {
                     <View style={styles.flexFill}>
                       <Text style={styles.restName}>{member.user_id === session?.user.id ? t('groups.you') : member.name}</Text>
                       <View style={styles.restStreak}>
-                        <Ionicons name="flame" size={11} color={colors.primary} />
+                        <Ionicons name="flame" size={11} color={temaAtual.primary} />
                         <Text style={styles.restStreakText}>{t('groups.streakDays', { count: member.streak })}</Text>
                       </View>
                     </View>
@@ -249,11 +534,11 @@ export function GroupsScreen() {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>{t('groups.createGroup', { defaultValue: 'Criar grupo' })}</Text>
               <Pressable onPress={() => setCreateVisible(false)} accessibilityRole="button" accessibilityLabel={t('common.close')}>
-                <Ionicons name="close" size={22} color={colors.ink} />
+                <Ionicons name="close" size={22} color={temaAtual.ink} />
               </Pressable>
             </View>
             <Text style={styles.stateText}>{t('groups.createGroupHint', { defaultValue: 'Defina um nome para organizar seus estudos com outras pessoas.' })}</Text>
-            <TextInput value={groupName} onChangeText={setGroupName} placeholder={t('groups.groupNamePlaceholder', { defaultValue: 'Nome do grupo' })} placeholderTextColor={colors.inkMuted} style={styles.inviteInput} accessibilityLabel={t('groups.groupNamePlaceholder', { defaultValue: 'Nome do grupo' })} />
+            <TextInput value={groupName} onChangeText={setGroupName} placeholder={t('groups.groupNamePlaceholder', { defaultValue: 'Nome do grupo' })} placeholderTextColor={temaAtual.inkMuted} style={styles.inviteInput} accessibilityLabel={t('groups.groupNamePlaceholder', { defaultValue: 'Nome do grupo' })} />
             {createError && <Text style={styles.errorText}>{createError.message}</Text>}
             <Pressable style={[styles.joinButton, (!groupName.trim() || creating) && styles.disabledButton]} onPress={() => void handleCreate()} disabled={!groupName.trim() || creating} accessibilityRole="button" accessibilityState={{ disabled: !groupName.trim() || creating, busy: creating }}>
               {creating ? <ActivityIndicator color="#fff" /> : <Text style={styles.joinButtonText}>{t('groups.createGroup', { defaultValue: 'Criar grupo' })}</Text>}
@@ -265,288 +550,7 @@ export function GroupsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  content: {
-    padding: spacing.lg,
-    gap: spacing.lg,
-    paddingBottom: spacing.xxl,
-  },
-  centered: {
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  squadName: {
-    fontFamily: fonts.headlineExtraBold,
-    fontSize: 24,
-    color: colors.ink,
-  },
-  squadSubtitle: {
-    fontFamily: fonts.bodyRegular,
-    fontSize: 13,
-    color: colors.inkMuted,
-  },
-  rankingHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  rankingHeaderLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  rankingTitle: {
-    fontFamily: fonts.headlineBold,
-    fontSize: 15,
-    color: colors.ink,
-  },
-  podiumRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'space-around',
-    marginTop: spacing.xl,
-  },
-  podiumMember: {
-    alignItems: 'center',
-    gap: 4,
-    flex: 1,
-  },
-  podiumStar: {
-    marginBottom: spacing.xs,
-  },
-  streakBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 2,
-    backgroundColor: colors.card,
-    borderRadius: radius.pill,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    marginTop: -10,
-  },
-  streakBadgeText: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 10,
-    color: colors.ink,
-  },
-  podiumName: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 13,
-    color: colors.ink,
-  },
-  podiumBar: {
-    width: '90%',
-    borderRadius: radius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: spacing.xs,
-  },
-  podiumBar1: {
-    height: 110,
-    backgroundColor: colors.primarySoft,
-  },
-  podiumBar2: {
-    height: 84,
-    backgroundColor: colors.surface,
-  },
-  podiumBar3: {
-    height: 70,
-    backgroundColor: colors.surface,
-  },
-  podiumRank: {
-    fontFamily: fonts.headlineExtraBold,
-    fontSize: 18,
-    color: colors.ink,
-  },
-  podiumPoints: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 11,
-    color: colors.inkMuted,
-  },
-  restRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    backgroundColor: colors.background,
-    borderRadius: radius.pill,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-  },
-  restList: {
-    gap: spacing.sm,
-    marginTop: spacing.lg,
-  },
-  restRowActive: {
-    borderWidth: 1.5,
-    borderColor: colors.primary,
-    backgroundColor: colors.primaryMuted,
-  },
-  restRank: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 14,
-    color: colors.inkMuted,
-    width: 16,
-  },
-  restName: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 14,
-    color: colors.ink,
-  },
-  restStreak: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-  },
-  restStreakText: {
-    fontFamily: fonts.bodyRegular,
-    fontSize: 11,
-    color: colors.inkMuted,
-  },
-  restPoints: {
-    fontFamily: fonts.headlineBold,
-    fontSize: 14,
-    color: colors.ink,
-  },
-  viewAllButton: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.pill,
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  viewAllWrap: {
-    marginTop: spacing.lg,
-  },
-  viewAllLabel: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 14,
-    color: colors.ink,
-  },
-  sectionTitle: {
-    fontFamily: fonts.headlineBold,
-    fontSize: 18,
-    color: colors.ink,
-  },
-  activityCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-  },
-  activityList: {
-    gap: spacing.sm,
-  },
-  flexFill: {
-    flex: 1,
-  },
-  activityIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.secondarySoft,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  activityMessage: {
-    fontFamily: fonts.bodyMedium,
-    fontSize: 13,
-    color: colors.ink,
-    lineHeight: 18,
-  },
-  activityTime: {
-    fontFamily: fonts.bodyRegular,
-    fontSize: 11,
-    color: colors.inkMuted,
-    marginTop: 2,
-  },
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(33,33,33,0.5)',
-    justifyContent: 'flex-end',
-  },
-  leaderboardModal: {
-    backgroundColor: colors.card,
-    borderTopLeftRadius: radius.lg,
-    borderTopRightRadius: radius.lg,
-    padding: spacing.lg,
-    maxHeight: '75%',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing.md,
-  },
-  modalTitle: {
-    fontFamily: fonts.headlineBold,
-    fontSize: 18,
-    color: colors.ink,
-  },
-  modalClose: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  modalList: {
-    gap: spacing.sm,
-  },
-  stateAction: {
-    minHeight: 44,
-    justifyContent: 'center',
-  },
-  errorText: {
-    fontFamily: fonts.bodyRegular,
-    fontSize: 12,
-    color: colors.danger,
-    textAlign: 'center',
-  },
-  stateText: {
-    fontFamily: fonts.bodyRegular,
-    fontSize: 13,
-    color: colors.inkMuted,
-    textAlign: 'center',
-  },
-  emptyCard: {
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  inviteInput: {
-    width: '100%',
-    minHeight: 48,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.md,
-    fontFamily: fonts.bodyBold,
-    color: colors.ink,
-    textAlign: 'center',
-    letterSpacing: 1,
-  },
-  joinButton: {
-    width: '100%',
-    minHeight: 48,
-    borderRadius: radius.pill,
-    backgroundColor: colors.secondary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  joinButtonText: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 14,
-    color: '#fff',
-  },
-  disabledButton: {
-    opacity: 0.55,
-  },
-  createLink: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, paddingVertical: spacing.sm },
-  createLinkText: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.secondary },
-  createModal: { backgroundColor: colors.card, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg, padding: spacing.lg, gap: spacing.md },
-});
+
 
 function getInitial(name: string) {
   return name.trim().charAt(0).toUpperCase() || '?';

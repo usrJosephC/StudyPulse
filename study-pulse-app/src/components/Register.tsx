@@ -24,19 +24,15 @@ import { ConfirmPasswordInput } from './ConfirmPasswordInput';
 import { BirthDateInput } from './BirthDateInput';
 import { GenderInput } from './GenderInput';
 
-import {
-  colors,
-  fonts,
-  radius,
-  spacing,
-} from '../theme';
+import { fonts, radius, spacing } from '../theme';
 
 import {
   signUpSchema,
   type RegisterFormData,
 } from '../validation/schemas';
 
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { logSafeError } from '../lib/logger';
 
 type Props = {
@@ -46,6 +42,7 @@ type Props = {
 export function Register({ onRegisterSuccess }: Props) {
   const { t } = useTranslation();
   const { signUp } = useAuth();
+  const { temaAtual } = useTheme();
 
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [termsError, setTermsError] = useState(false);
@@ -53,6 +50,80 @@ export function Register({ onRegisterSuccess }: Props) {
   const [isLoading, setIsLoading] = useState(false);
 
   const submitInProgress = useRef(false);
+
+  const styles = StyleSheet.create({
+    container: {
+      width: '100%',
+      gap: spacing.md,
+    },
+
+    sectionTitle: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 14,
+      color: temaAtual.ink,
+    },
+
+    termsContainer: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: spacing.xs,
+    },
+
+    termsText: {
+      flex: 1,
+      fontFamily: fonts.bodyRegular,
+      fontSize: 12,
+      color: temaAtual.inkMuted,
+      lineHeight: 17,
+    },
+
+    termsLink: {
+      fontFamily: fonts.bodyBold,
+      color: temaAtual.secondary,
+      textDecorationLine: 'underline',
+    },
+
+    termsError: {
+      fontFamily: fonts.bodyMedium,
+      fontSize: 12,
+      color: temaAtual.danger,
+      marginTop: spacing.xs,
+      marginLeft: spacing.xl,
+    },
+
+    modalOverlay: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: 'rgba(0, 0, 0, 0.45)',
+      padding: spacing.xl,
+    },
+
+    modalContent: {
+      width: '100%',
+      maxWidth: 500,
+      maxHeight: '80%',
+      backgroundColor: temaAtual.card,
+      borderRadius: radius.lg,
+      padding: spacing.xl,
+      gap: spacing.lg,
+    },
+
+    modalTitle: {
+      fontFamily: fonts.headlineBold,
+      fontSize: 20,
+      color: temaAtual.ink,
+      marginBottom: spacing.sm,
+    },
+
+    modalText: {
+      fontFamily: fonts.bodyRegular,
+      fontSize: 14,
+      lineHeight: 21,
+      color: temaAtual.inkMuted,
+      marginBottom: spacing.md,
+    },
+  });
 
   const {
     control,
@@ -127,6 +198,7 @@ export function Register({ onRegisterSuccess }: Props) {
       }
 
       // The AuthProvider handles navigation when the session is emitted.
+      onRegisterSuccess?.();
     } catch {
       logSafeError('auth.registration_failed');
 
@@ -194,7 +266,11 @@ export function Register({ onRegisterSuccess }: Props) {
           <Ionicons
             name={acceptedTerms ? 'checkbox' : 'square-outline'}
             size={18}
-            color={termsError ? colors.danger : colors.secondary}
+            color={
+              termsError
+                ? temaAtual.danger
+                : temaAtual.secondary
+            }
           />
 
           <Text style={styles.termsText}>
@@ -265,77 +341,3 @@ export function Register({ onRegisterSuccess }: Props) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    width: '100%',
-    gap: spacing.md,
-  },
-
-  sectionTitle: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 14,
-    color: colors.ink,
-  },
-
-  termsContainer: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: spacing.xs,
-  },
-
-  termsText: {
-    flex: 1,
-    fontFamily: fonts.bodyRegular,
-    fontSize: 12,
-    color: colors.inkMuted,
-    lineHeight: 17,
-  },
-
-  termsLink: {
-    fontFamily: fonts.bodyBold,
-    color: colors.secondary,
-    textDecorationLine: 'underline',
-  },
-
-  termsError: {
-    fontFamily: fonts.bodyMedium,
-    fontSize: 12,
-    color: colors.danger,
-    marginTop: spacing.xs,
-    marginLeft: spacing.xl,
-  },
-
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.45)',
-    padding: spacing.xl,
-  },
-
-  modalContent: {
-    width: '100%',
-    maxWidth: 500,
-    maxHeight: '80%',
-    backgroundColor: colors.card,
-    borderRadius: radius.lg,
-    padding: spacing.xl,
-    gap: spacing.lg,
-  },
-
-  modalTitle: {
-    fontFamily: fonts.headlineBold,
-    fontSize: 20,
-    color: colors.ink,
-    marginBottom: spacing.sm,
-  },
-
-  modalText: {
-    fontFamily: fonts.bodyRegular,
-    fontSize: 14,
-    lineHeight: 21,
-    color: colors.inkMuted,
-    marginBottom: spacing.md,
-  },
-});

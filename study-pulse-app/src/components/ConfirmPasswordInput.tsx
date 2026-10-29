@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import {
   Controller,
-  Control,
-  FieldErrors,
+  type Control,
+  type FieldErrors,
 } from 'react-hook-form';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -14,7 +14,8 @@ import {
   View,
 } from 'react-native';
 
-import { colors, fonts, radius, spacing } from '../theme';
+import { fonts, radius, spacing } from '../theme';
+import { useTheme } from '../contexts/ThemeContext';
 import type { RegisterFormData } from '../validation/schemas';
 
 type Props = {
@@ -28,6 +29,37 @@ export function ConfirmPasswordInput({
 }: Props) {
   const [showPassword, setShowPassword] = useState(false);
   const { t } = useTranslation();
+  const { temaAtual } = useTheme();
+
+  const styles = StyleSheet.create({
+    wrapper: {
+      marginBottom: spacing.md,
+    },
+    inputContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: temaAtual.surface,
+      borderRadius: radius.pill,
+      paddingHorizontal: spacing.lg,
+      height: 48,
+    },
+    icon: {
+      marginRight: spacing.sm,
+    },
+    input: {
+      flex: 1,
+      fontFamily: fonts.bodyRegular,
+      fontSize: 14,
+      color: temaAtual.ink,
+    },
+    error: {
+      marginTop: spacing.xs,
+      marginLeft: spacing.sm,
+      fontFamily: fonts.bodyRegular,
+      fontSize: 12,
+      color: temaAtual.danger,
+    },
+  });
 
   return (
     <Controller
@@ -39,14 +71,14 @@ export function ConfirmPasswordInput({
             <Ionicons
               name="lock-closed-outline"
               size={20}
-              color={colors.inkMuted}
+              color={temaAtual.inkMuted}
               style={styles.icon}
             />
 
             <TextInput
               style={styles.input}
               placeholder={t('register.confirmPassword')}
-              placeholderTextColor={colors.inkFaint}
+              placeholderTextColor={temaAtual.inkFaint}
               value={value}
               onChangeText={onChange}
               onBlur={onBlur}
@@ -68,7 +100,7 @@ export function ConfirmPasswordInput({
               <Ionicons
                 name={showPassword ? 'eye-outline' : 'eye-off-outline'}
                 size={20}
-                color={colors.inkMuted}
+                color={temaAtual.inkMuted}
               />
             </Pressable>
           </View>
@@ -83,37 +115,3 @@ export function ConfirmPasswordInput({
     />
   );
 }
-
-const styles = StyleSheet.create({
-  wrapper: {
-    marginBottom: spacing.md,
-  },
-
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderRadius: radius.pill,
-    paddingHorizontal: spacing.lg,
-    height: 48,
-  },
-
-  icon: {
-    marginRight: spacing.sm,
-  },
-
-  input: {
-    flex: 1,
-    fontFamily: fonts.bodyRegular,
-    fontSize: 14,
-    color: colors.ink,
-  },
-
-  error: {
-    marginTop: spacing.xs,
-    marginLeft: spacing.sm,
-    fontFamily: fonts.bodyRegular,
-    fontSize: 12,
-    color: colors.danger,
-  },
-});

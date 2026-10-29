@@ -10,14 +10,16 @@ import { Card } from '../components/Card';
 import { ProgressRing } from '../components/ProgressRing';
 import { Button } from '../components/Button';
 import { Pill } from '../components/Pill';
-import { colors, fonts, radius, spacing } from '../theme';
-import { useAuth } from '../context/AuthContext';
+import { fonts, radius, spacing } from '../theme';
+import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
 import { usePoints } from '../hooks/usePoints';
 import { useStreak } from '../hooks/useStreak';
 import { useTasks } from '../hooks/useTasks';
 
 export function HomeScreen() {
   const { t } = useTranslation();
+  const { temaAtual } = useTheme();
   const { session, profile } = useAuth();
   const streak = useStreak();
   const points = usePoints();
@@ -68,19 +70,163 @@ export function HomeScreen() {
     void Promise.all([refreshTasks(), points.refresh(), streak.refresh()]);
   }, [points.refresh, refreshTasks, streak.refresh]));
 
+  const styles = StyleSheet.create({
+    safe: {
+      flex: 1,
+      backgroundColor: temaAtual.background,
+    },
+    content: {
+      padding: spacing.lg,
+      gap: spacing.lg,
+      paddingBottom: spacing.xxl,
+    },
+    streakBanner: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.md,
+      borderRadius: radius.pill,
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.lg,
+    },
+    streakIcon: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      backgroundColor: 'rgba(255,255,255,0.55)',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    streakLabel: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 12,
+      color: temaAtual.ink,
+      letterSpacing: 1,
+    },
+    streakValue: {
+      fontFamily: fonts.headlineExtraBold,
+      fontSize: 20,
+      color: temaAtual.ink,
+    },
+    tasksCard: {
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    ringValue: {
+      fontFamily: fonts.headlineExtraBold,
+      fontSize: 26,
+      color: temaAtual.ink,
+    },
+    ringLabel: {
+      fontFamily: fonts.bodyMedium,
+      fontSize: 13,
+      color: temaAtual.inkMuted,
+    },
+    encourageTitle: {
+      fontFamily: fonts.headlineBold,
+      fontSize: 18,
+      color: temaAtual.ink,
+      marginTop: spacing.sm,
+    },
+    encourageBody: {
+      fontFamily: fonts.bodyRegular,
+      fontSize: 14,
+      color: temaAtual.inkMuted,
+      textAlign: 'center',
+    },
+    ctaWrap: {
+      width: '100%',
+      marginTop: spacing.sm,
+    },
+    sectionHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    sectionTitle: {
+      fontFamily: fonts.headlineBold,
+      fontSize: 18,
+      color: temaAtual.ink,
+    },
+    seeAll: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 13,
+      color: temaAtual.secondary,
+    },
+    taskRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.md,
+      backgroundColor: temaAtual.card,
+      borderRadius: radius.pill,
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.md,
+    },
+    taskRowActive: {
+      borderWidth: 1.5,
+      borderColor: temaAtual.primary,
+    },
+    taskRowPressed: {
+      opacity: 0.8,
+    },
+    taskList: {
+      gap: spacing.sm,
+    },
+    flexFill: {
+      flex: 1,
+    },
+    squadSectionTitle: {
+      marginTop: spacing.xl,
+    },
+    taskTitle: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 15,
+      color: temaAtual.ink,
+      marginBottom: 4,
+    },
+    taskTitleDone: {
+      color: temaAtual.inkFaint,
+      textDecorationLine: 'line-through',
+    },
+    loadingText: {
+      fontFamily: fonts.bodyRegular,
+      fontSize: 12,
+      color: temaAtual.inkMuted,
+    },
+    errorText: {
+      fontFamily: fonts.bodyRegular,
+      fontSize: 12,
+      color: temaAtual.danger,
+    },
+    squadHeaderRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    squadHeaderLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs,
+    },
+    squadTitle: {
+      fontFamily: fonts.headlineBold,
+      fontSize: 15,
+      color: temaAtual.ink,
+    },
+  });
+
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScreenHeader userInitial={userInitial} />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <LinearGradient
-          colors={[colors.primary, colors.primarySoft]}
+          colors={[temaAtual.primary, temaAtual.primarySoft]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={styles.streakBanner}
         >
           <View style={styles.streakIcon}>
-            <Ionicons name="flame" size={22} color={colors.primary} />
+            <Ionicons name="flame" size={22} color={temaAtual.primary} />
           </View>
 
           <View>
@@ -165,7 +311,7 @@ export function HomeScreen() {
               <Ionicons
                 name={task.done ? 'checkmark-circle' : 'ellipse-outline'}
                 size={24}
-                color={task.done ? colors.primary : colors.inkFaint}
+                color={task.done ? temaAtual.primary : temaAtual.inkFaint}
               />
 
               <View style={styles.flexFill}>
@@ -185,7 +331,7 @@ export function HomeScreen() {
         <Card>
           <View style={styles.squadHeaderRow}>
             <View style={styles.squadHeaderLeft}>
-              <Ionicons name="trophy" size={18} color={colors.primary} />
+              <Ionicons name="trophy" size={18} color={temaAtual.primary} />
               <Text style={styles.squadTitle}>{t('home.yourWeeklyTotal')}</Text>
             </View>
 
@@ -213,147 +359,3 @@ export function HomeScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  content: {
-    padding: spacing.lg,
-    gap: spacing.lg,
-    paddingBottom: spacing.xxl,
-  },
-  streakBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    borderRadius: radius.pill,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.lg,
-  },
-  streakIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255,255,255,0.55)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  streakLabel: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 12,
-    color: colors.ink,
-    letterSpacing: 1,
-  },
-  streakValue: {
-    fontFamily: fonts.headlineExtraBold,
-    fontSize: 20,
-    color: colors.ink,
-  },
-  tasksCard: {
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  ringValue: {
-    fontFamily: fonts.headlineExtraBold,
-    fontSize: 26,
-    color: colors.ink,
-  },
-  ringLabel: {
-    fontFamily: fonts.bodyMedium,
-    fontSize: 13,
-    color: colors.inkMuted,
-  },
-  encourageTitle: {
-    fontFamily: fonts.headlineBold,
-    fontSize: 18,
-    color: colors.ink,
-    marginTop: spacing.sm,
-  },
-  encourageBody: {
-    fontFamily: fonts.bodyRegular,
-    fontSize: 14,
-    color: colors.inkMuted,
-    textAlign: 'center',
-  },
-  ctaWrap: {
-    width: '100%',
-    marginTop: spacing.sm,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  sectionTitle: {
-    fontFamily: fonts.headlineBold,
-    fontSize: 18,
-    color: colors.ink,
-  },
-  seeAll: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 13,
-    color: colors.secondary,
-  },
-  taskRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    backgroundColor: colors.card,
-    borderRadius: radius.pill,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-  },
-  taskRowActive: {
-    borderWidth: 1.5,
-    borderColor: colors.primary,
-  },
-  taskRowPressed: {
-    opacity: 0.8,
-  },
-  taskList: {
-    gap: spacing.sm,
-  },
-  flexFill: {
-    flex: 1,
-  },
-  squadSectionTitle: {
-    marginTop: spacing.xl,
-  },
-  taskTitle: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 15,
-    color: colors.ink,
-    marginBottom: 4,
-  },
-  taskTitleDone: {
-    color: colors.inkFaint,
-    textDecorationLine: 'line-through',
-  },
-  loadingText: {
-    fontFamily: fonts.bodyRegular,
-    fontSize: 12,
-    color: colors.inkMuted,
-  },
-  errorText: {
-    fontFamily: fonts.bodyRegular,
-    fontSize: 12,
-    color: colors.danger,
-  },
-  squadHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  squadHeaderLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  squadTitle: {
-    fontFamily: fonts.headlineBold,
-    fontSize: 15,
-    color: colors.ink,
-  },
-});
