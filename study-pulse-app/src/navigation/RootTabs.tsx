@@ -7,7 +7,9 @@ import { HomeScreen } from '../screens/HomeScreen';
 import { GoalsScreen } from '../screens/GoalsScreen';
 import { GroupsScreen } from '../screens/GroupsScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
-import { colors, fonts } from '../theme';
+import { fonts } from '../theme';
+import { useTheme } from '../contexts/ThemeContext';
+import { NotificationsHost } from '../components/NotificationsHost';
 
 export type TabParamList = {
   Home: undefined;
@@ -29,22 +31,24 @@ function TabIcon({
   name,
   label,
   focused,
+  palette,
 }: {
   name: keyof TabParamList;
   label: string;
   focused: boolean;
+  palette: ReturnType<typeof useTheme>['temaAtual'];
 }) {
   return (
     <View style={styles.tabItem}>
-      <View style={[styles.iconWrap, focused && styles.iconWrapActive]}>
+      <View style={[styles.iconWrap, focused && { backgroundColor: palette.primary }]}>
         <Ionicons
           name={icons[name]}
           size={20}
-          color={focused ? colors.ink : colors.inkMuted}
+          color={focused ? palette.background : palette.inkMuted}
         />
       </View>
       <Text
-        style={[styles.tabLabel, focused && styles.tabLabelActive]}
+        style={[styles.tabLabel, { color: focused ? palette.ink : palette.inkMuted }, focused && styles.tabLabelActive]}
         numberOfLines={1}
         adjustsFontSizeToFit
         minimumFontScale={0.9}
@@ -57,13 +61,15 @@ function TabIcon({
 
 export function RootTabs() {
   const { t } = useTranslation();
+  const { temaAtual } = useTheme();
 
   return (
+    <NotificationsHost>
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: false,
-        tabBarStyle: styles.tabBar,
+        tabBarStyle: [styles.tabBar, { backgroundColor: temaAtual.card, borderTopColor: temaAtual.border }],
         tabBarItemStyle: styles.tabBarItem,
       }}
     >
@@ -76,6 +82,7 @@ export function RootTabs() {
               name="Home"
               label={t('navigation.tabs.home')}
               focused={focused}
+              palette={temaAtual}
             />
           ),
         }}
@@ -89,6 +96,7 @@ export function RootTabs() {
               name="Goals"
               label={t('navigation.tabs.goals')}
               focused={focused}
+              palette={temaAtual}
             />
           ),
         }}
@@ -102,6 +110,7 @@ export function RootTabs() {
               name="Groups"
               label={t('navigation.tabs.groups')}
               focused={focused}
+              palette={temaAtual}
             />
           ),
         }}
@@ -115,18 +124,19 @@ export function RootTabs() {
               name="Profile"
               label={t('navigation.tabs.profile')}
               focused={focused}
+              palette={temaAtual}
             />
           ),
         }}
       />
     </Tab.Navigator>
+    </NotificationsHost>
   );
 }
 
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor: colors.card,
-    borderTopWidth: 0,
+    borderTopWidth: StyleSheet.hairlineWidth,
     height: 88,
     paddingTop: 6,
     paddingBottom: 8,
@@ -154,19 +164,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  iconWrapActive: {
-    backgroundColor: colors.primary,
-  },
   tabLabel: {
     fontFamily: fonts.bodyMedium,
     fontSize: 11,
     lineHeight: 14,
-    color: colors.inkMuted,
     textAlign: 'center',
     width: 76,
   },
   tabLabelActive: {
     fontFamily: fonts.bodyBold,
-    color: colors.ink,
   },
 });

@@ -1,12 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { AppError } from '../lib/result';
-import { archiveGoal, completeGoal, createGoal, listActive, updateGoal, updateProgress } from '../services/goals.service';
+import { archiveGoal, completeGoal, createGoal, listActive, listArchived, updateGoal, updateProgress } from '../services/goals.service';
 import type { Goal, GoalInput, GoalUpdate } from '../types/domain';
 
 export function useGoals() {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<AppError | null>(null);
+  const [archivedGoals, setArchivedGoals] = useState<Goal[]>([]);
+  const [archivedLoading, setArchivedLoading] = useState(false);
+  const [archivedError, setArchivedError] = useState<AppError | null>(null);
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -58,6 +61,48 @@ export function useGoals() {
     return result;
   }, []);
 
-  useEffect(() => { void refresh(); }, [refresh]);
-  return { goals, loading, error, refresh, createGoal: add, updateProgress: progress, completeGoal: complete, updateGoal: edit, archiveGoal: archive };
+  const refreshArchived = useCallback(async () => {
+    setArchivedLoading(true);
+    setArchivedError(null);
+    const result = await listArchived();
+    if (result.ok) setArchivedGoals(result.data);
+    else setArchivedError(result.error);
+    setArchivedLoading(false);
+    return result;
+  }, []);
+
+  const restore = useCallback(async (id: number) => {
+    setArchivedError(null);
+    const result = await archiveGoal(id, false);
+    if (!result.ok) {
+      setArchivedError(result.error);
+      return result;
+    }
+
+    setArchivedGoals((current) => current.filter((goal) => goal.id !== id));
+    const activeResult = await listActive();
+    if (activeResult.ok) setGoals(activeResult.data);
+    else setError(activeResult.error);
+    return result;
+  }, []);
+
+  useEffect(() => {
+    void Promise.resolve().then(refresh);
+  }, [refresh]);
+  return {
+    goals,
+    loading,
+    error,
+    archivedGoals,
+    archivedLoading,
+    archivedError,
+    refresh,
+    refreshArchived,
+    createGoal: add,
+    updateProgress: progress,
+    completeGoal: complete,
+    updateGoal: edit,
+    archiveGoal: archive,
+    restoreGoal: restore,
+  };
 }

@@ -87,6 +87,27 @@ export async function createSquad(name: string, subtitle = '', seasonEndsAt: str
   } catch (error) { return guarded(error, 'Não foi possível criar o squad.'); }
 }
 
+export async function updateSquad(id: number, name: string, subtitle = ''): Promise<Result<Squad>> {
+  if (!Number.isInteger(id) || id < 1) return fail({ code: 'validation', message: 'Grupo inválido.' });
+  const squadName = name.trim();
+  const squadSubtitle = subtitle.trim();
+  if (!squadName || squadName.length > 100) return fail({ code: 'validation', message: 'Informe um nome de squad de até 100 caracteres.' });
+  if (squadSubtitle.length > 160) return fail({ code: 'validation', message: 'A descrição do squad deve ter até 160 caracteres.' });
+  const db = client();
+  if (!db) return unavailable();
+
+  try {
+    const { data, error } = await db.rpc('rpc_update_squad', {
+      target_squad: id,
+      squad_name: squadName,
+      squad_subtitle: squadSubtitle,
+    });
+    return error ? guarded(error, 'Não foi possível atualizar o squad.') : ok(data as Squad);
+  } catch (error) {
+    return guarded(error, 'Não foi possível atualizar o squad.');
+  }
+}
+
 export async function leaveSquad(id: number): Promise<Result<null>> {
   if (!Number.isInteger(id) || id < 1) return fail({ code: 'validation', message: 'Grupo inválido.' });
   const db = client();
