@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, Share, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
@@ -19,6 +19,7 @@ import { useSquadCreation } from '../hooks/useSquadCreation';
 import type { RankingEntry, SquadActivity } from '../types/domain';
 
 export function GroupsScreen() {
+  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const { temaAtual } = useTheme();
   const { session, profile } = useAuth();
@@ -615,7 +616,10 @@ export function GroupsScreen() {
       </Modal>
       <Modal visible={createVisible} transparent animationType="slide" onRequestClose={() => setCreateVisible(false)}>
         <Pressable style={styles.backdrop} onPress={() => setCreateVisible(false)} accessibilityLabel={t('common.close')}>
-          <Pressable style={styles.createModal} onPress={(event) => event.stopPropagation()}>
+          <Pressable
+            style={[styles.createModal, { paddingBottom: spacing.lg + insets.bottom }]}
+            onPress={(event) => event.stopPropagation()}
+          >
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>{t('groups.createGroup', { defaultValue: 'Criar grupo' })}</Text>
               <Pressable onPress={() => setCreateVisible(false)} accessibilityRole="button" accessibilityLabel={t('common.close')}>
