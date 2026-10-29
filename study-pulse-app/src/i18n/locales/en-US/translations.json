@@ -278,20 +278,44 @@
       "earnedAt": "Earned on {{date}}",
       "streakHistory": "Recent streak history",
       "streakEntry_one": "{{date}} · {{count}} day",
-      "streakEntry_other": "{{date}} · {{count}} days"
+      "streakEntry_other": "{{date}} · {{count}} days",
+      "unlocked": "Unlocked",
+      "locked": "Locked",
+      "catalog": {
+        "first_step": { "title": "First Step", "description": "Complete your first check-in." },
+        "week_warrior": { "title": "Week Warrior", "description": "Reach a 7-day study streak." },
+        "study_century": { "title": "Study Century", "description": "Earn 100 points." },
+        "point_collector": { "title": "Point Collector", "description": "Earn 500 points." },
+        "task_starter": { "title": "Task Starter", "description": "Complete 10 tasks." },
+        "goal_getter": { "title": "Goal Getter", "description": "Reach 3 goals." },
+        "goal_complete": { "title": "Goal Complete", "description": "Complete your first goal." },
+        "focus_hour": { "title": "Focus Hour", "description": "Study for 600 minutes." },
+        "squad_player": { "title": "Squad Player", "description": "Join a study squad." },
+        "consistent": { "title": "Consistent", "description": "Check in on 14 different days." }
+      }
     },
     "notifications": {
       "studyReminders": "Study reminders",
       "hint": "Get a reminder to keep your streak going.",
       "enabled": "Reminders enabled",
-      "disabled": "Reminders disabled"
+      "disabled": "Reminders disabled",
+      "today": "Today",
+      "pending": "Task pending today",
+      "activity": "New study group activity",
+      "empty": "No updates right now."
     },
     "account": {
       "name": "Name",
       "email": "Email",
       "memberSince": "Member since",
-      "unavailable": "Not provided"
+      "unavailable": "Not provided",
+      "save": "Save changes",
+      "saveError": "Could not save your profile.",
+      "saved": "Profile saved.",
+      "emailConfirmation": "Check your new email address to confirm the change.",
+      "genderHint": "Select a value"
     },
+    "squad": { "edit": "Edit group", "description": "Description", "invalid": "Use a name of up to 100 characters and a description of up to 160.", "saved": "Group updated.", "saveError": "Could not update the group." },
     "signingOut": "Signing out...",
     "pleaseWait": "Please wait"
   }

@@ -11,6 +11,11 @@ import { Avatar } from './Avatar';
 
 import { fonts, spacing } from '../theme';
 import { useTheme } from '../contexts/ThemeContext';
+import { useTranslation } from 'react-i18next';
+import { useOpenNotifications } from './NotificationsHost';
+import { useNavigation } from '@react-navigation/native';
+import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import type { TabParamList } from '../navigation/RootTabs';
 
 type Props = {
   userInitial: string;
@@ -18,6 +23,9 @@ type Props = {
 
 export function ScreenHeader({ userInitial }: Props) {
   const { temaAtual } = useTheme();
+  const { t } = useTranslation();
+  const openNotifications = useOpenNotifications();
+  const navigation = useNavigation<BottomTabNavigationProp<TabParamList>>();
 
   const styles = StyleSheet.create({
     row: {
@@ -48,18 +56,17 @@ export function ScreenHeader({ userInitial }: Props) {
 
   return (
     <View style={styles.row}>
-      <Avatar
-        label={userInitial}
-        size={40}
-        ringColor={temaAtual.primary}
-      />
+      <Pressable onPress={() => navigation.navigate('Profile')} accessibilityRole="button" accessibilityLabel={t('navigation.tabs.profile')} hitSlop={8}>
+        <Avatar label={userInitial} size={40} ringColor={temaAtual.primary} />
+      </Pressable>
 
       <Text style={styles.title}>StudyPulse</Text>
 
       <Pressable
         style={styles.bell}
+        onPress={openNotifications}
         accessibilityRole="button"
-        accessibilityLabel="Notifications"
+        accessibilityLabel={t('profile.settings.notifications')}
       >
         <Ionicons
           name="notifications-outline"

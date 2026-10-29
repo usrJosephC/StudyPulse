@@ -127,22 +127,6 @@ export function HomeScreen() {
     streakContent: {
       flex: 1,
     },
-    checkInButton: {
-      minHeight: 40,
-      paddingHorizontal: spacing.md,
-      borderRadius: radius.pill,
-      backgroundColor: temaAtual.card,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    checkInButtonDisabled: {
-      opacity: 0.6,
-    },
-    checkInButtonText: {
-      fontFamily: fonts.bodyBold,
-      fontSize: 12,
-      color: temaAtual.secondary,
-    },
     checkInFeedback: {
       marginTop: -spacing.sm,
       fontFamily: fonts.bodyMedium,
@@ -326,29 +310,6 @@ export function HomeScreen() {
             </Text>
           </View>
 
-          <Pressable
-            onPress={() => { void handleCheckIn(); }}
-            disabled={dailyCheckIn.loading || Boolean(dailyCheckIn.result)}
-            accessibilityRole="button"
-            accessibilityLabel={t('home.checkIn')}
-            accessibilityState={{
-              disabled: dailyCheckIn.loading || Boolean(dailyCheckIn.result),
-              busy: dailyCheckIn.loading,
-            }}
-            style={({ pressed }) => [
-              styles.checkInButton,
-              pressed && styles.taskRowPressed,
-              (dailyCheckIn.loading || dailyCheckIn.result) && styles.checkInButtonDisabled,
-            ]}
-          >
-            <Text style={styles.checkInButtonText}>
-              {dailyCheckIn.loading
-                ? t('home.checkingIn')
-                : dailyCheckIn.result
-                  ? t('home.checkedIn')
-                  : t('home.checkIn')}
-            </Text>
-          </Pressable>
         </LinearGradient>
 
         {dailyCheckIn.result && (
@@ -380,7 +341,15 @@ export function HomeScreen() {
           </Text>
 
           <View style={styles.ctaWrap}>
-            <Button label={t('home.continueStudying')} />
+            <Button
+              label={dailyCheckIn.loading
+                ? t('home.checkingIn')
+                : dailyCheckIn.result
+                  ? t('home.checkedIn')
+                  : t('home.checkIn')}
+              onPress={() => { void handleCheckIn(); }}
+              disabled={dailyCheckIn.loading || Boolean(dailyCheckIn.result)}
+            />
           </View>
         </Card>
 

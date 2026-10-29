@@ -278,20 +278,44 @@
       "earnedAt": "Conseguido el {{date}}",
       "streakHistory": "Historial reciente de racha",
       "streakEntry_one": "{{date}} · {{count}} día",
-      "streakEntry_other": "{{date}} · {{count}} días"
+      "streakEntry_other": "{{date}} · {{count}} días",
+      "unlocked": "Conseguida",
+      "locked": "Bloqueada",
+      "catalog": {
+        "first_step": { "title": "Primer Paso", "description": "Haz tu primer registro de estudio." },
+        "week_warrior": { "title": "Guerrero de la Semana", "description": "Alcanza una racha de 7 días." },
+        "study_century": { "title": "Centena de Estudio", "description": "Gana 100 puntos." },
+        "point_collector": { "title": "Coleccionista de Puntos", "description": "Gana 500 puntos." },
+        "task_starter": { "title": "Inicio de Tareas", "description": "Completa 10 tareas." },
+        "goal_getter": { "title": "Cazador de Metas", "description": "Alcanza 3 metas." },
+        "goal_complete": { "title": "Meta Completada", "description": "Completa tu primera meta." },
+        "focus_hour": { "title": "Hora de Concentración", "description": "Estudia durante 600 minutos." },
+        "squad_player": { "title": "Jugador de Equipo", "description": "Únete a un grupo de estudio." },
+        "consistent": { "title": "Constante", "description": "Registra actividad en 14 días diferentes." }
+      }
     },
     "notifications": {
       "studyReminders": "Recordatorios de estudio",
       "hint": "Recibe un recordatorio para mantener tu racha.",
       "enabled": "Recordatorios activados",
-      "disabled": "Recordatorios desactivados"
+      "disabled": "Recordatorios desactivados",
+      "today": "Hoy",
+      "pending": "Tarea pendiente hoy",
+      "activity": "Nueva actividad en el grupo de estudio",
+      "empty": "No hay novedades por ahora."
     },
     "account": {
       "name": "Nombre",
       "email": "Correo electrónico",
       "memberSince": "Miembro desde",
-      "unavailable": "No informado"
+      "unavailable": "No informado",
+      "save": "Guardar cambios",
+      "saveError": "No se pudo guardar tu perfil.",
+      "saved": "Perfil guardado.",
+      "emailConfirmation": "Confirma el cambio en tu nueva dirección de correo.",
+      "genderHint": "Selecciona una opción"
     },
+    "squad": { "edit": "Editar grupo", "description": "Descripción", "invalid": "Usa un nombre de hasta 100 caracteres y una descripción de hasta 160.", "saved": "Grupo actualizado.", "saveError": "No se pudo actualizar el grupo." },
     "signingOut": "Cerrando sesión...",
     "pleaseWait": "Espera, por favor"
   }
