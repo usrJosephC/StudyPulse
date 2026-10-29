@@ -230,7 +230,31 @@
       "studySquad": "Grupo de estudos",
       "comingSoon": "Esta seção estará disponível em breve."
     },
-    "signOut": "Sair", "achievements": { "title": "Conquistas", "empty": "Continue estudando para desbloquear sua primeira conquista.", "badge": "Em progresso" }, "notifications": { "studyReminders": "Lembretes de estudo", "hint": "Receba um lembrete para manter sua sequência." },
+    "signOut": "Sair",
+    "achievements": {
+      "title": "Conquistas",
+      "empty": "Continue estudando para desbloquear sua primeira conquista.",
+      "open": "Abrir conquistas",
+      "loading": "Carregando conquistas",
+      "count_one": "{{count}} conquista",
+      "count_other": "{{count}} conquistas",
+      "earnedAt": "Conquistada em {{date}}",
+      "streakHistory": "Histórico recente de sequência",
+      "streakEntry_one": "{{date}} · {{count}} dia",
+      "streakEntry_other": "{{date}} · {{count}} dias"
+    },
+    "notifications": {
+      "studyReminders": "Lembretes de estudo",
+      "hint": "Receba um lembrete para manter sua sequência.",
+      "enabled": "Lembretes ativados",
+      "disabled": "Lembretes desativados"
+    },
+    "account": {
+      "name": "Nome",
+      "email": "E-mail",
+      "memberSince": "Membro desde",
+      "unavailable": "Não informado"
+    },
     "signingOut": "Saindo...",
     "pleaseWait": "Aguarde"
   }

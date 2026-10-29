@@ -230,7 +230,31 @@
       "studySquad": "Grupo de estudio",
       "comingSoon": "Esta sección estará disponible pronto."
     },
-    "signOut": "Cerrar sesión", "achievements": { "title": "Logros", "empty": "Sigue estudiando para desbloquear tu primer logro.", "badge": "En progreso" }, "notifications": { "studyReminders": "Recordatorios de estudio", "hint": "Recibe un recordatorio para mantener tu racha." },
+    "signOut": "Cerrar sesión",
+    "achievements": {
+      "title": "Logros",
+      "empty": "Sigue estudiando para desbloquear tu primer logro.",
+      "open": "Abrir logros",
+      "loading": "Cargando logros",
+      "count_one": "{{count}} logro",
+      "count_other": "{{count}} logros",
+      "earnedAt": "Conseguido el {{date}}",
+      "streakHistory": "Historial reciente de racha",
+      "streakEntry_one": "{{date}} · {{count}} día",
+      "streakEntry_other": "{{date}} · {{count}} días"
+    },
+    "notifications": {
+      "studyReminders": "Recordatorios de estudio",
+      "hint": "Recibe un recordatorio para mantener tu racha.",
+      "enabled": "Recordatorios activados",
+      "disabled": "Recordatorios desactivados"
+    },
+    "account": {
+      "name": "Nombre",
+      "email": "Correo electrónico",
+      "memberSince": "Miembro desde",
+      "unavailable": "No informado"
+    },
     "signingOut": "Cerrando sesión...",
     "pleaseWait": "Espera, por favor"
   }
