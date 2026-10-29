@@ -5,7 +5,8 @@
     "warning": "Warning",
     "loading": "Loading...",
     "cancel": "Cancel",
-    "save": "Save"
+    "save": "Save",
+    "formInvalid": "Review the highlighted fields before continuing."
   },
   "language": {
     "label": "Language",
@@ -13,6 +14,12 @@
     "english": "English",
     "spanish": "Español",
     "saveError": "Unable to save the language preference."
+  },
+  "theme": {
+    "enableDark": "Enable dark theme",
+    "enableLight": "Enable light theme",
+    "dark": "Dark theme",
+    "light": "Light theme"
   },
   "validation": {
     "invalidEmail": "Please enter a valid email.",
