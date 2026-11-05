@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 
 import {
   Alert,
+  Animated,
   Modal,
   Pressable,
   ScrollView,
@@ -34,6 +35,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { logSafeError } from '../lib/logger';
+import { useErrorShake } from '../hooks/useErrorShake';
 
 type Props = {
   onRegisterSuccess?: () => void;
@@ -43,6 +45,7 @@ export function Register({ onRegisterSuccess }: Props) {
   const { t } = useTranslation();
   const { signUp } = useAuth();
   const { temaAtual } = useTheme();
+  const { shake, shakeStyle } = useErrorShake();
 
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [termsError, setTermsError] = useState(false);
@@ -152,6 +155,7 @@ export function Register({ onRegisterSuccess }: Props) {
     const normalizedName = data.name.trim();
 
     if (normalizedName.length > 80) {
+      shake(t('register.longNameMessage'));
       Alert.alert(
         t('register.longNameTitle'),
         t('register.longNameMessage')
@@ -181,6 +185,7 @@ export function Register({ onRegisterSuccess }: Props) {
       );
 
       if (!result.ok) {
+        shake(result.error.message || t('register.unexpectedError'));
         Alert.alert(
           t('register.registerErrorTitle'),
           result.error.message ||
@@ -201,6 +206,7 @@ export function Register({ onRegisterSuccess }: Props) {
       onRegisterSuccess?.();
     } catch {
       logSafeError('auth.registration_failed');
+      shake(t('register.unexpectedError'));
 
       Alert.alert(
         t('common.error'),
@@ -215,11 +221,14 @@ export function Register({ onRegisterSuccess }: Props) {
   function handleRegister() {
     if (!acceptedTerms) {
       setTermsError(true);
+      shake(t('login.acceptTermsRequired'));
       return;
     }
 
     setTermsError(false);
-    handleSubmit(onSubmit)();
+    void handleSubmit(onSubmit, () => {
+      shake(t('common.formInvalid'));
+    })();
   }
 
   function handleTermsToggle() {
@@ -228,7 +237,7 @@ export function Register({ onRegisterSuccess }: Props) {
   }
 
   return (
-    <View style={styles.container}>
+    <Animated.View style={[styles.container, shakeStyle]}>
       <NameInput control={control} errors={errors} />
 
       <EmailInput control={control} errors={errors} />
@@ -338,6 +347,6 @@ export function Register({ onRegisterSuccess }: Props) {
         onPress={handleRegister}
         disabled={isLoading}
       />
-    </View>
+    </Animated.View>
   );
 }

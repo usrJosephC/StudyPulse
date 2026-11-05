@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
@@ -36,6 +36,7 @@ import { logSafeError } from '../lib/logger';
 export function GoalsScreen() {
   const { t } = useTranslation();
   const { temaAtual } = useTheme();
+  const insets = useSafeAreaInsets();
   const { session, profile } = useAuth();
 
   const {
@@ -48,6 +49,11 @@ export function GoalsScreen() {
     completeGoal,
     updateGoal,
     archiveGoal,
+    archivedGoals,
+    archivedLoading,
+    archivedError,
+    refreshArchived,
+    restoreGoal,
   } = useGoals();
 
   const {
@@ -72,6 +78,10 @@ export function GoalsScreen() {
   const [actionError, setActionError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [editingGoalId, setEditingGoalId] = useState<number | null>(null);
+  const [editingDueDate, setEditingDueDate] = useState<string | null>(null);
+  const [durationChanged, setDurationChanged] = useState(false);
+  const [historyVisible, setHistoryVisible] = useState(false);
+  const [restoringGoalId, setRestoringGoalId] = useState<number | null>(null);
 
   const displayName =
     profile?.name?.trim() ||
@@ -87,16 +97,20 @@ export function GoalsScreen() {
     setTitleError(false);
     setActionError(null);
     setEditingGoalId(null);
+    setEditingDueDate(null);
+    setDurationChanged(false);
     setModalVisible(true);
   }
 
   function openEditModal(goal: (typeof goals)[number]) {
     setCategory(goal.category);
     setTitle(goal.title);
-    setDurationDays('');
+    setDurationDays(durationFromDueDate(goal.due_date));
     setTitleError(false);
     setActionError(null);
     setEditingGoalId(goal.id);
+    setEditingDueDate(goal.due_date);
+    setDurationChanged(false);
     setModalVisible(true);
   }
 
@@ -126,7 +140,12 @@ export function GoalsScreen() {
       const goalData = {
         category: category.trim() || 'General',
         title: trimmedTitle,
-        due_date: duration === null ? null : dueDateFromDays(duration, t),
+        due_date:
+          editingGoalId !== null && !durationChanged
+            ? editingDueDate
+            : duration === null
+              ? null
+              : dueDateFromDays(duration, t),
         icon: 'school-outline',
       };
 
@@ -152,6 +171,18 @@ export function GoalsScreen() {
       { text: t('common.cancel'), style: 'cancel' },
       { text: t('goals.archiveGoal'), style: 'destructive', onPress: () => { void (async () => { const result = await archiveGoal(id); if (!result.ok) setActionError(result.error.message); })(); } },
     ]);
+  }
+
+  function openHistory() {
+    setHistoryVisible(true);
+    void refreshArchived();
+  }
+
+  async function handleRestore(id: number) {
+    if (restoringGoalId !== null) return;
+    setRestoringGoalId(id);
+    await restoreGoal(id);
+    setRestoringGoalId(null);
   }
 
   async function handleGoalAction(id: number, progress: number) {
@@ -203,6 +234,23 @@ export function GoalsScreen() {
     fontFamily: fonts.headlineBold,
     fontSize: 18,
     color: temaAtual.ink,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.md,
+  },
+  historyLink: {
+    minHeight: 44,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  historyLinkText: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 13,
+    color: temaAtual.secondary,
   },
   streakLabel: {
     fontFamily: fonts.bodyMedium,
@@ -384,6 +432,40 @@ export function GoalsScreen() {
   modalAction: {
     flex: 1,
   },
+  historyList: {
+    gap: spacing.sm,
+    paddingBottom: spacing.sm,
+  },
+  historyCard: {
+    backgroundColor: temaAtual.background,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    gap: spacing.xs,
+  },
+  historyCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.md,
+  },
+  historyTitle: {
+    flex: 1,
+    fontFamily: fonts.bodyBold,
+    fontSize: 15,
+    color: temaAtual.ink,
+  },
+  restoreButton: {
+    minHeight: 44,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+  },
+  restoreText: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 13,
+    color: temaAtual.secondary,
+  },
 });
 
   function getIntensityStyle(level: number) {
@@ -472,9 +554,20 @@ export function GoalsScreen() {
             )}
         </Card>
 
-        <Text style={styles.sectionTitle}>
-          {t('goals.activeGoals')}
-        </Text>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>
+            {t('goals.activeGoals')}
+          </Text>
+          <Pressable
+            style={styles.historyLink}
+            onPress={openHistory}
+            accessibilityRole="button"
+            accessibilityLabel={t('goals.openHistory')}
+          >
+            <Ionicons name="archive-outline" size={17} color={temaAtual.secondary} />
+            <Text style={styles.historyLinkText}>{t('goals.history')}</Text>
+          </Pressable>
+        </View>
 
         {(goalsLoading || heatmapLoading) && (
           <ActivityIndicator
@@ -638,7 +731,10 @@ export function GoalsScreen() {
             style={styles.modalWrap}
           >
             <Pressable
-              style={styles.modalCard}
+              style={[
+                styles.modalCard,
+                { paddingBottom: spacing.xl + insets.bottom },
+              ]}
               onPress={(event) => event.stopPropagation()}
             >
               <ScrollView
@@ -709,6 +805,7 @@ export function GoalsScreen() {
                   value={durationDays}
                   onChangeText={(value) => {
                     setDurationDays(value.replace(/\D/g, ''));
+                    setDurationChanged(true);
                     setActionError(null);
                   }}
                   placeholder={t('goals.durationPlaceholder')}
@@ -755,6 +852,76 @@ export function GoalsScreen() {
               </ScrollView>
             </Pressable>
           </KeyboardAvoidingView>
+        </Pressable>
+      </Modal>
+
+      <Modal
+        visible={historyVisible}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setHistoryVisible(false)}
+      >
+        <Pressable
+          style={styles.backdrop}
+          onPress={() => setHistoryVisible(false)}
+          accessibilityLabel={t('goals.closeHistory')}
+        >
+          <Pressable
+            style={[
+              styles.modalCard,
+              { paddingBottom: spacing.xl + insets.bottom },
+            ]}
+            onPress={(event) => event.stopPropagation()}
+          >
+            <View style={styles.sectionHeader}>
+              <Text style={styles.modalTitle} accessibilityRole="header">
+                {t('goals.historyTitle')}
+              </Text>
+              <Pressable
+                onPress={() => setHistoryVisible(false)}
+                accessibilityRole="button"
+                accessibilityLabel={t('goals.closeHistory')}
+                hitSlop={8}
+              >
+                <Ionicons name="close" size={22} color={temaAtual.ink} />
+              </Pressable>
+            </View>
+            {archivedLoading && (
+              <ActivityIndicator color={temaAtual.primary} accessibilityLabel={t('goals.loadingHistory')} />
+            )}
+            {archivedError && (
+              <Pressable onPress={() => void refreshArchived()} accessibilityRole="button" style={styles.stateAction}>
+                <Text style={styles.errorLabel}>{archivedError.message} · {t('goals.tapToRetry')}</Text>
+              </Pressable>
+            )}
+            {!archivedLoading && !archivedError && archivedGoals.length === 0 && (
+              <Text style={styles.stateText}>{t('goals.emptyHistory')}</Text>
+            )}
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.historyList}>
+              {archivedGoals.map((goal) => (
+                <View key={goal.id} style={styles.historyCard}>
+                  <View style={styles.historyCardHeader}>
+                    <Text style={styles.historyTitle} numberOfLines={2}>{goal.title}</Text>
+                    <Pill label={goal.category} variant="muted" />
+                  </View>
+                  <Text style={styles.dueLabel}>{formatDueDate(goal.due_date, t)}</Text>
+                  <Pressable
+                    style={styles.restoreButton}
+                    onPress={() => void handleRestore(goal.id)}
+                    disabled={restoringGoalId !== null}
+                    accessibilityRole="button"
+                    accessibilityLabel={t('goals.restoreGoal', { title: goal.title })}
+                    accessibilityState={{ disabled: restoringGoalId !== null, busy: restoringGoalId === goal.id }}
+                  >
+                    {restoringGoalId === goal.id
+                      ? <ActivityIndicator size="small" color={temaAtual.secondary} />
+                      : <Ionicons name="refresh" size={17} color={temaAtual.secondary} />}
+                    <Text style={styles.restoreText}>{t('goals.restore')}</Text>
+                  </Pressable>
+                </View>
+              ))}
+            </ScrollView>
+          </Pressable>
         </Pressable>
       </Modal>
     </SafeAreaView>
@@ -824,6 +991,15 @@ function dueDateFromDays(days: number, t: TFunction) {
   today.setUTCDate(today.getUTCDate() + days);
 
   return today.toISOString().slice(0, 10);
+}
+
+function durationFromDueDate(value: string | null) {
+  if (!value) return '';
+  const due = parseIsoDate(value);
+  const today = parseIsoDate(todayInSaoPaulo());
+  if (!due || !today) return '';
+  const days = Math.ceil((due.getTime() - today.getTime()) / 86_400_000);
+  return days > 0 ? String(days) : '';
 }
 
 function toIconName(

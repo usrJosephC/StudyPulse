@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, Share, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
@@ -19,10 +19,11 @@ import { useSquadCreation } from '../hooks/useSquadCreation';
 import type { RankingEntry, SquadActivity } from '../types/domain';
 
 export function GroupsScreen() {
+  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const { temaAtual } = useTheme();
   const { session, profile } = useAuth();
-  const { squad, loading: squadLoading, error: squadError, refresh: refreshSquad, joinSquad } = useSquad();
+  const { squad, loading: squadLoading, error: squadError, refresh: refreshSquad, joinSquad, leaveSquad } = useSquad();
   const { ranking, loading: rankingLoading, error: rankingError, refresh: refreshRanking } = useRanking(squad?.id ?? null);
   const { activities, loading: activityLoading, error: activityError, refresh: refreshActivity } = useSquadActivity(squad?.id ?? null);
   const { createSquad, loading: creating, error: createError } = useSquadCreation();
@@ -34,6 +35,9 @@ export function GroupsScreen() {
   const [joinError, setJoinError] = useState<string | null>(null);
   const [createVisible, setCreateVisible] = useState(false);
   const [groupName, setGroupName] = useState('');
+  const [sharing, setSharing] = useState(false);
+  const [leaving, setLeaving] = useState(false);
+  const [squadActionError, setSquadActionError] = useState<string | null>(null);
   const displayName = profile?.name?.trim()
     || (typeof session?.user.user_metadata?.name === 'string' ? session.user.user_metadata.name.trim() : '')
     || t('groups.defaultStudent');
@@ -321,6 +325,16 @@ export function GroupsScreen() {
     createLink: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, paddingVertical: spacing.sm },
     createLinkText: { fontFamily: fonts.bodyBold, fontSize: 14, color: temaAtual.secondary },
     createModal: { backgroundColor: temaAtual.card, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg, padding: spacing.lg, gap: spacing.md },
+    inviteCard: { gap: spacing.md },
+    inviteHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+    inviteTitle: { flex: 1, fontFamily: fonts.headlineBold, fontSize: 15, color: temaAtual.ink },
+    inviteCodeBox: { backgroundColor: temaAtual.surface, borderRadius: radius.md, paddingVertical: spacing.md, paddingHorizontal: spacing.lg, alignItems: 'center' },
+    inviteCodeValue: { fontFamily: fonts.headlineExtraBold, fontSize: 22, letterSpacing: 3, color: temaAtual.secondary },
+    squadActions: { flexDirection: 'row', gap: spacing.sm },
+    shareButton: { flex: 1, minHeight: 46, borderRadius: radius.pill, backgroundColor: temaAtual.secondary, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.xs, paddingHorizontal: spacing.md },
+    shareButtonText: { fontFamily: fonts.bodyBold, fontSize: 13, color: '#fff' },
+    leaveButton: { minHeight: 46, borderRadius: radius.pill, borderWidth: 1, borderColor: temaAtual.danger, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.xs, paddingHorizontal: spacing.md },
+    leaveButtonText: { fontFamily: fonts.bodyBold, fontSize: 13, color: temaAtual.danger },
   });
 
   function refreshAll() {
@@ -341,6 +355,41 @@ export function GroupsScreen() {
     if (!groupName.trim() || creating) return;
     const result = await createSquad(groupName.trim());
     if (result.ok) { setCreateVisible(false); setGroupName(''); refreshAll(); }
+  }
+
+  async function handleShareSquad() {
+    if (!squad || sharing) return;
+    setSharing(true);
+    setSquadActionError(null);
+    try {
+      await Share.share({
+        title: t('groups.shareTitle'),
+        message: t('groups.shareMessage', { name: squad.name, code: squad.invite_code }),
+      });
+    } catch {
+      setSquadActionError(t('groups.shareError'));
+    } finally {
+      setSharing(false);
+    }
+  }
+
+  function handleLeaveSquad() {
+    if (!squad || leaving) return;
+    Alert.alert(t('groups.leaveTitle'), t('groups.leaveConfirmation', { name: squad.name }), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('groups.leaveButton'),
+        style: 'destructive',
+        onPress: () => {
+          setLeaving(true);
+          setSquadActionError(null);
+          void leaveSquad(squad.id).then((result) => {
+            if (!result.ok) setSquadActionError(result.error.message);
+            setLeaving(false);
+          });
+        },
+      },
+    ]);
   }
 
   useFocusEffect(useCallback(() => {
@@ -396,6 +445,43 @@ export function GroupsScreen() {
             <Text style={styles.squadName}>{squad.name}</Text>
             <Text style={styles.squadSubtitle}>{squad.subtitle || t('groups.defaultSubtitle')}</Text>
           </View>
+          <Card style={styles.inviteCard}>
+            <View style={styles.inviteHeader}>
+              <Ionicons name="key-outline" size={20} color={temaAtual.secondary} />
+              <Text style={styles.inviteTitle}>{t('groups.yourInviteCode')}</Text>
+            </View>
+            <Text style={styles.stateText}>{t('groups.shareInviteHint')}</Text>
+            <View style={styles.inviteCodeBox}>
+              <Text style={styles.inviteCodeValue} selectable accessibilityLabel={t('groups.inviteCodeAccessibility')}>
+                {squad.invite_code}
+              </Text>
+            </View>
+            {squadActionError && <Text style={styles.errorText}>{squadActionError}</Text>}
+            <View style={styles.squadActions}>
+              <Pressable
+                style={[styles.shareButton, sharing && styles.disabledButton]}
+                onPress={() => void handleShareSquad()}
+                disabled={sharing}
+                accessibilityRole="button"
+                accessibilityState={{ disabled: sharing, busy: sharing }}
+                accessibilityLabel={t('groups.shareCode')}
+              >
+                {sharing ? <ActivityIndicator color="#fff" /> : <Ionicons name="share-social-outline" size={18} color="#fff" />}
+                {!sharing && <Text style={styles.shareButtonText}>{t('groups.shareCode')}</Text>}
+              </Pressable>
+              <Pressable
+                style={[styles.leaveButton, leaving && styles.disabledButton]}
+                onPress={handleLeaveSquad}
+                disabled={leaving}
+                accessibilityRole="button"
+                accessibilityState={{ disabled: leaving, busy: leaving }}
+                accessibilityLabel={t('groups.leaveButton')}
+              >
+                {leaving ? <ActivityIndicator color={temaAtual.danger} /> : <Ionicons name="exit-outline" size={18} color={temaAtual.danger} />}
+                {!leaving && <Text style={styles.leaveButtonText}>{t('groups.leaveButton')}</Text>}
+              </Pressable>
+            </View>
+          </Card>
           <Card>
             <View style={styles.rankingHeader}>
               <View style={styles.rankingHeaderLeft}>
@@ -530,7 +616,10 @@ export function GroupsScreen() {
       </Modal>
       <Modal visible={createVisible} transparent animationType="slide" onRequestClose={() => setCreateVisible(false)}>
         <Pressable style={styles.backdrop} onPress={() => setCreateVisible(false)} accessibilityLabel={t('common.close')}>
-          <Pressable style={styles.createModal} onPress={(event) => event.stopPropagation()}>
+          <Pressable
+            style={[styles.createModal, { paddingBottom: spacing.lg + insets.bottom }]}
+            onPress={(event) => event.stopPropagation()}
+          >
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>{t('groups.createGroup', { defaultValue: 'Criar grupo' })}</Text>
               <Pressable onPress={() => setCreateVisible(false)} accessibilityRole="button" accessibilityLabel={t('common.close')}>

@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -16,6 +16,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { usePoints } from '../hooks/usePoints';
 import { useStreak } from '../hooks/useStreak';
 import { useTasks } from '../hooks/useTasks';
+import { useCheckIn } from '../hooks/useCheckIn';
 
 export function HomeScreen() {
   const { t } = useTranslation();
@@ -23,9 +24,14 @@ export function HomeScreen() {
   const { session, profile } = useAuth();
   const streak = useStreak();
   const points = usePoints();
-  const { tasks, loading: tasksLoading, error: tasksError, refresh: refreshTasks, toggleTask } = useTasks();
+  const dailyCheckIn = useCheckIn();
+  const { tasks, loading: tasksLoading, error: tasksError, refresh: refreshTasks, createTask, toggleTask } = useTasks();
   const [taskError, setTaskError] = useState<string | null>(null);
   const [updatingTaskId, setUpdatingTaskId] = useState<number | null>(null);
+  const [taskFormVisible, setTaskFormVisible] = useState(false);
+  const [taskTitle, setTaskTitle] = useState('');
+  const [taskCategory, setTaskCategory] = useState('');
+  const [creatingTask, setCreatingTask] = useState(false);
 
   const displayName = profile?.name?.trim()
     || (typeof session?.user.user_metadata?.name === 'string' ? session.user.user_metadata.name.trim() : '')
@@ -36,6 +42,36 @@ export function HomeScreen() {
   const tasksDone = tasks.filter((task) => task.done).length;
   const tasksTotal = tasks.length;
   const tasksProgress = tasksTotal > 0 ? tasksDone / tasksTotal : 0;
+
+  async function handleCheckIn() {
+    if (dailyCheckIn.loading || dailyCheckIn.result) return;
+
+    const result = await dailyCheckIn.checkIn();
+    if (result.ok) {
+      await Promise.all([points.refresh(), streak.refresh()]);
+    }
+  }
+
+  async function handleCreateTask() {
+    const title = taskTitle.trim();
+    if (!title || creatingTask) return;
+
+    setCreatingTask(true);
+    setTaskError(null);
+    const result = await createTask({
+      title,
+      category: taskCategory.trim() || t('home.generalCategory'),
+    });
+
+    if (result.ok) {
+      setTaskTitle('');
+      setTaskCategory('');
+      setTaskFormVisible(false);
+    } else {
+      setTaskError(result.error.message);
+    }
+    setCreatingTask(false);
+  }
 
   async function handleToggleTask(id: number) {
     if (updatingTaskId !== null) return;
@@ -87,6 +123,16 @@ export function HomeScreen() {
       borderRadius: radius.pill,
       paddingHorizontal: spacing.lg,
       paddingVertical: spacing.lg,
+    },
+    streakContent: {
+      flex: 1,
+    },
+    checkInFeedback: {
+      marginTop: -spacing.sm,
+      fontFamily: fonts.bodyMedium,
+      fontSize: 12,
+      color: temaAtual.inkMuted,
+      textAlign: 'center',
     },
     streakIcon: {
       width: 44,
@@ -151,6 +197,34 @@ export function HomeScreen() {
       fontFamily: fonts.bodyBold,
       fontSize: 13,
       color: temaAtual.secondary,
+    },
+    addTaskButton: {
+      minHeight: 44,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs,
+      paddingHorizontal: spacing.sm,
+    },
+    taskForm: {
+      gap: spacing.sm,
+    },
+    taskInput: {
+      minHeight: 48,
+      borderWidth: 1,
+      borderColor: temaAtual.border,
+      borderRadius: radius.md,
+      paddingHorizontal: spacing.md,
+      fontFamily: fonts.bodyRegular,
+      fontSize: 14,
+      color: temaAtual.ink,
+      backgroundColor: temaAtual.background,
+    },
+    taskFormActions: {
+      flexDirection: 'row',
+      gap: spacing.sm,
+    },
+    taskFormAction: {
+      flex: 1,
     },
     taskRow: {
       flexDirection: 'row',
@@ -229,13 +303,26 @@ export function HomeScreen() {
             <Ionicons name="flame" size={22} color={temaAtual.primary} />
           </View>
 
-          <View>
+          <View style={styles.streakContent}>
             <Text style={styles.streakLabel}>{t('home.onFire')}</Text>
             <Text style={styles.streakValue}>
               {streak.loading ? t('home.loading') : t('home.dayStreak', { count: streak.streak })}
             </Text>
           </View>
+
         </LinearGradient>
+
+        {dailyCheckIn.result && (
+          <Text style={styles.checkInFeedback} accessibilityRole="alert">
+            {t('home.checkInSuccess', { count: dailyCheckIn.result.pointsAwarded })}
+          </Text>
+        )}
+
+        {dailyCheckIn.error && (
+          <Text style={[styles.checkInFeedback, styles.errorText]} accessibilityRole="alert">
+            {dailyCheckIn.error.message}
+          </Text>
+        )}
 
         <Card style={styles.tasksCard}>
           <ProgressRing progress={tasksProgress} size={150} strokeWidth={14}>
@@ -254,14 +341,81 @@ export function HomeScreen() {
           </Text>
 
           <View style={styles.ctaWrap}>
-            <Button label={t('home.continueStudying')} />
+            <Button
+              label={dailyCheckIn.loading
+                ? t('home.checkingIn')
+                : dailyCheckIn.result
+                  ? t('home.checkedIn')
+                  : t('home.checkIn')}
+              onPress={() => { void handleCheckIn(); }}
+              disabled={dailyCheckIn.loading || Boolean(dailyCheckIn.result)}
+            />
           </View>
         </Card>
 
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>{t('home.todaysTasks')}</Text>
-          <Text style={styles.seeAll}>{t('home.seeAll')}</Text>
+          <Pressable
+            onPress={() => setTaskFormVisible((visible) => !visible)}
+            accessibilityRole="button"
+            accessibilityLabel={t('home.addTask')}
+            accessibilityState={{ expanded: taskFormVisible }}
+            style={styles.addTaskButton}
+          >
+            <Ionicons name={taskFormVisible ? 'close' : 'add'} size={18} color={temaAtual.secondary} />
+            <Text style={styles.seeAll}>{taskFormVisible ? t('common.cancel') : t('home.addTask')}</Text>
+          </Pressable>
         </View>
+
+        {taskFormVisible && (
+          <Card style={styles.taskForm}>
+            <TextInput
+              value={taskTitle}
+              onChangeText={setTaskTitle}
+              placeholder={t('home.taskTitlePlaceholder')}
+              placeholderTextColor={temaAtual.inkFaint}
+              maxLength={160}
+              editable={!creatingTask}
+              returnKeyType="next"
+              accessibilityLabel={t('home.taskTitle')}
+              style={styles.taskInput}
+            />
+            <TextInput
+              value={taskCategory}
+              onChangeText={setTaskCategory}
+              placeholder={t('home.taskCategoryPlaceholder')}
+              placeholderTextColor={temaAtual.inkFaint}
+              maxLength={80}
+              editable={!creatingTask}
+              returnKeyType="done"
+              onSubmitEditing={() => { void handleCreateTask(); }}
+              accessibilityLabel={t('home.taskCategory')}
+              style={styles.taskInput}
+            />
+            <View style={styles.taskFormActions}>
+              <View style={styles.taskFormAction}>
+                <Button
+                  label={t('common.cancel')}
+                  variant="muted"
+                  disabled={creatingTask}
+                  onPress={() => {
+                    setTaskFormVisible(false);
+                    setTaskTitle('');
+                    setTaskCategory('');
+                  }}
+                />
+              </View>
+              <View style={styles.taskFormAction}>
+                <Button
+                  label={creatingTask ? t('home.creatingTask') : t('home.saveTask')}
+                  icon="checkmark"
+                  disabled={!taskTitle.trim() || creatingTask}
+                  onPress={() => { void handleCreateTask(); }}
+                />
+              </View>
+            </View>
+          </Card>
+        )}
 
         {points.loading && (
           <Text style={styles.loadingText}>{t('home.loadingPoints')}</Text>

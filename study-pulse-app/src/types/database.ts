@@ -424,6 +424,10 @@ export type Database = {
       }
       rpc_join_squad: { Args: { code: string }; Returns: number }
       rpc_leave_squad: { Args: { target_squad: number }; Returns: boolean }
+      rpc_update_squad: {
+        Args: { squad_name: string; squad_subtitle?: string; target_squad: number }
+        Returns: Database['public']['Tables']['squads']['Row']
+      }
       rpc_reopen_task: { Args: { task_id: number }; Returns: boolean }
       rpc_update_goal_progress: {
         Args: { goal_id: number; new_progress: number }
