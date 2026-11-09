@@ -11,7 +11,7 @@ export async function reversePoints(eventId: number, reason = 'reversal'): Promi
 
 export async function listBadges(): Promise<Result<Badge[]>> {
   const db = client(); if (!db) return unavailable();
-  try { const { data, error } = await db.from('badges').select('*').order('requirement'); return error ? guarded(error, 'Não foi possível carregar os badges.') : ok((data ?? []) as Badge[]); }
+  try { const { data, error } = await db.from('badges').select('*').order('sort_order'); return error ? guarded(error, 'Não foi possível carregar os badges.') : ok((data ?? []) as Badge[]); }
   catch (error) { return guarded(error, 'Não foi possível carregar os badges.'); }
 }
 
@@ -20,7 +20,7 @@ export async function listMyBadges(): Promise<Result<UserBadge[]>> {
   try {
     const [userBadges, badges] = await Promise.all([
       db.from('user_badges').select('*').order('awarded_at', { ascending: false }),
-      db.from('badges').select('*').order('requirement'),
+      db.from('badges').select('*').order('sort_order'),
     ]);
     if (userBadges.error) return guarded(userBadges.error, 'Não foi possível carregar suas conquistas.');
     if (badges.error) return guarded(badges.error, 'Não foi possível carregar suas conquistas.');

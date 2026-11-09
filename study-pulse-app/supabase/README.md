@@ -29,3 +29,9 @@ Para parar sem apagar os dados, use `docker-compose down`. O comando `docker-com
 A CLI continua disponível como dependência do projeto. O fluxo equivalente é `npx supabase start`, seguido de `npx supabase db reset`. Não execute a stack da CLI e a stack do Compose ao mesmo tempo, pois ambas usam as portas 54321 e 54322.
 
 As migrations criam esquema, RLS e RPCs. O cliente lê apenas os dados permitidos pelas policies; pontos, check-ins, conclusões e squads passam por RPC autenticada. O seed é sintético e não contém dados reais.
+
+## Conquistas
+
+A migration 007 persiste o catálogo de dez badges e os desbloqueia no servidor a partir de check-ins, streak, minutos estudados, pontos, tarefas, metas e participação em grupo. O cliente pode consultar o catálogo e as próprias conquistas, mas não pode conceder badges.
+
+Depois de aplicar ou resetar as migrations, valide catálogo e regras executando: npx supabase test db supabase/tests/achievement_catalog.sql

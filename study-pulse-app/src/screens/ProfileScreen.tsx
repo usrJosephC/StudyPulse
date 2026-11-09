@@ -23,19 +23,6 @@ const profileSettings = [
   { id: 'squad', icon: 'people-outline' as const, labelKey: 'profile.settings.studySquad' },
 ];
 
-const achievementCatalog = [
-  { code: 'first_step', icon: 'footsteps', color: '#2563EB' },
-  { code: 'week_warrior', icon: 'flame', color: '#EA580C' },
-  { code: 'study_century', icon: 'radio-button-on', color: '#16A34A' },
-  { code: 'point_collector', icon: 'trophy', color: '#CA8A04' },
-  { code: 'task_starter', icon: 'checkmark-circle', color: '#7C3AED' },
-  { code: 'goal_getter', icon: 'flag', color: '#DB2777' },
-  { code: 'goal_complete', icon: 'medal', color: '#0891B2' },
-  { code: 'focus_hour', icon: 'time', color: '#0D9488' },
-  { code: 'squad_player', icon: 'people', color: '#4F46E5' },
-  { code: 'consistent', icon: 'calendar', color: '#65A30D' },
-] as const;
-
 export function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const { t, i18n } = useTranslation();
@@ -196,7 +183,7 @@ export function ProfileScreen() {
             <View style={styles.achievementIcon}><Ionicons name="trophy" size={22} color={temaAtual.primary} /></View>
             <View style={styles.achievementCopy}>
               <Text style={styles.achievementTitle}>{t('profile.achievements.title')}</Text>
-              <Text style={styles.achievementText}>{progression.badges[0]?.badge?.name || profile?.badge || t('profile.achievements.empty')}</Text>
+              <Text style={styles.achievementText}>{progression.badges[0]?.badge_code ? t('profile.achievements.catalog.' + progression.badges[0].badge_code + '.title') : profile?.badge || t('profile.achievements.empty')}</Text>
             </View>
             <Pill label={t('profile.achievements.count', { count: progression.badges.length })} variant="secondary" />
           </Card>
@@ -206,7 +193,7 @@ export function ProfileScreen() {
         <View style={{ gap: spacing.sm }}>
           {profileSettings.map((item) => (
             <Pressable key={item.id} style={styles.settingRow} onPress={() => setSettingsView(item.id)} accessibilityRole="button">
-              <View style={styles.settingIcon}><Ionicons name={item.icon} size={18} color={temaAtual.secondary} /></View>
+              <View style={styles.settingIcon}><Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={18} color={temaAtual.secondary} /></View>
               <Text style={styles.settingLabel}>{t(item.labelKey)}</Text>
               <Ionicons name="chevron-forward" size={18} color={temaAtual.inkFaint} />
             </Pressable>
@@ -252,16 +239,16 @@ export function ProfileScreen() {
             {settingsView === 'achievements' ? (
               <ScrollView style={styles.modalScroll} contentContainerStyle={styles.modalScrollContent} showsVerticalScrollIndicator={false}>
                 {progression.loading && <ActivityIndicator color={temaAtual.primary} accessibilityLabel={t('profile.achievements.loading')} />}
-                {progression.error && (
+                {(progression.catalogError || progression.badgesError) && (
                   <Pressable onPress={() => void progression.refresh()} accessibilityRole="button">
-                    <Text style={styles.errorText}>{progression.error.message} · {t('profile.tapToRetry')}</Text>
+                    <Text style={styles.errorText}>{(progression.catalogError || progression.badgesError)?.message} · {t('profile.tapToRetry')}</Text>
                   </Pressable>
                 )}
-                {!progression.loading && !progression.error && progression.badges.length === 0 && <Text style={styles.preferenceHint}>{t('profile.achievements.empty')}</Text>}
-                {!progression.loading && !progression.error && achievementCatalog.map((item) => {
+                {!progression.loading && !progression.badgesError && progression.badges.length === 0 && <Text style={styles.preferenceHint}>{t('profile.achievements.empty')}</Text>}
+                {!progression.loading && !progression.catalogError && progression.catalog.map((item) => {
                   const earned = progression.badges.find((badge) => badge.badge_code === item.code);
                   return <View key={item.code} style={[styles.badgeCard, !earned && styles.lockedBadge]} accessibilityLabel={`${t(`profile.achievements.catalog.${item.code}.title`)}. ${t(earned ? 'profile.achievements.unlocked' : 'profile.achievements.locked')}`}>
-                    <View style={[styles.achievementIcon, { backgroundColor: earned ? `${item.color}22` : temaAtual.surface }]}><Ionicons name={item.icon} size={22} color={earned ? item.color : temaAtual.inkMuted} /></View>
+                    <View style={[styles.achievementIcon, { backgroundColor: earned ? `${item.color}22` : temaAtual.surface }]}><Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={22} color={earned ? item.color : temaAtual.inkMuted} /></View>
                     <View style={styles.badgeCopy}>
                       <Text style={styles.achievementTitle}>{t(`profile.achievements.catalog.${item.code}.title`)}</Text>
                       <Text style={styles.achievementText}>{t(`profile.achievements.catalog.${item.code}.description`)}</Text>
@@ -272,6 +259,7 @@ export function ProfileScreen() {
                   </View>;
                 })}
                 {progression.history.length > 0 && <Text style={styles.achievementTitle}>{t('profile.achievements.streakHistory')}</Text>}
+                {progression.historyError && <Text style={styles.errorText}>{progression.historyError.message}</Text>}
                 {progression.history.slice(0, 7).map((record) => (
                   <View key={record.streak_date} style={styles.historyRow}>
                     <Ionicons name={record.was_broken ? 'remove-circle-outline' : record.is_record ? 'trophy-outline' : 'flame-outline'} size={18} color={record.was_broken ? temaAtual.danger : temaAtual.primary} />
