@@ -1,5 +1,9 @@
+import { useState } from 'react';
+import { Ionicons } from '@expo/vector-icons';
 import {
   Image,
+  Modal,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -14,6 +18,7 @@ import { Register } from '../components/Register';
 import { RootStackParamList } from '../navigation/RootStack';
 import { fonts, spacing } from '../theme';
 import { useTheme } from '../contexts/ThemeContext';
+import { ProfilePreferences } from '../screens/ProfileFlows';
 
 type Props = NativeStackScreenProps<
   RootStackParamList,
@@ -24,9 +29,11 @@ export function RegisterPage({
   navigation,
 }: Props) {
   const { t } = useTranslation();
+  const [preferencesOpen, setPreferencesOpen] = useState(false);
   const { temaAtual } = useTheme();
 
   const styles = StyleSheet.create({
+    preferencesButton: { minHeight: 44, minWidth: 44, alignItems: 'center', justifyContent: 'center', alignSelf: 'flex-end', marginBottom: spacing.xs, borderRadius: 22 },
     safe: {
       flex: 1,
       backgroundColor: temaAtual.background,
@@ -98,6 +105,7 @@ export function RegisterPage({
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
+        <Pressable style={styles.preferencesButton} onPress={() => setPreferencesOpen(true)} accessibilityRole="button" accessibilityLabel={t('profile.settings.preferences')} hitSlop={4}><Ionicons name="options-outline" size={21} color={temaAtual.secondary} /></Pressable>
         <View style={styles.container}>
           <Image
             source={require('../../assets/studypulse-logo-v1.png')}
@@ -132,6 +140,7 @@ export function RegisterPage({
           </Text>
         </View>
       </ScrollView>
+      <Modal visible={preferencesOpen} animationType="slide" onRequestClose={() => setPreferencesOpen(false)}><SafeAreaView style={{ flex: 1, backgroundColor: temaAtual.background }} edges={['top', 'bottom']}><ProfilePreferences close={() => setPreferencesOpen(false)} /></SafeAreaView></Modal>
     </SafeAreaView>
   );
 }

@@ -19,6 +19,7 @@ import { ProfileFlows, type ProfileFlowName } from './ProfileFlows';
 
 const profileSettings = [
   { id: 'account', icon: 'person-outline' as const, labelKey: 'profile.settings.account' },
+  { id: 'preferences', icon: 'options-outline' as const, labelKey: 'profile.settings.preferences' },
   { id: 'notifications', icon: 'notifications-outline' as const, labelKey: 'profile.settings.notifications' },
   { id: 'squad', icon: 'people-outline' as const, labelKey: 'profile.settings.studySquad' },
 ];
@@ -175,7 +176,7 @@ export function ProfileScreen() {
 
         <Pressable
           style={styles.achievementButton}
-          onPress={() => setSettingsView('achievements')}
+          onPress={() => { void progression.refresh(); setSettingsView('achievements'); }}
           accessibilityRole="button"
           accessibilityLabel={t('profile.achievements.open')}
         >
@@ -192,8 +193,7 @@ export function ProfileScreen() {
         <Text style={styles.sectionTitle}>{t('profile.settings.title')}</Text>
         <View style={{ gap: spacing.sm }}>
           {profileSettings.map((item) => (
-            <Pressable key={item.id} style={styles.settingRow} onPress={() => setSettingsView(item.id)} accessibilityRole="button">
-              <View style={styles.settingIcon}><Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={18} color={temaAtual.secondary} /></View>
+            <Pressable key={item.id} style={styles.settingRow} onPress={() => setSettingsView(item.id)} accessibilityRole="button" accessibilityLabel={t(item.labelKey)} accessibilityHint={t('profile.settings.openHint')}><View style={styles.settingIcon}><Ionicons name={item.icon as keyof typeof Ionicons.glyphMap} size={18} color={temaAtual.secondary} /></View>
               <Text style={styles.settingLabel}>{t(item.labelKey)}</Text>
               <Ionicons name="chevron-forward" size={18} color={temaAtual.inkFaint} />
             </Pressable>

@@ -40,8 +40,10 @@ export function useGoals() {
   const complete = useCallback(async (id: number) => {
     setError(null);
     const result = await completeGoal(id);
-    if (result.ok) setGoals((current) => current.filter((goal) => goal.id !== id));
-    else setError(result.error);
+    if (result.ok) {
+      setGoals((current) => current.filter((goal) => goal.id !== id));
+      setArchivedGoals((current) => [result.data, ...current.filter((goal) => goal.id !== id)]);
+    } else setError(result.error);
     return result;
   }, []);
 

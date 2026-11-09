@@ -34,7 +34,7 @@ import { useStreak } from '../hooks/useStreak';
 import { logSafeError } from '../lib/logger';
 
 export function GoalsScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { temaAtual } = useTheme();
   const insets = useSafeAreaInsets();
   const { session, profile } = useAuth();
@@ -435,6 +435,9 @@ export function GoalsScreen() {
   historyList: {
     gap: spacing.sm,
     paddingBottom: spacing.sm,
+  },
+  historyScroll: {
+    flexShrink: 1,
   },
   historyCard: {
     backgroundColor: temaAtual.background,
@@ -897,35 +900,52 @@ export function GoalsScreen() {
             {!archivedLoading && !archivedError && archivedGoals.length === 0 && (
               <Text style={styles.stateText}>{t('goals.emptyHistory')}</Text>
             )}
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.historyList}>
-              {archivedGoals.map((goal) => (
-                <View key={goal.id} style={styles.historyCard}>
-                  <View style={styles.historyCardHeader}>
-                    <Text style={styles.historyTitle} numberOfLines={2}>{goal.title}</Text>
-                    <Pill label={goal.category} variant="muted" />
+            <ScrollView style={styles.historyScroll} showsVerticalScrollIndicator={false} contentContainerStyle={styles.historyList}>
+              {archivedGoals.map((goal) => {
+                const completed = goal.completed_at !== null;
+                const historyAt = goal.completed_at ?? goal.archived_at ?? goal.created_at;
+                return (
+                  <View key={goal.id} style={styles.historyCard}>
+                    <View style={styles.historyCardHeader}>
+                      <Text style={styles.historyTitle} numberOfLines={2}>{goal.title}</Text>
+                      <Pill label={goal.category} variant="muted" />
+                    </View>
+                    <Pill
+                      label={completed ? t('goals.historyCompleted') : t('goals.historyArchived')}
+                      variant={completed ? 'primary' : 'muted'}
+                    />
+                    <Text style={styles.dueLabel}>
+                      {t(completed ? 'goals.historyCompletedOn' : 'goals.historyArchivedOn', { date: formatHistoryDate(historyAt, i18n.language) })}
+                    </Text>
+                    {goal.due_date && <Text style={styles.dueLabel}>{formatDueDate(goal.due_date, t)}</Text>}
+                    {goal.archived_at !== null && !completed && (
+                      <Pressable
+                        style={styles.restoreButton}
+                        onPress={() => void handleRestore(goal.id)}
+                        disabled={restoringGoalId !== null}
+                        accessibilityRole="button"
+                        accessibilityLabel={t('goals.restoreGoal', { title: goal.title })}
+                        accessibilityState={{ disabled: restoringGoalId !== null, busy: restoringGoalId === goal.id }}
+                      >
+                        {restoringGoalId === goal.id
+                          ? <ActivityIndicator size="small" color={temaAtual.secondary} />
+                          : <Ionicons name="refresh" size={17} color={temaAtual.secondary} />}
+                        <Text style={styles.restoreText}>{t('goals.restore')}</Text>
+                      </Pressable>
+                    )}
                   </View>
-                  <Text style={styles.dueLabel}>{formatDueDate(goal.due_date, t)}</Text>
-                  <Pressable
-                    style={styles.restoreButton}
-                    onPress={() => void handleRestore(goal.id)}
-                    disabled={restoringGoalId !== null}
-                    accessibilityRole="button"
-                    accessibilityLabel={t('goals.restoreGoal', { title: goal.title })}
-                    accessibilityState={{ disabled: restoringGoalId !== null, busy: restoringGoalId === goal.id }}
-                  >
-                    {restoringGoalId === goal.id
-                      ? <ActivityIndicator size="small" color={temaAtual.secondary} />
-                      : <Ionicons name="refresh" size={17} color={temaAtual.secondary} />}
-                    <Text style={styles.restoreText}>{t('goals.restore')}</Text>
-                  </Pressable>
-                </View>
-              ))}
+                );
+              })}
             </ScrollView>
           </Pressable>
         </Pressable>
       </Modal>
     </SafeAreaView>
   );
+}
+
+function formatHistoryDate(value: string, language: string) {
+  return new Intl.DateTimeFormat(language, { dateStyle: 'medium' }).format(new Date(value));
 }
 
 function formatDueDate(

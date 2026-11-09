@@ -1,7 +1,9 @@
-import { StyleSheet, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Animated, StyleSheet, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import type { ReactNode } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
+import { useReducedMotion } from '../hooks/useReducedMotion';
 
 type Props = {
   progress: number;
@@ -21,11 +23,38 @@ export function ProgressRing({
   children,
 }: Props) {
   const { temaAtual } = useTheme();
+  const reduceMotion = useReducedMotion();
 
   const radiusPx = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radiusPx;
   const clamped = Math.max(0, Math.min(1, progress));
-  const dashOffset = circumference * (1 - clamped);
+  const [animatedProgress] = useState(() => new Animated.Value(0));
+  const [displayProgress, setDisplayProgress] = useState(0);
+
+  useEffect(() => {
+    const listenerId = animatedProgress.addListener(({ value }) => {
+      setDisplayProgress(value);
+    });
+    return () => animatedProgress.removeListener(listenerId);
+  }, [animatedProgress]);
+
+  useEffect(() => {
+    animatedProgress.stopAnimation();
+    if (reduceMotion) {
+      animatedProgress.setValue(clamped);
+      return;
+    }
+
+    const animation = Animated.timing(animatedProgress, {
+      toValue: clamped,
+      duration: 320,
+      useNativeDriver: false,
+    });
+    animation.start();
+    return () => animation.stop();
+  }, [animatedProgress, clamped, reduceMotion]);
+
+  const dashOffset = circumference * (1 - displayProgress);
 
   const ringColor = color ?? temaAtual.primary;
   const backgroundColor = trackColor ?? temaAtual.surface;

@@ -2,9 +2,7 @@ import { useRef, useState } from 'react';
 import {
   Alert,
   Animated,
-  Modal,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -23,7 +21,6 @@ import { useTheme } from '../contexts/ThemeContext';
 import { loginSchema, type LoginFormData } from '../validation/schemas';
 import { useAuth } from '../contexts/AuthContext';
 import { logSafeError } from '../lib/logger';
-import { changeAppLanguage, type AppLanguage } from '../i18n';
 import { useErrorShake } from '../hooks/useErrorShake';
 
 type Props = {
@@ -32,29 +29,14 @@ type Props = {
 };
 
 export function Login({ onCreateAccount }: Props) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { signIn } = useAuth();
-  const { tema, temaAtual, alternarTema } = useTheme();
+  const { temaAtual } = useTheme();
   const styles = createStyles(temaAtual);
   const { shake, shakeStyle } = useErrorShake();
-  const [acceptedTerms, setAcceptedTerms] =
-    useState(false);
-  const [termsError, setTermsError] =
-    useState(false);
-  const [modalVisible, setModalVisible] =
-    useState(false);
   const [isLoading, setIsLoading] =
     useState(false);
   const submitInProgress = useRef(false);
-  const currentLanguage = (
-    i18n.resolvedLanguage ?? i18n.language
-  ).toLowerCase();
-  const selectedLanguage: AppLanguage =
-    currentLanguage.startsWith('en')
-      ? 'en-US'
-      : currentLanguage.startsWith('es')
-        ? 'es-ES'
-        : 'pt-BR';
   const {
     control,
     formState: { errors },
@@ -67,21 +49,6 @@ export function Login({ onCreateAccount }: Props) {
       password: '',
     },
   });
-
-  async function handleLanguageChange(
-    language: AppLanguage
-  ) {
-    if (language === selectedLanguage) return;
-    try {
-      await changeAppLanguage(language);
-    } catch {
-      logSafeError('language.change_failed');
-      Alert.alert(
-        t('common.error'),
-        t('language.saveError')
-      );
-    }
-  }
 
   async function onSubmit(data: LoginFormData) {
     if (submitInProgress.current) return;
@@ -116,135 +83,13 @@ export function Login({ onCreateAccount }: Props) {
   }
 
   function handleLogin() {
-    if (!acceptedTerms) {
-      setTermsError(true);
-      shake(t('login.acceptTermsRequired'));
-      return;
-    }
-    setTermsError(false);
     void handleSubmit(onSubmit, () => {
       shake(t('common.formInvalid'));
     })();
   }
-
-  function handleTermsToggle() {
-    setAcceptedTerms((current) => !current);
-    setTermsError(false);
-  }
   return (
     <View style={styles.container}>
       <Animated.View style={[styles.form, shakeStyle]}>
-        {/* Language selector */}
-        <View style={styles.languageContainer}>
-          <Text style={styles.languageLabel}>
-            {t('language.label')}
-          </Text>
-          <View
-            style={styles.languageOptions}
-            accessibilityRole="radiogroup"
-            accessibilityLabel={t('language.label')}
-          >
-            {/* Portuguese */}
-            <Pressable
-              accessibilityRole="radio"
-              accessibilityState={{
-                selected: selectedLanguage === 'pt-BR',
-              }}
-              accessibilityLabel={t('language.portuguese')}
-              style={[
-                styles.languageOption,
-                selectedLanguage === 'pt-BR' &&
-                  styles.languageOptionSelected,
-              ]}
-              disabled={isLoading}
-              onPress={() =>
-                handleLanguageChange('pt-BR')
-              }
-            >
-              <Text
-                style={[
-                  styles.languageOptionText,
-                  selectedLanguage === 'pt-BR' &&
-                    styles.languageOptionTextSelected,
-                ]}
-              >
-                {t('language.portuguese')}
-              </Text>
-            </Pressable>
-            {/* English */}
-            <Pressable
-              accessibilityRole="radio"
-              accessibilityState={{
-                selected: selectedLanguage === 'en-US',
-              }}
-              accessibilityLabel={t('language.english')}
-              style={[
-                styles.languageOption,
-                selectedLanguage === 'en-US' &&
-                  styles.languageOptionSelected,
-              ]}
-              disabled={isLoading}
-              onPress={() =>
-                handleLanguageChange('en-US')
-              }
-            >
-              <Text
-                style={[
-                  styles.languageOptionText,
-                  selectedLanguage === 'en-US' &&
-                    styles.languageOptionTextSelected,
-                ]}
-              >
-                {t('language.english')}
-              </Text>
-            </Pressable>
-            {/* Spanish */}
-            <Pressable
-              accessibilityRole="radio"
-              accessibilityState={{
-                selected: selectedLanguage === 'es-ES',
-              }}
-              accessibilityLabel={t('language.spanish')}
-              style={[
-                styles.languageOption,
-                selectedLanguage === 'es-ES' &&
-                  styles.languageOptionSelected,
-              ]}
-              disabled={isLoading}
-              onPress={() =>
-                handleLanguageChange('es-ES')
-              }
-            >
-              <Text
-                style={[
-                  styles.languageOptionText,
-                  selectedLanguage === 'es-ES' &&
-                    styles.languageOptionTextSelected,
-                ]}
-              >
-                {t('language.spanish')}
-              </Text>
-            </Pressable>
-          </View>
-        </View>
-        {/* Theme toggle */}
-        <Pressable
-          style={styles.themeToggle}
-          onPress={alternarTema}
-          accessibilityRole="button"
-          accessibilityLabel={
-            tema === 'light' ? t('theme.enableDark') : t('theme.enableLight')
-          }
-        >
-          <Ionicons
-            name={tema === 'light' ? 'moon-outline' : 'sunny-outline'}
-            size={20}
-            color={temaAtual.secondary}
-          />
-          <Text style={styles.themeToggleText}>
-            {tema === 'light' ? t('theme.dark') : t('theme.light')}
-          </Text>
-        </Pressable>
         <EmailInput
           control={control}
           errors={errors}
@@ -266,79 +111,6 @@ export function Login({ onCreateAccount }: Props) {
             {t('login.forgotPassword')}
           </Text>
         </Pressable>
-        {/* Terms of Service */}
-        <View>
-          <Pressable
-            style={styles.termsContainer}
-            disabled={isLoading}
-            onPress={handleTermsToggle}
-            accessibilityRole="checkbox"
-            accessibilityState={{
-              checked: acceptedTerms,
-            }}
-          >
-            <Ionicons
-              name={
-                acceptedTerms
-                  ? 'checkbox'
-                  : 'square-outline'
-              }
-              size={18}
-              color={
-                termsError
-                  ? temaAtual.danger
-                  : temaAtual.secondary
-              }
-            />
-            <Text style={styles.termsText}>
-              {t('login.termsAgreementStart')}{' '}
-              <Text
-                style={styles.termsLink}
-                onPress={() => setModalVisible(true)}
-              >
-                {t('login.termsOfService')}
-              </Text>
-              {t('login.termsAgreementEnd')}
-            </Text>
-          </Pressable>
-          {termsError && (
-            <Text
-              accessibilityRole="alert"
-              style={styles.termsError}
-            >
-              {t('login.acceptTermsRequired')}
-            </Text>
-          )}
-        </View>
-        {/* Terms modal */}
-        <Modal
-          animationType="fade"
-          transparent
-          visible={modalVisible}
-          onRequestClose={() => setModalVisible(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              <ScrollView
-                showsVerticalScrollIndicator={false}
-              >
-                <Text style={styles.modalTitle}>
-                  {t('login.termsTitle')}
-                </Text>
-                <Text style={styles.modalText}>
-                  {t('login.termsContent.paragraph1')}
-                </Text>
-                <Text style={styles.modalText}>
-                  {t('login.termsContent.paragraph2')}
-                </Text>
-              </ScrollView>
-              <Button
-                label={t('common.close')}
-                onPress={() => setModalVisible(false)}
-              />
-            </View>
-          </View>
-        </Modal>
         {/* Login button */}
         <Button
           label={
