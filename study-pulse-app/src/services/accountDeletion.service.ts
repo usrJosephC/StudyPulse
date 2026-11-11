@@ -1,31 +1,37 @@
-import { fail, ok, type Result } from '../lib/result'
 import { supabase, supabaseConfigured } from '../lib/supabase'
 
-const unavailable = (): Result<null> => fail({
-  code: 'unknown',
-  message: 'Supabase não está configurado. Verifique as variáveis de ambiente.',
+export type AccountDeletionErrorCode =
+  | 'not_configured'
+  | 'session_required'
+  | 'session_expired'
+  | 'delete_failed'
+
+export type AccountDeletionResult =
+  | { ok: true; data: null }
+  | { ok: false; error: { code: AccountDeletionErrorCode } }
+
+const failure = (code: AccountDeletionErrorCode): AccountDeletionResult => ({
+  ok: false,
+  error: { code },
 })
 
 /** Permanently deletes the authenticated account. The caller clears the local session after showing success. */
-export async function deleteCurrentAccount(): Promise<Result<null>> {
-  if (!supabase || !supabaseConfigured) return unavailable()
+export async function deleteCurrentAccount(): Promise<AccountDeletionResult> {
+  if (!supabase || !supabaseConfigured) return failure('not_configured')
 
   try {
     const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-    if (sessionError || !session?.access_token) {
-      return fail({ code: 'auth', message: 'Faça login para excluir sua conta.' })
-    }
+    if (sessionError) return failure('delete_failed')
+    if (!session?.access_token) return failure('session_required')
 
     const { error: functionError } = await supabase.functions.invoke('delete-account', { method: 'POST' })
     if (functionError) {
       const status = functionError.context instanceof Response ? functionError.context.status : undefined
-      return status === 401
-        ? fail({ code: 'auth', message: 'Sua sessão expirou. Entre novamente e tente excluir a conta.' })
-        : fail({ code: 'unknown', message: 'Não foi possível excluir sua conta. Tente novamente.' })
+      return failure(status === 401 ? 'session_expired' : 'delete_failed')
     }
 
-    return ok(null)
+    return { ok: true, data: null }
   } catch {
-    return fail({ code: 'unknown', message: 'Não foi possível excluir sua conta. Tente novamente.' })
+    return failure('delete_failed')
   }
 }

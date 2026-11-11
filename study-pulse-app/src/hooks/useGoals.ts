@@ -11,8 +11,8 @@ export function useGoals() {
   const [archivedLoading, setArchivedLoading] = useState(false);
   const [archivedError, setArchivedError] = useState<AppError | null>(null);
 
-  const refresh = useCallback(async () => {
-    setLoading(true);
+  const refresh = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
     setError(null);
     const result = await listActive();
     if (result.ok) setGoals(result.data);

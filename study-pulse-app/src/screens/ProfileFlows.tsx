@@ -4,7 +4,7 @@ import { ActivityIndicator, Modal, Pressable, ScrollView, Share, StyleSheet, Tex
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../contexts/ThemeContext';
 import { changeAppLanguage, type AppLanguage } from '../i18n';
-import { deleteCurrentAccount } from '../services/accountDeletion.service';
+import { deleteCurrentAccount, type AccountDeletionErrorCode } from '../services/accountDeletion.service';
 import { useAuth } from '../contexts/AuthContext';
 import { useSquad } from '../hooks/useSquad';
 import { useSquadCreation } from '../hooks/useSquadCreation';
@@ -14,6 +14,13 @@ import { supabase } from '../lib/supabase';
 import { updateSquad } from '../services/squad.service';
 import { Card } from '../components/Card';
 import { fonts, radius, spacing } from '../theme';
+
+const accountDeletionErrorKeys: Record<AccountDeletionErrorCode, string> = {
+  not_configured: 'profile.account.deleteErrors.notConfigured',
+  session_required: 'profile.account.deleteErrors.sessionRequired',
+  session_expired: 'profile.account.deleteErrors.sessionExpired',
+  delete_failed: 'profile.account.deleteErrors.failed',
+};
 
 export type ProfileFlowName = 'account' | 'notifications' | 'squad' | 'preferences';
 type ProfileFlowProps = { flow: ProfileFlowName; close: () => void; saved: (name: string) => void; initialName?: string };
@@ -110,7 +117,7 @@ function ProfileFlowContent({ flow, close, saved, initialName }: Omit<ProfileFlo
     const result = await deleteCurrentAccount();
     setDeleting(false);
     if (!result.ok) {
-      setDeleteError(result.error.message);
+      setDeleteError(t(accountDeletionErrorKeys[result.error.code]));
       return;
     }
     setDeleteError(null);
@@ -127,7 +134,7 @@ function ProfileFlowContent({ flow, close, saved, initialName }: Omit<ProfileFlo
       setDeleteConfirmationOpen(false);
       close();
     } catch {
-      setDeleteError(t('login.unexpectedError'));
+      setDeleteError(t('profile.account.deleteErrors.sessionCloseFailed'));
       setFinishingSignOut(false);
     }
   }

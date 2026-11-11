@@ -9,7 +9,7 @@ export function useRanking(id: number | null) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<AppError | null>(null);
   const requestId = useRef(0);
-  const refresh = useCallback(async (): Promise<Result<RankingEntry[]>> => {
+  const refresh = useCallback(async (silent = false): Promise<Result<RankingEntry[]>> => {
     const currentRequest = ++requestId.current;
     setError(null);
     if (id === null) {
@@ -17,8 +17,10 @@ export function useRanking(id: number | null) {
       setLoading(false);
       return ok([]);
     }
-    setRanking([]);
-    setLoading(true);
+    if (!silent) {
+      setRanking([]);
+      setLoading(true);
+    }
     const result = await getRanking(id);
     if (currentRequest === requestId.current) {
       if (result.ok) {

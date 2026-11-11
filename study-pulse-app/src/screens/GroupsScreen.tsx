@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, Share, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -32,6 +32,7 @@ export function GroupsScreen() {
   const podium = [ranking[1], ranking[0], ranking[2]].filter((member): member is RankingEntry => Boolean(member));
   const rest = ranking.slice(3);
   const [leaderboardVisible, setLeaderboardVisible] = useState(false);
+  const hasFocusedRef = useRef(false);
   const [inviteCode, setInviteCode] = useState('');
   const [joining, setJoining] = useState(false);
   const [joinError, setJoinError] = useState<string | null>(null);
@@ -254,6 +255,9 @@ export function GroupsScreen() {
       backgroundColor: 'rgba(33,33,33,0.5)',
       justifyContent: 'flex-end',
     },
+    leaderboardBackdrop: {
+      backgroundColor: 'rgba(0,0,0,0.68)',
+    },
     leaderboardModal: {
       backgroundColor: temaAtual.card,
       borderTopLeftRadius: radius.lg,
@@ -349,8 +353,8 @@ export function GroupsScreen() {
     editButtonText: { fontFamily: fonts.bodyBold, fontSize: 13, color: temaAtual.secondary },
   });
 
-  function refreshAll() {
-    void Promise.all([refreshSquad(), refreshRanking(), refreshActivity()]);
+  function refreshAll(silent = false) {
+    void Promise.all([refreshSquad(silent), refreshRanking(silent), refreshActivity(silent)]);
   }
 
   async function handleJoin() {
@@ -366,7 +370,7 @@ export function GroupsScreen() {
   async function handleCreate() {
     if (!groupName.trim() || creating) return;
     const result = await createSquad(groupName.trim(), groupDescription.trim());
-    if (result.ok) { setCreateVisible(false); setGroupName(''); setGroupDescription(''); refreshAll(); }
+    if (result.ok) { setCreateVisible(false); setGroupName(''); setGroupDescription(''); refreshAll(true); }
   }
 
   function openEditSquad() {
@@ -375,6 +379,10 @@ export function GroupsScreen() {
     setEditDescription(squad.subtitle ?? '');
     setEditError(null);
     setEditVisible(true);
+  }
+
+  function closeEditSquad() {
+    setEditVisible(false);
   }
 
   function handleUpdateSquad() {
@@ -387,7 +395,7 @@ export function GroupsScreen() {
         return;
       }
       setEditVisible(false);
-      refreshAll();
+      refreshAll(true);
     }).finally(() => setUpdating(false));
   }
 
@@ -441,7 +449,11 @@ export function GroupsScreen() {
   }
 
   useFocusEffect(useCallback(() => {
-    void Promise.all([refreshSquad(), refreshRanking(), refreshActivity()]);
+    if (!hasFocusedRef.current) {
+      hasFocusedRef.current = true;
+      return;
+    }
+    void Promise.all([refreshSquad(true), refreshRanking(true), refreshActivity(true)]);
   }, [refreshActivity, refreshRanking, refreshSquad]));
 
   return (
@@ -644,7 +656,7 @@ export function GroupsScreen() {
         transparent
         onRequestClose={() => setLeaderboardVisible(false)}
       >
-        <View style={styles.backdrop}>
+        <View style={[styles.backdrop, styles.leaderboardBackdrop]}>
           <SafeAreaView style={styles.leaderboardModal} edges={['bottom']}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>{t('groups.fullLeaderboard')}</Text>
@@ -705,14 +717,14 @@ export function GroupsScreen() {
           </KeyboardAvoidingView>
         </Pressable>
       </Modal>
-      <Modal visible={editVisible} transparent animationType="slide" onRequestClose={() => setEditVisible(false)}>
+      <Modal visible={editVisible} transparent animationType="slide" onRequestClose={closeEditSquad} >
         <Pressable style={styles.backdrop} onPress={() => setEditVisible(false)} accessibilityLabel={t('common.close')}>
           <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
             <Pressable style={[styles.createModal, { paddingBottom: spacing.lg + insets.bottom }]} onPress={(event) => event.stopPropagation()}>
               <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: spacing.md }}>
                 <View style={styles.modalHeader}>
                   <Text style={styles.modalTitle}>{t('groups.editGroup')}</Text>
-                  <Pressable onPress={() => setEditVisible(false)} accessibilityRole="button" accessibilityLabel={t('common.close')}>
+                  <Pressable onPress={closeEditSquad} accessibilityRole="button" accessibilityLabel={t('common.close')} hitSlop={8} style={styles.modalClose}>
                     <Ionicons name="close" size={22} color={temaAtual.ink} />
                   </Pressable>
                 </View>

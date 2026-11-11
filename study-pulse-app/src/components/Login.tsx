@@ -2,7 +2,9 @@ import { useRef, useState } from 'react';
 import {
   Alert,
   Animated,
+  Modal,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -36,6 +38,9 @@ export function Login({ onCreateAccount }: Props) {
   const { shake, shakeStyle } = useErrorShake();
   const [isLoading, setIsLoading] =
     useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [termsError, setTermsError] = useState(false);
+  const [termsVisible, setTermsVisible] = useState(false);
   const submitInProgress = useRef(false);
   const {
     control,
@@ -60,12 +65,12 @@ export function Login({ onCreateAccount }: Props) {
         data.password
       );
       if (!result.ok) {
-        shake(result.error.message || t('login.unexpectedError'));
-        Alert.alert(
-          t('login.loginErrorTitle'),
-          result.error.message ||
-            t('login.unexpectedError')
-        );
+        const errorMessage =
+          result.error.message === 'invalid_credentials'
+            ? t('login.invalidCredentials')
+            : result.error.message || t('login.unexpectedError');
+        shake(errorMessage);
+        Alert.alert(t('login.loginErrorTitle'), errorMessage);
         return;
       }
       // The AuthProvider handles navigation when the session is emitted.
@@ -83,6 +88,12 @@ export function Login({ onCreateAccount }: Props) {
   }
 
   function handleLogin() {
+    if (!termsAccepted) {
+      setTermsError(true);
+      shake(t('login.acceptTermsRequired'));
+      return;
+    }
+    setTermsError(false);
     void handleSubmit(onSubmit, () => {
       shake(t('common.formInvalid'));
     })();
@@ -98,6 +109,41 @@ export function Login({ onCreateAccount }: Props) {
           control={control}
           errors={errors}
         />
+        <View style={styles.termsContainer}>
+          <Pressable
+            style={styles.termsCheckbox}
+            onPress={() => {
+              setTermsAccepted((accepted) => !accepted);
+              setTermsError(false);
+            }}
+            disabled={isLoading}
+            accessibilityRole="checkbox"
+            accessibilityLabel={`${t('login.termsAgreementStart')} ${t('login.termsOfService')}`}
+            accessibilityState={{ checked: termsAccepted, disabled: isLoading }}
+          >
+            <Ionicons
+              name={termsAccepted ? 'checkbox' : 'square-outline'}
+              size={20}
+              color={termsAccepted ? temaAtual.secondary : temaAtual.inkMuted}
+            />
+          </Pressable>
+          <Text style={styles.termsText}>
+            {t('login.termsAgreementStart')}{' '}
+            <Text
+              style={styles.termsLink}
+              onPress={() => setTermsVisible(true)}
+              accessibilityRole="link"
+            >
+              {t('login.termsOfService')}
+            </Text>
+            {t('login.termsAgreementEnd')}
+          </Text>
+        </View>
+        {termsError && (
+          <Text style={styles.termsError} accessibilityRole="alert">
+            {t('login.acceptTermsRequired')}
+          </Text>
+        )}
         <Pressable
           disabled={isLoading}
           onPress={() =>
@@ -149,6 +195,33 @@ export function Login({ onCreateAccount }: Props) {
           </Text>
         </Pressable>
       </Animated.View>
+      <Modal
+        visible={termsVisible}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setTermsVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>{t('login.termsTitle')}</Text>
+            <ScrollView>
+              <Text style={styles.modalText}>
+                {t('login.termsContent.paragraph1')}
+                {'\n\n'}
+                {t('login.termsContent.paragraph2')}
+              </Text>
+            </ScrollView>
+            <Pressable
+              onPress={() => setTermsVisible(false)}
+              style={styles.modalCloseButton}
+              accessibilityRole="button"
+              accessibilityLabel={t('common.close')}
+            >
+              <Text style={styles.modalCloseText}>{t('common.close')}</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -226,7 +299,7 @@ const createStyles = (colors: Colors) => StyleSheet.create({
   },
   termsContainer: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     gap: spacing.xs,
   },
   termsText: {
@@ -240,6 +313,12 @@ const createStyles = (colors: Colors) => StyleSheet.create({
     fontFamily: fonts.bodyBold,
     color: colors.secondary,
     textDecorationLine: 'underline',
+  },
+  termsCheckbox: {
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   termsError: {
     fontFamily: fonts.bodyMedium,
@@ -276,6 +355,18 @@ const createStyles = (colors: Colors) => StyleSheet.create({
     lineHeight: 21,
     color: colors.inkMuted,
     marginBottom: spacing.md,
+  },
+  modalCloseButton: {
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radius.md,
+    backgroundColor: colors.secondary,
+  },
+  modalCloseText: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 14,
+    color: colors.card,
   },
   googleButton: {
     flexDirection: 'row',

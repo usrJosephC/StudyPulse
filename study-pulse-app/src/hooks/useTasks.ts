@@ -8,8 +8,8 @@ export function useTasks() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<AppError | null>(null);
 
-  const refresh = useCallback(async () => {
-    setLoading(true);
+  const refresh = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
     setError(null);
     const result = await listToday();
     if (result.ok) setTasks(result.data);

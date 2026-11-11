@@ -12,8 +12,8 @@ export function useProgression() {
   const [catalogError, setCatalogError] = useState<AppError | null>(null);
   const [badgesError, setBadgesError] = useState<AppError | null>(null);
   const [historyError, setHistoryError] = useState<AppError | null>(null);
-  const refresh = useCallback(async () => {
-    setLoading(true);
+  const refresh = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
     setError(null);
     const [catalogResult, badgeResult, historyResult] = await Promise.all([
       listBadges(),

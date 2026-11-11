@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -33,6 +33,7 @@ export function ProfileScreen() {
   const points = usePoints();
   const tasks = useTasks();
   const progression = useProgression();
+  const hasFocusedRef = useRef(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [signOutError, setSignOutError] = useState<string | null>(null);
   const [savedName, setSavedName] = useState<string | null>(null);
@@ -128,7 +129,11 @@ export function ProfileScreen() {
   const refreshProgression = progression.refresh;
 
   useFocusEffect(useCallback(() => {
-    void Promise.all([refreshStreak(), refreshPoints(), refreshTasks(), refreshProgression()]);
+    if (!hasFocusedRef.current) {
+      hasFocusedRef.current = true;
+      return;
+    }
+    void Promise.all([refreshStreak(true), refreshPoints(true), refreshTasks(true), refreshProgression(true)]);
   }, [refreshPoints, refreshProgression, refreshStreak, refreshTasks]));
 
   return (

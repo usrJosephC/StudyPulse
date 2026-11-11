@@ -69,7 +69,8 @@
     "serverError": "An unexpected error occurred.",
     "connectionErrorTitle": "Connection error",
     "connectionError": "No response from the server.",
-    "unexpectedError": "An error occurred while trying to log in."
+    "unexpectedError": "An error occurred while trying to log in.",
+    "invalidCredentials": "Incorrect email or password."
   },
   "registerPage": {
     "title": "Create Account",
@@ -238,6 +239,8 @@
     "checkedIn": "Checked in",
     "checkInSuccess_one": "Check-in complete: +{{count}} point.",
     "checkInSuccess_other": "Check-in complete: +{{count}} points.",
+    "checkInAlready": "You've already checked in today.",
+    "checkInFailed": "Couldn't record your check-in. Please try again.",
     "tasks": "Tasks",
     "almostThere": "Almost there, {{name}}!",
     "goalsEncouragement": "You're over halfway through today's goals. Keep that momentum going!",
@@ -367,7 +370,14 @@
       "deleteConfirmTitle": "Delete your account?",
       "deleteConfirmMessage": "This permanently removes your account and associated data. This action cannot be undone.",
       "deleteSuccessTitle": "Account deleted",
-      "deleteSuccess": "Your account has been deleted."
+      "deleteSuccess": "Your account has been deleted.",
+      "deleteErrors": {
+        "notConfigured": "Account deletion is not configured. Please try again later.",
+        "sessionRequired": "Log in to request account deletion.",
+        "sessionExpired": "Your session has expired. Log in again and try deleting your account.",
+        "failed": "We couldn't delete your account. Please try again.",
+        "sessionCloseFailed": "Your account was deleted, but we couldn't end the session on this device. Please try signing out again."
+      }
     },
     "squad": {
       "edit": "Edit group",

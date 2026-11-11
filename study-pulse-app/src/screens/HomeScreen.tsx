@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AccessibilityInfo, Animated, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { AccessibilityInfo, Animated, Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -27,6 +27,10 @@ export function HomeScreen() {
   const points = usePoints();
   const dailyCheckIn = useCheckIn();
   const { tasks, loading: tasksLoading, error: tasksError, refresh: refreshTasks, createTask, toggleTask } = useTasks();
+  const hasFocusedRef = useRef(false);
+  const taskListRef = useRef<ScrollView>(null);
+  const taskTitleInputRef = useRef<TextInput>(null);
+  const taskFormOffset = useRef(0);
   const reduceMotion = useReducedMotion();
   const [animatedTasksDone] = useState(() => new Animated.Value(0));
   const [checkmarkScale] = useState(() => new Animated.Value(0.6));
@@ -143,6 +147,20 @@ export function HomeScreen() {
 
   useEffect(() => () => checkmarkScale.stopAnimation(), [checkmarkScale]);
 
+  useEffect(() => {
+    if (!taskFormVisible) return;
+    const keyboardSubscription = Keyboard.addListener('keyboardDidShow', () => {
+      taskListRef.current?.scrollTo({ y: Math.max(0, taskFormOffset.current - spacing.md), animated: true });
+    });
+    const focusTimer = setTimeout(() => {
+      taskTitleInputRef.current?.focus();
+    }, 250);
+    return () => {
+      clearTimeout(focusTimer);
+      keyboardSubscription.remove();
+    };
+  }, [taskFormVisible]);
+
   async function refreshHomeData() {
     setTaskError(null);
 
@@ -153,7 +171,11 @@ export function HomeScreen() {
   }
 
   useFocusEffect(useCallback(() => {
-    void Promise.all([refreshTasks(), points.refresh(), streak.refresh()]);
+    if (!hasFocusedRef.current) {
+      hasFocusedRef.current = true;
+      return;
+    }
+    void Promise.all([refreshTasks(true), points.refresh(true), streak.refresh(true)]);
   }, [points.refresh, refreshTasks, streak.refresh]));
 
   const styles = StyleSheet.create({
@@ -342,7 +364,14 @@ export function HomeScreen() {
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScreenHeader userInitial={userInitial} />
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <KeyboardAvoidingView style={styles.flexFill} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <ScrollView
+        ref={taskListRef}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+      >
         <LinearGradient
           colors={[temaAtual.primary, temaAtual.primarySoft]}
           start={{ x: 0, y: 0 }}
@@ -370,7 +399,9 @@ export function HomeScreen() {
 
         {dailyCheckIn.error && (
           <Text style={[styles.checkInFeedback, styles.errorText]} accessibilityRole="alert">
-            {dailyCheckIn.error.message}
+            {dailyCheckIn.error.code === 'conflict'
+              ? t('home.checkInAlready')
+              : t('home.checkInFailed')}
           </Text>
         )}
 
@@ -418,8 +449,12 @@ export function HomeScreen() {
         </View>
 
         {taskFormVisible && (
-          <Card style={styles.taskForm}>
+          <Card
+            style={styles.taskForm}
+            onLayout={(event) => { taskFormOffset.current = event.nativeEvent.layout.y; }}
+          >
             <TextInput
+              ref={taskTitleInputRef}
               value={taskTitle}
               onChangeText={setTaskTitle}
               placeholder={t('home.taskTitlePlaceholder')}
@@ -566,6 +601,7 @@ export function HomeScreen() {
           </Text>
         </Card>
       </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -37,6 +37,7 @@ export function GoalsScreen() {
   const { t, i18n } = useTranslation();
   const { temaAtual } = useTheme();
   const insets = useSafeAreaInsets();
+  const hasFocusedRef = useRef(false);
   const { session, profile } = useAuth();
 
   const {
@@ -209,10 +210,14 @@ export function GoalsScreen() {
 
   useFocusEffect(
     useCallback(() => {
+      if (!hasFocusedRef.current) {
+        hasFocusedRef.current = true;
+        return;
+      }
       void Promise.all([
-        refreshGoals(),
-        refreshHeatmap(),
-        refreshStreak(),
+        refreshGoals(true),
+        refreshHeatmap(true),
+        refreshStreak(true),
       ]);
     }, [refreshGoals, refreshHeatmap, refreshStreak])
   );
@@ -368,7 +373,9 @@ export function GoalsScreen() {
     justifyContent: 'flex-end',
   },
   modalWrap: {
+    flex: 1,
     width: '100%',
+    justifyContent: 'flex-end',
   },
   modalCard: {
     backgroundColor: temaAtual.card,
@@ -376,7 +383,11 @@ export function GoalsScreen() {
     borderTopRightRadius: radius.lg,
     padding: spacing.lg,
     paddingBottom: spacing.xl,
-    maxHeight: '90%',
+    maxHeight: '85%',
+    flexShrink: 1,
+  },
+  modalScroll: {
+    flexShrink: 1,
   },
   modalContent: {
     gap: spacing.xs,
@@ -741,6 +752,7 @@ export function GoalsScreen() {
               onPress={(event) => event.stopPropagation()}
             >
               <ScrollView
+                style={styles.modalScroll}
                 contentContainerStyle={styles.modalContent}
                 keyboardShouldPersistTaps="handled"
                 showsVerticalScrollIndicator={false}
@@ -829,30 +841,30 @@ export function GoalsScreen() {
                   </Text>
                 )}
 
-                <View style={styles.modalActions}>
-                  <View style={styles.modalAction}>
-                    <Button
-                      label={t('common.cancel')}
-                      variant="muted"
-                      onPress={() => setModalVisible(false)}
-                      disabled={saving}
-                    />
-                  </View>
-
-                  <View style={styles.modalAction}>
-                    <Button
-                      label={
-                        saving ? t('goals.saving') : editingGoalId !== null ? t('goals.updateGoal') : t('common.save')
-                      }
-                      variant="primary"
-                      onPress={() => {
-                        void handleSave();
-                      }}
-                      disabled={saving}
-                    />
-                  </View>
-                </View>
               </ScrollView>
+              <View style={styles.modalActions}>
+                <View style={styles.modalAction}>
+                  <Button
+                    label={t('common.cancel')}
+                    variant="muted"
+                    onPress={() => setModalVisible(false)}
+                    disabled={saving}
+                  />
+                </View>
+
+                <View style={styles.modalAction}>
+                  <Button
+                    label={
+                      saving ? t('goals.saving') : editingGoalId !== null ? t('goals.updateGoal') : t('common.save')
+                    }
+                    variant="primary"
+                    onPress={() => {
+                      void handleSave();
+                    }}
+                    disabled={saving}
+                  />
+                </View>
+              </View>
             </Pressable>
           </KeyboardAvoidingView>
         </Pressable>

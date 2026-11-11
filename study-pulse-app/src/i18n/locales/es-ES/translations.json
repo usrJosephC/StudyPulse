@@ -69,7 +69,8 @@
     "serverError": "Se ha producido un error inesperado.",
     "connectionErrorTitle": "Error de conexión",
     "connectionError": "No se ha recibido respuesta del servidor.",
-    "unexpectedError": "Se ha producido un error al intentar iniciar sesión."
+    "unexpectedError": "Se ha producido un error al intentar iniciar sesión.",
+    "invalidCredentials": "Correo electrónico o contraseña incorrectos."
   },
   "registerPage": {
     "title": "Crear cuenta",
@@ -238,6 +239,8 @@
     "checkedIn": "Actividad registrada",
     "checkInSuccess_one": "Registro completado: +{{count}} punto.",
     "checkInSuccess_other": "Registro completado: +{{count}} puntos.",
+    "checkInAlready": "Ya has registrado tu actividad de hoy.",
+    "checkInFailed": "No se pudo registrar tu actividad. Inténtalo de nuevo.",
     "tasks": "Tareas",
     "almostThere": "¡Ya casi lo tienes, {{name}}!",
     "goalsEncouragement": "Ya has completado más de la mitad de los objetivos de hoy. ¡Sigue así!",
@@ -367,7 +370,14 @@
       "deleteConfirmTitle": "¿Eliminar tu cuenta?",
       "deleteConfirmMessage": "Tu cuenta y los datos asociados se eliminarán de forma permanente. Esta acción no se puede deshacer.",
       "deleteSuccessTitle": "Cuenta eliminada",
-      "deleteSuccess": "Tu cuenta se ha eliminado."
+      "deleteSuccess": "Tu cuenta se ha eliminado.",
+      "deleteErrors": {
+        "notConfigured": "La eliminación de cuentas no está configurada. Inténtalo de nuevo más tarde.",
+        "sessionRequired": "Inicia sesión para solicitar la eliminación de tu cuenta.",
+        "sessionExpired": "Tu sesión ha caducado. Inicia sesión de nuevo e intenta eliminar la cuenta.",
+        "failed": "No se pudo eliminar tu cuenta. Inténtalo de nuevo.",
+        "sessionCloseFailed": "Tu cuenta se eliminó, pero no se pudo cerrar la sesión en este dispositivo. Intenta cerrar sesión de nuevo."
+      }
     },
     "squad": {
       "edit": "Editar grupo",

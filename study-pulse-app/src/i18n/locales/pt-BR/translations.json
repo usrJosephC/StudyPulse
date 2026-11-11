@@ -69,7 +69,8 @@
     "serverError": "Ocorreu um erro inesperado.",
     "connectionErrorTitle": "Erro de conexão",
     "connectionError": "Não houve resposta do servidor.",
-    "unexpectedError": "Ocorreu um erro ao tentar entrar."
+    "unexpectedError": "Ocorreu um erro ao tentar entrar.",
+    "invalidCredentials": "E-mail ou senha incorretos."
   },
   "registerPage": {
     "title": "Criar conta",
@@ -238,6 +239,8 @@
     "checkedIn": "Check-in feito",
     "checkInSuccess_one": "Check-in concluído: +{{count}} ponto.",
     "checkInSuccess_other": "Check-in concluído: +{{count}} pontos.",
+    "checkInAlready": "Você já fez o check-in de hoje.",
+    "checkInFailed": "Não foi possível registrar o check-in. Tente novamente.",
     "tasks": "Tarefas",
     "almostThere": "Quase lá, {{name}}!",
     "goalsEncouragement": "Você já passou da metade das metas de hoje. Continue nesse ritmo!",
@@ -367,7 +370,14 @@
       "deleteConfirmTitle": "Excluir sua conta?",
       "deleteConfirmMessage": "Sua conta e os dados associados serão removidos permanentemente. Esta ação não pode ser desfeita.",
       "deleteSuccessTitle": "Conta excluída",
-      "deleteSuccess": "Sua conta foi excluída."
+      "deleteSuccess": "Sua conta foi excluída.",
+      "deleteErrors": {
+        "notConfigured": "O serviço de exclusão de conta não está configurado. Tente novamente mais tarde.",
+        "sessionRequired": "Entre na sua conta para solicitar a exclusão.",
+        "sessionExpired": "Sua sessão expirou. Entre novamente e tente excluir a conta.",
+        "failed": "Não foi possível excluir sua conta. Tente novamente.",
+        "sessionCloseFailed": "A conta foi excluída, mas não foi possível encerrar a sessão neste dispositivo. Tente sair novamente."
+      }
     },
     "squad": {
       "edit": "Editar grupo",
