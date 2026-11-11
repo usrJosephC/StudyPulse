@@ -13,6 +13,6 @@ export type SquadActivity = { id: number; squad_id: number; user_id: string; use
 export type TaskInput = { title: string; category?: string; task_date?: string };
 export type GoalInput = { title: string; category?: string; due_date?: string | null; progress?: number; icon?: string | null };
 export type GoalUpdate = Pick<GoalInput, 'title' | 'category' | 'due_date' | 'icon'>;
-export type Badge = { code: string; name: string; description: string; requirement: number };
+export type Badge = { code: string; name: string; description: string; requirement: number; sort_order: number; icon: string; color: string };
 export type UserBadge = { user_id: string; badge_code: string; awarded_at: string; badge?: Badge };
 export type StreakRecord = { streak_date: string; streak: number; is_record: boolean; was_broken: boolean };

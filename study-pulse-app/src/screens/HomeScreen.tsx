@@ -1,6 +1,6 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { AccessibilityInfo, Animated, Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -17,6 +17,7 @@ import { usePoints } from '../hooks/usePoints';
 import { useStreak } from '../hooks/useStreak';
 import { useTasks } from '../hooks/useTasks';
 import { useCheckIn } from '../hooks/useCheckIn';
+import { useReducedMotion } from '../hooks/useReducedMotion';
 
 export function HomeScreen() {
   const { t } = useTranslation();
@@ -26,6 +27,15 @@ export function HomeScreen() {
   const points = usePoints();
   const dailyCheckIn = useCheckIn();
   const { tasks, loading: tasksLoading, error: tasksError, refresh: refreshTasks, createTask, toggleTask } = useTasks();
+  const hasFocusedRef = useRef(false);
+  const taskListRef = useRef<ScrollView>(null);
+  const taskTitleInputRef = useRef<TextInput>(null);
+  const taskFormOffset = useRef(0);
+  const reduceMotion = useReducedMotion();
+  const [animatedTasksDone] = useState(() => new Animated.Value(0));
+  const [checkmarkScale] = useState(() => new Animated.Value(0.6));
+  const [displayTasksDone, setDisplayTasksDone] = useState(0);
+  const [feedbackTaskId, setFeedbackTaskId] = useState<number | null>(null);
   const [taskError, setTaskError] = useState<string | null>(null);
   const [updatingTaskId, setUpdatingTaskId] = useState<number | null>(null);
   const [taskFormVisible, setTaskFormVisible] = useState(false);
@@ -42,6 +52,30 @@ export function HomeScreen() {
   const tasksDone = tasks.filter((task) => task.done).length;
   const tasksTotal = tasks.length;
   const tasksProgress = tasksTotal > 0 ? tasksDone / tasksTotal : 0;
+
+  useEffect(() => {
+    const listenerId = animatedTasksDone.addListener(({ value }) => {
+      setDisplayTasksDone(Math.round(value));
+    });
+    return () => {
+      animatedTasksDone.removeListener(listenerId);
+      animatedTasksDone.stopAnimation();
+    };
+  }, [animatedTasksDone]);
+
+  useEffect(() => {
+    animatedTasksDone.stopAnimation();
+    if (reduceMotion) {
+      animatedTasksDone.setValue(tasksDone);
+      return;
+    }
+
+    Animated.timing(animatedTasksDone, {
+      toValue: tasksDone,
+      duration: 320,
+      useNativeDriver: false,
+    }).start();
+  }, [animatedTasksDone, reduceMotion, tasksDone]);
 
   async function handleCheckIn() {
     if (dailyCheckIn.loading || dailyCheckIn.result) return;
@@ -84,6 +118,24 @@ export function HomeScreen() {
     if (!result.ok) {
       setTaskError(result.error.message);
     } else {
+      if (result.data.done) {
+        setFeedbackTaskId(id);
+        checkmarkScale.stopAnimation();
+        checkmarkScale.setValue(0.6);
+        if (reduceMotion) {
+          checkmarkScale.setValue(1);
+        } else {
+          Animated.timing(checkmarkScale, {
+            toValue: 1,
+            duration: 180,
+            useNativeDriver: true,
+          }).start();
+        }
+        AccessibilityInfo.announceForAccessibility(t('home.taskAccessibility', {
+          title: result.data.title,
+          category: result.data.category,
+        }));
+      }
       const refreshed = await Promise.all([refreshTasks(), points.refresh(), streak.refresh()]);
       const failedRefresh = refreshed.find((item) => !item.ok);
 
@@ -92,6 +144,22 @@ export function HomeScreen() {
 
     setUpdatingTaskId(null);
   }
+
+  useEffect(() => () => checkmarkScale.stopAnimation(), [checkmarkScale]);
+
+  useEffect(() => {
+    if (!taskFormVisible) return;
+    const keyboardSubscription = Keyboard.addListener('keyboardDidShow', () => {
+      taskListRef.current?.scrollTo({ y: Math.max(0, taskFormOffset.current - spacing.md), animated: true });
+    });
+    const focusTimer = setTimeout(() => {
+      taskTitleInputRef.current?.focus();
+    }, 250);
+    return () => {
+      clearTimeout(focusTimer);
+      keyboardSubscription.remove();
+    };
+  }, [taskFormVisible]);
 
   async function refreshHomeData() {
     setTaskError(null);
@@ -103,7 +171,11 @@ export function HomeScreen() {
   }
 
   useFocusEffect(useCallback(() => {
-    void Promise.all([refreshTasks(), points.refresh(), streak.refresh()]);
+    if (!hasFocusedRef.current) {
+      hasFocusedRef.current = true;
+      return;
+    }
+    void Promise.all([refreshTasks(true), points.refresh(true), streak.refresh(true)]);
   }, [points.refresh, refreshTasks, streak.refresh]));
 
   const styles = StyleSheet.create({
@@ -292,7 +364,14 @@ export function HomeScreen() {
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScreenHeader userInitial={userInitial} />
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <KeyboardAvoidingView style={styles.flexFill} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <ScrollView
+        ref={taskListRef}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+      >
         <LinearGradient
           colors={[temaAtual.primary, temaAtual.primarySoft]}
           start={{ x: 0, y: 0 }}
@@ -320,14 +399,16 @@ export function HomeScreen() {
 
         {dailyCheckIn.error && (
           <Text style={[styles.checkInFeedback, styles.errorText]} accessibilityRole="alert">
-            {dailyCheckIn.error.message}
+            {dailyCheckIn.error.code === 'conflict'
+              ? t('home.checkInAlready')
+              : t('home.checkInFailed')}
           </Text>
         )}
 
         <Card style={styles.tasksCard}>
           <ProgressRing progress={tasksProgress} size={150} strokeWidth={14}>
             <Text style={styles.ringValue}>
-              {tasksDone}/{tasksTotal}
+              {displayTasksDone}/{tasksTotal}
             </Text>
             <Text style={styles.ringLabel}>{t('home.tasks')}</Text>
           </ProgressRing>
@@ -368,8 +449,12 @@ export function HomeScreen() {
         </View>
 
         {taskFormVisible && (
-          <Card style={styles.taskForm}>
+          <Card
+            style={styles.taskForm}
+            onLayout={(event) => { taskFormOffset.current = event.nativeEvent.layout.y; }}
+          >
             <TextInput
+              ref={taskTitleInputRef}
               value={taskTitle}
               onChangeText={setTaskTitle}
               placeholder={t('home.taskTitlePlaceholder')}
@@ -462,11 +547,17 @@ export function HomeScreen() {
                 updatingTaskId === task.id && styles.taskRowPressed,
               ]}
             >
-              <Ionicons
-                name={task.done ? 'checkmark-circle' : 'ellipse-outline'}
-                size={24}
-                color={task.done ? temaAtual.primary : temaAtual.inkFaint}
-              />
+              {task.done && task.id === feedbackTaskId ? (
+                <Animated.View style={{ opacity: checkmarkScale, transform: [{ scale: checkmarkScale }] }}>
+                  <Ionicons name="checkmark-circle" size={24} color={temaAtual.primary} />
+                </Animated.View>
+              ) : (
+                <Ionicons
+                  name={task.done ? 'checkmark-circle' : 'ellipse-outline'}
+                  size={24}
+                  color={task.done ? temaAtual.primary : temaAtual.inkFaint}
+                />
+              )}
 
               <View style={styles.flexFill}>
                 <Text style={[styles.taskTitle, task.done && styles.taskTitleDone]}>
@@ -510,6 +601,7 @@ export function HomeScreen() {
           </Text>
         </Card>
       </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

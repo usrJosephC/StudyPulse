@@ -6,7 +6,8 @@
     "loading": "Carregando...",
     "cancel": "Cancelar",
     "save": "Salvar",
-    "formInvalid": "Revise os campos destacados antes de continuar."
+    "formInvalid": "Revise os campos destacados antes de continuar.",
+    "back": "Voltar"
   },
   "language": {
     "label": "Idioma",
@@ -19,7 +20,8 @@
     "enableDark": "Ativar tema escuro",
     "enableLight": "Ativar tema claro",
     "dark": "Tema escuro",
-    "light": "Tema claro"
+    "light": "Tema claro",
+    "label": "Tema"
   },
   "validation": {
     "invalidEmail": "Informe um e-mail válido.",
@@ -67,7 +69,8 @@
     "serverError": "Ocorreu um erro inesperado.",
     "connectionErrorTitle": "Erro de conexão",
     "connectionError": "Não houve resposta do servidor.",
-    "unexpectedError": "Ocorreu um erro ao tentar entrar."
+    "unexpectedError": "Ocorreu um erro ao tentar entrar.",
+    "invalidCredentials": "E-mail ou senha incorretos."
   },
   "registerPage": {
     "title": "Criar conta",
@@ -142,7 +145,10 @@
     "invalidDuration": "Informe uma duração entre 1 e 3650 dias.",
     "saving": "Salvando...",
     "createError": "Não foi possível criar a meta. Tente novamente.",
-    "editGoal": "Editar meta", "updateGoal": "Atualizar meta", "archiveGoal": "Arquivar meta", "archiveConfirm": "Esta meta sairá da sua lista ativa. Deseja arquivá-la?",
+    "editGoal": "Editar meta",
+    "updateGoal": "Atualizar meta",
+    "archiveGoal": "Arquivar meta",
+    "archiveConfirm": "Esta meta sairá da sua lista ativa. Deseja arquivá-la?",
     "history": "Histórico",
     "openHistory": "Abrir histórico de metas arquivadas",
     "historyTitle": "Metas arquivadas",
@@ -159,7 +165,11 @@
     "overdue_other": "Atrasada há {{count}} dias",
     "dueToday": "Vence hoje",
     "remainingDays_one": "{{count}} dia restante",
-    "remainingDays_other": "{{count}} dias restantes"
+    "remainingDays_other": "{{count}} dias restantes",
+    "historyCompleted": "Concluídas",
+    "historyArchived": "Arquivadas",
+    "historyCompletedOn": "Concluída em {{date}}",
+    "historyArchivedOn": "Arquivada em {{date}}"
   },
   "groups": {
     "defaultStudent": "Estudante",
@@ -170,7 +180,10 @@
     "inviteInstructions": "Informe o código de convite para acompanhar o ranking e as atividades.",
     "inviteCodePlaceholder": "CÓDIGO DE CONVITE",
     "inviteCodeAccessibility": "Código de convite do grupo",
-    "joinButton": "Entrar no grupo", "createGroup": "Criar grupo", "createGroupHint": "Defina um nome para organizar seus estudos com outras pessoas.", "groupNamePlaceholder": "Nome do grupo",
+    "joinButton": "Entrar no grupo",
+    "createGroup": "Criar grupo",
+    "createGroupHint": "Defina um nome para organizar seus estudos com outras pessoas.",
+    "groupNamePlaceholder": "Nome do grupo",
     "studySquad": "SEU GRUPO",
     "defaultSubtitle": "Estude em conjunto e alcance seus objetivos",
     "yourInviteCode": "Código do grupo",
@@ -209,7 +222,11 @@
     "hoursAgo_one": "Há {{count}} h",
     "hoursAgo_other": "Há {{count}} h",
     "daysAgo_one": "Há {{count}} dia",
-    "daysAgo_other": "Há {{count}} dias"
+    "daysAgo_other": "Há {{count}} dias",
+    "copyCode": "Copiar código",
+    "editGroup": "Editar grupo",
+    "groupDescription": "Descrição do grupo",
+    "groupDescriptionPlaceholder": "Ex.: descreva os objetivos do grupo"
   },
   "home": {
     "defaultStudent": "Estudante",
@@ -222,6 +239,8 @@
     "checkedIn": "Check-in feito",
     "checkInSuccess_one": "Check-in concluído: +{{count}} ponto.",
     "checkInSuccess_other": "Check-in concluído: +{{count}} pontos.",
+    "checkInAlready": "Você já fez o check-in de hoje.",
+    "checkInFailed": "Não foi possível registrar o check-in. Tente novamente.",
     "tasks": "Tarefas",
     "almostThere": "Quase lá, {{name}}!",
     "goalsEncouragement": "Você já passou da metade das metas de hoje. Continue nesse ritmo!",
@@ -265,7 +284,10 @@
       "account": "Conta",
       "notifications": "Notificações",
       "studySquad": "Grupo de estudos",
-      "comingSoon": "Esta seção estará disponível em breve."
+      "comingSoon": "Esta seção estará disponível em breve.",
+      "preferences": "Preferências",
+      "privacy": "Política de privacidade",
+      "openHint": "Abrir esta configuração"
     },
     "signOut": "Sair",
     "achievements": {
@@ -282,16 +304,46 @@
       "unlocked": "Conquistada",
       "locked": "Bloqueada",
       "catalog": {
-        "first_step": { "title": "Primeiro Passo", "description": "Faça seu primeiro check-in." },
-        "week_warrior": { "title": "Guerreiro da Semana", "description": "Alcance uma sequência de 7 dias." },
-        "study_century": { "title": "Centena de Estudos", "description": "Ganhe 100 pontos." },
-        "point_collector": { "title": "Colecionador de Pontos", "description": "Ganhe 500 pontos." },
-        "task_starter": { "title": "Início das Tarefas", "description": "Conclua 10 tarefas." },
-        "goal_getter": { "title": "Caçador de Metas", "description": "Alcance 3 metas." },
-        "goal_complete": { "title": "Meta Concluída", "description": "Conclua sua primeira meta." },
-        "focus_hour": { "title": "Hora de Foco", "description": "Estude por 600 minutos." },
-        "squad_player": { "title": "Jogador de Equipe", "description": "Entre em um grupo de estudos." },
-        "consistent": { "title": "Consistente", "description": "Faça check-in em 14 dias diferentes." }
+        "first_step": {
+          "title": "Primeiro Passo",
+          "description": "Faça seu primeiro check-in."
+        },
+        "week_warrior": {
+          "title": "Guerreiro da Semana",
+          "description": "Alcance uma sequência de 7 dias."
+        },
+        "study_century": {
+          "title": "Centena de Estudos",
+          "description": "Ganhe 100 pontos."
+        },
+        "point_collector": {
+          "title": "Colecionador de Pontos",
+          "description": "Ganhe 500 pontos."
+        },
+        "task_starter": {
+          "title": "Início das Tarefas",
+          "description": "Conclua 10 tarefas."
+        },
+        "goal_getter": {
+          "title": "Caçador de Metas",
+          "description": "Alcance 3 metas."
+        },
+        "goal_complete": {
+          "title": "Meta Concluída",
+          "description": "Conclua sua primeira meta."
+        },
+        "focus_hour": {
+          "title": "Hora de Foco",
+          "description": "Estude por 600 minutos."
+        },
+        "squad_player": {
+          "title": "Jogador de Equipe",
+          "description": "Entre em um grupo de estudos."
+        },
+        "consistent": {
+          "title": "Consistente",
+          "description": "Faça check-in em 14 dias diferentes."
+        }
       }
     },
     "notifications": {
@@ -313,10 +365,31 @@
       "saveError": "Não foi possível salvar seu perfil.",
       "saved": "Perfil salvo.",
       "emailConfirmation": "Confirme a alteração no novo endereço de e-mail.",
-      "genderHint": "Selecione uma opção"
+      "genderHint": "Selecione uma opção",
+      "deleteAction": "Excluir conta",
+      "deleteConfirmTitle": "Excluir sua conta?",
+      "deleteConfirmMessage": "Sua conta e os dados associados serão removidos permanentemente. Esta ação não pode ser desfeita.",
+      "deleteSuccessTitle": "Conta excluída",
+      "deleteSuccess": "Sua conta foi excluída.",
+      "deleteErrors": {
+        "notConfigured": "O serviço de exclusão de conta não está configurado. Tente novamente mais tarde.",
+        "sessionRequired": "Entre na sua conta para solicitar a exclusão.",
+        "sessionExpired": "Sua sessão expirou. Entre novamente e tente excluir a conta.",
+        "failed": "Não foi possível excluir sua conta. Tente novamente.",
+        "sessionCloseFailed": "A conta foi excluída, mas não foi possível encerrar a sessão neste dispositivo. Tente sair novamente."
+      }
     },
-    "squad": { "edit": "Editar grupo", "description": "Descrição", "invalid": "Use um nome de até 100 caracteres e uma descrição de até 160.", "saved": "Grupo atualizado.", "saveError": "Não foi possível atualizar o grupo." },
+    "squad": {
+      "edit": "Editar grupo",
+      "description": "Descrição",
+      "invalid": "Use um nome de até 100 caracteres e uma descrição de até 160.",
+      "saved": "Grupo atualizado.",
+      "saveError": "Não foi possível atualizar o grupo."
+    },
     "signingOut": "Saindo...",
-    "pleaseWait": "Aguarde"
+    "pleaseWait": "Aguarde",
+    "privacy": {
+      "content": "Usamos as informações da sua conta para oferecer seu perfil de estudos e os recursos relacionados. Você pode solicitar a exclusão da conta nas configurações da conta."
+    }
   }
 }

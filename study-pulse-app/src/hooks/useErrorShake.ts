@@ -13,7 +13,7 @@ export function useErrorShake() {
       AccessibilityInfo.announceForAccessibility(announcement);
     }
 
-    void AccessibilityInfo.isReduceMotionEnabled().then((reduceMotion) => {
+    void AccessibilityInfo.isReduceMotionEnabled().catch(() => false).then((reduceMotion) => {
       translateX.stopAnimation();
       translateX.setValue(0);
       if (reduceMotion) return;

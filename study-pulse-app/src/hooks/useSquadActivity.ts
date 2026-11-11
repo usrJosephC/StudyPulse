@@ -9,7 +9,7 @@ export function useSquadActivity(id: number | null, limit = 20) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<AppError | null>(null);
   const requestId = useRef(0);
-  const refresh = useCallback(async (): Promise<Result<SquadActivity[]>> => {
+  const refresh = useCallback(async (silent = false): Promise<Result<SquadActivity[]>> => {
     const currentRequest = ++requestId.current;
     setError(null);
     if (id === null) {
@@ -17,8 +17,10 @@ export function useSquadActivity(id: number | null, limit = 20) {
       setLoading(false);
       return ok([]);
     }
-    setActivities([]);
-    setLoading(true);
+    if (!silent) {
+      setActivities([]);
+      setLoading(true);
+    }
     const result = await getActivity(id, limit);
     if (currentRequest === requestId.current) {
       if (result.ok) {

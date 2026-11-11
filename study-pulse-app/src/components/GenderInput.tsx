@@ -5,7 +5,10 @@ import {
 } from 'react-hook-form';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { useEffect } from 'react';
+import { useErrorShake } from '../hooks/useErrorShake';
 import {
+  Animated,
   Pressable,
   StyleSheet,
   Text,
@@ -24,14 +27,17 @@ type Props = {
 export function GenderInput({ control, errors }: Props) {
   const { t } = useTranslation();
   const { temaAtual } = useTheme();
+  const { shake, shakeStyle } = useErrorShake();
+  useEffect(() => { if (errors.gender) shake(String(errors.gender.message ?? t('common.formInvalid'))); }, [errors.gender, shake, t]);
 
   const styles = StyleSheet.create({
     container: {
-      marginBottom: spacing.lg,
+      marginTop: spacing.xs,
+      marginBottom: spacing.md,
     },
     row: {
       flexDirection: 'row',
-      gap: spacing.sm,
+      gap: spacing.xs,
     },
     option: {
       flex: 1,
@@ -100,7 +106,7 @@ export function GenderInput({ control, errors }: Props) {
       control={control}
       name="gender"
       render={({ field: { value, onChange } }) => (
-        <View style={styles.container}>
+        <Animated.View style={[styles.container, shakeStyle]} accessibilityRole="radiogroup" accessibilityLabel={t('register.gender')}>
           <View style={styles.row}>
             {options.map((option) => {
               const selected = value === option.value;
@@ -114,6 +120,7 @@ export function GenderInput({ control, errors }: Props) {
                     selected && styles.optionSelected,
                   ]}
                   accessibilityRole="radio"
+                  accessibilityLabel={option.label}
                   accessibilityState={{ selected }}
                 >
                   <Text
@@ -145,11 +152,11 @@ export function GenderInput({ control, errors }: Props) {
           </View>
 
           {errors.gender && (
-            <Text style={styles.error}>
+            <Text style={styles.error} accessibilityRole="alert">
               {String(errors.gender.message)}
             </Text>
           )}
-        </View>
+        </Animated.View>
       )}
     />
   );

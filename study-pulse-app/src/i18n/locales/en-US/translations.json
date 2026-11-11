@@ -6,7 +6,8 @@
     "loading": "Loading...",
     "cancel": "Cancel",
     "save": "Save",
-    "formInvalid": "Review the highlighted fields before continuing."
+    "formInvalid": "Review the highlighted fields before continuing.",
+    "back": "Go back"
   },
   "language": {
     "label": "Language",
@@ -19,7 +20,8 @@
     "enableDark": "Enable dark theme",
     "enableLight": "Enable light theme",
     "dark": "Dark theme",
-    "light": "Light theme"
+    "light": "Light theme",
+    "label": "Theme"
   },
   "validation": {
     "invalidEmail": "Please enter a valid email.",
@@ -67,7 +69,8 @@
     "serverError": "An unexpected error occurred.",
     "connectionErrorTitle": "Connection error",
     "connectionError": "No response from the server.",
-    "unexpectedError": "An error occurred while trying to log in."
+    "unexpectedError": "An error occurred while trying to log in.",
+    "invalidCredentials": "Incorrect email or password."
   },
   "registerPage": {
     "title": "Create Account",
@@ -142,7 +145,10 @@
     "invalidDuration": "Enter a duration between 1 and 3650 days.",
     "saving": "Saving...",
     "createError": "Unable to create the goal. Please try again.",
-    "editGoal": "Edit goal", "updateGoal": "Update goal", "archiveGoal": "Archive goal", "archiveConfirm": "This goal will leave your active list. Archive it?",
+    "editGoal": "Edit goal",
+    "updateGoal": "Update goal",
+    "archiveGoal": "Archive goal",
+    "archiveConfirm": "This goal will leave your active list. Archive it?",
     "history": "History",
     "openHistory": "Open archived goals history",
     "historyTitle": "Archived goals",
@@ -159,7 +165,11 @@
     "overdue_other": "Overdue by {{count}} days",
     "dueToday": "Due today",
     "remainingDays_one": "{{count}} day remaining",
-    "remainingDays_other": "{{count}} days remaining"
+    "remainingDays_other": "{{count}} days remaining",
+    "historyCompleted": "Completed",
+    "historyArchived": "Archived",
+    "historyCompletedOn": "Completed on {{date}}",
+    "historyArchivedOn": "Archived on {{date}}"
   },
   "groups": {
     "defaultStudent": "Student",
@@ -170,7 +180,10 @@
     "inviteInstructions": "Enter the invitation code to follow the ranking and activities.",
     "inviteCodePlaceholder": "INVITATION CODE",
     "inviteCodeAccessibility": "Group invitation code",
-    "joinButton": "Join group", "createGroup": "Create group", "createGroupHint": "Choose a name to organize your studies with others.", "groupNamePlaceholder": "Group name",
+    "joinButton": "Join group",
+    "createGroup": "Create group",
+    "createGroupHint": "Choose a name to organize your studies with others.",
+    "groupNamePlaceholder": "Group name",
     "studySquad": "YOUR GROUP",
     "defaultSubtitle": "Study together and reach your goals",
     "yourInviteCode": "Group code",
@@ -209,7 +222,11 @@
     "hoursAgo_one": "{{count}}h ago",
     "hoursAgo_other": "{{count}}h ago",
     "daysAgo_one": "{{count}}d ago",
-    "daysAgo_other": "{{count}}d ago"
+    "daysAgo_other": "{{count}}d ago",
+    "copyCode": "Copy code",
+    "editGroup": "Edit group",
+    "groupDescription": "Group description",
+    "groupDescriptionPlaceholder": "e.g., describe the group's goals"
   },
   "home": {
     "defaultStudent": "Student",
@@ -222,6 +239,8 @@
     "checkedIn": "Checked in",
     "checkInSuccess_one": "Check-in complete: +{{count}} point.",
     "checkInSuccess_other": "Check-in complete: +{{count}} points.",
+    "checkInAlready": "You've already checked in today.",
+    "checkInFailed": "Couldn't record your check-in. Please try again.",
     "tasks": "Tasks",
     "almostThere": "Almost there, {{name}}!",
     "goalsEncouragement": "You're over halfway through today's goals. Keep that momentum going!",
@@ -265,7 +284,10 @@
       "account": "Account",
       "notifications": "Notifications",
       "studySquad": "Study Squad",
-      "comingSoon": "This section will be available soon."
+      "comingSoon": "This section will be available soon.",
+      "preferences": "Preferences",
+      "privacy": "Privacy policy",
+      "openHint": "Open this setting"
     },
     "signOut": "Sign Out",
     "achievements": {
@@ -282,16 +304,46 @@
       "unlocked": "Unlocked",
       "locked": "Locked",
       "catalog": {
-        "first_step": { "title": "First Step", "description": "Complete your first check-in." },
-        "week_warrior": { "title": "Week Warrior", "description": "Reach a 7-day study streak." },
-        "study_century": { "title": "Study Century", "description": "Earn 100 points." },
-        "point_collector": { "title": "Point Collector", "description": "Earn 500 points." },
-        "task_starter": { "title": "Task Starter", "description": "Complete 10 tasks." },
-        "goal_getter": { "title": "Goal Getter", "description": "Reach 3 goals." },
-        "goal_complete": { "title": "Goal Complete", "description": "Complete your first goal." },
-        "focus_hour": { "title": "Focus Hour", "description": "Study for 600 minutes." },
-        "squad_player": { "title": "Squad Player", "description": "Join a study squad." },
-        "consistent": { "title": "Consistent", "description": "Check in on 14 different days." }
+        "first_step": {
+          "title": "First Step",
+          "description": "Complete your first check-in."
+        },
+        "week_warrior": {
+          "title": "Week Warrior",
+          "description": "Reach a 7-day study streak."
+        },
+        "study_century": {
+          "title": "Study Century",
+          "description": "Earn 100 points."
+        },
+        "point_collector": {
+          "title": "Point Collector",
+          "description": "Earn 500 points."
+        },
+        "task_starter": {
+          "title": "Task Starter",
+          "description": "Complete 10 tasks."
+        },
+        "goal_getter": {
+          "title": "Goal Getter",
+          "description": "Reach 3 goals."
+        },
+        "goal_complete": {
+          "title": "Goal Complete",
+          "description": "Complete your first goal."
+        },
+        "focus_hour": {
+          "title": "Focus Hour",
+          "description": "Study for 600 minutes."
+        },
+        "squad_player": {
+          "title": "Squad Player",
+          "description": "Join a study squad."
+        },
+        "consistent": {
+          "title": "Consistent",
+          "description": "Check in on 14 different days."
+        }
       }
     },
     "notifications": {
@@ -313,10 +365,31 @@
       "saveError": "Could not save your profile.",
       "saved": "Profile saved.",
       "emailConfirmation": "Check your new email address to confirm the change.",
-      "genderHint": "Select a value"
+      "genderHint": "Select a value",
+      "deleteAction": "Delete account",
+      "deleteConfirmTitle": "Delete your account?",
+      "deleteConfirmMessage": "This permanently removes your account and associated data. This action cannot be undone.",
+      "deleteSuccessTitle": "Account deleted",
+      "deleteSuccess": "Your account has been deleted.",
+      "deleteErrors": {
+        "notConfigured": "Account deletion is not configured. Please try again later.",
+        "sessionRequired": "Log in to request account deletion.",
+        "sessionExpired": "Your session has expired. Log in again and try deleting your account.",
+        "failed": "We couldn't delete your account. Please try again.",
+        "sessionCloseFailed": "Your account was deleted, but we couldn't end the session on this device. Please try signing out again."
+      }
     },
-    "squad": { "edit": "Edit group", "description": "Description", "invalid": "Use a name of up to 100 characters and a description of up to 160.", "saved": "Group updated.", "saveError": "Could not update the group." },
+    "squad": {
+      "edit": "Edit group",
+      "description": "Description",
+      "invalid": "Use a name of up to 100 characters and a description of up to 160.",
+      "saved": "Group updated.",
+      "saveError": "Could not update the group."
+    },
     "signingOut": "Signing out...",
-    "pleaseWait": "Please wait"
+    "pleaseWait": "Please wait",
+    "privacy": {
+      "content": "We use your account information to provide your study profile and related features. You can request account deletion from your account settings."
+    }
   }
 }

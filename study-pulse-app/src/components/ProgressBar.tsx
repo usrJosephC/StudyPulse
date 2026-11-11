@@ -1,6 +1,8 @@
-import { StyleSheet, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Animated, StyleSheet, View } from 'react-native';
 import { radius } from '../theme';
 import { useTheme } from '../contexts/ThemeContext';
+import { useReducedMotion } from '../hooks/useReducedMotion';
 
 type Props = {
   progress: number;
@@ -16,10 +18,33 @@ export function ProgressBar({
   height = 8,
 }: Props) {
   const { temaAtual } = useTheme();
+  const reduceMotion = useReducedMotion();
 
   const clamped = Math.max(0, Math.min(1, progress));
+  const [animatedProgress] = useState(() => new Animated.Value(0));
+
+  useEffect(() => {
+    animatedProgress.stopAnimation();
+    if (reduceMotion) {
+      animatedProgress.setValue(clamped);
+      return;
+    }
+
+    const animation = Animated.timing(animatedProgress, {
+      toValue: clamped,
+      duration: 300,
+      useNativeDriver: false,
+    });
+    animation.start();
+    return () => animation.stop();
+  }, [animatedProgress, clamped, reduceMotion]);
+
   const fillColor = color ?? temaAtual.primary;
   const backgroundColor = trackColor ?? temaAtual.surface;
+  const fillWidth = animatedProgress.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0%', '100%'],
+  });
 
   return (
     <View
@@ -31,12 +56,12 @@ export function ProgressBar({
         },
       ]}
     >
-      <View
+      <Animated.View
         style={[
           styles.fill,
           {
             backgroundColor: fillColor,
-            width: `${clamped * 100}%`,
+            width: fillWidth,
             height,
           },
         ]}

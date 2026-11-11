@@ -11,8 +11,8 @@ export function useGoals() {
   const [archivedLoading, setArchivedLoading] = useState(false);
   const [archivedError, setArchivedError] = useState<AppError | null>(null);
 
-  const refresh = useCallback(async () => {
-    setLoading(true);
+  const refresh = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
     setError(null);
     const result = await listActive();
     if (result.ok) setGoals(result.data);
@@ -40,8 +40,10 @@ export function useGoals() {
   const complete = useCallback(async (id: number) => {
     setError(null);
     const result = await completeGoal(id);
-    if (result.ok) setGoals((current) => current.filter((goal) => goal.id !== id));
-    else setError(result.error);
+    if (result.ok) {
+      setGoals((current) => current.filter((goal) => goal.id !== id));
+      setArchivedGoals((current) => [result.data, ...current.filter((goal) => goal.id !== id)]);
+    } else setError(result.error);
     return result;
   }, []);
 
@@ -87,7 +89,7 @@ export function useGoals() {
   }, []);
 
   useEffect(() => {
-    void Promise.resolve().then(refresh);
+    void Promise.resolve().then(() => refresh());
   }, [refresh]);
   return {
     goals,

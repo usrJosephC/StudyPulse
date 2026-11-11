@@ -36,11 +36,15 @@ export async function listArchived(): Promise<Result<Goal[]>> {
     const { data, error } = await db
       .from('goals')
       .select('*')
-      .not('archived_at', 'is', null)
-      .order('archived_at', { ascending: false });
-    return error
-      ? guarded(error, 'Não foi possível carregar o histórico de metas.')
-      : ok((data ?? []) as Goal[]);
+      .or('archived_at.not.is.null,completed_at.not.is.null');
+    if (error) return guarded(error, 'Não foi possível carregar o histórico de metas.');
+    const history = (data ?? []) as Goal[];
+    history.sort((a, b) => {
+      const dateA = Date.parse(a.completed_at ?? a.archived_at ?? a.created_at);
+      const dateB = Date.parse(b.completed_at ?? b.archived_at ?? b.created_at);
+      return dateB - dateA;
+    });
+    return ok(history);
   } catch (error) {
     return guarded(error, 'Não foi possível carregar o histórico de metas.');
   }

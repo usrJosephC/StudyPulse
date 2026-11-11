@@ -376,7 +376,7 @@ export type Database = {
       }
       points_reversals: { Row: { id: number; user_id: string; original_event_id: number; points: number; reason: string; created_at: string }; Insert: never; Update: never; Relationships: [] }
       streak_history: { Row: { user_id: string; streak_date: string; streak: number; is_record: boolean; was_broken: boolean; created_at: string }; Insert: never; Update: never; Relationships: [] }
-      badges: { Row: { code: string; name: string; description: string; requirement: number }; Insert: never; Update: never; Relationships: [] }
+      badges: { Row: { code: string; name: string; description: string; requirement: number; sort_order: number; icon: string; color: string }; Insert: never; Update: never; Relationships: [] }
       user_badges: { Row: { user_id: string; badge_code: string; awarded_at: string }; Insert: never; Update: never; Relationships: [] }
       weekly_resets: { Row: { user_id: string; week_start: string; reset_at: string }; Insert: never; Update: never; Relationships: [] }
     }

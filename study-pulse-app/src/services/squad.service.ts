@@ -79,10 +79,12 @@ export async function joinSquad(inviteCode: string): Promise<Result<number>> {
 export async function createSquad(name: string, subtitle = '', seasonEndsAt: string | null = null): Promise<Result<number>> {
   const squadName = name.trim();
   if (!squadName || squadName.length > 100) return fail({ code: 'validation', message: 'Informe um nome de squad de até 100 caracteres.' });
+  const squadSubtitle = subtitle.trim();
+  if (squadSubtitle.length > 160) return fail({ code: 'validation', message: 'A descrição do squad deve ter até 160 caracteres.' });
   const db = client();
   if (!db) return unavailable();
   try {
-    const { data, error } = await db.rpc('rpc_create_squad', { squad_name: squadName, squad_subtitle: subtitle.trim(), ...(seasonEndsAt ? { season_end: seasonEndsAt } : {}) });
+    const { data, error } = await db.rpc('rpc_create_squad', { squad_name: squadName, squad_subtitle: squadSubtitle, ...(seasonEndsAt ? { season_end: seasonEndsAt } : {}) });
     return error ? guarded(error, 'Não foi possível criar o squad.') : ok(Number(data));
   } catch (error) { return guarded(error, 'Não foi possível criar o squad.'); }
 }

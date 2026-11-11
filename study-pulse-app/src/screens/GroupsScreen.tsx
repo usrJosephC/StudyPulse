@@ -1,10 +1,11 @@
-import { useCallback, useState } from 'react';
-import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, Share, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useCallback, useRef, useState } from 'react';
+import { ActivityIndicator, Alert, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, Share, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
+import * as Clipboard from 'expo-clipboard';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { Card } from '../components/Card';
 import { Pill } from '../components/Pill';
@@ -16,6 +17,7 @@ import { useRanking } from '../hooks/useRanking';
 import { useSquad } from '../hooks/useSquad';
 import { useSquadActivity } from '../hooks/useSquadActivity';
 import { useSquadCreation } from '../hooks/useSquadCreation';
+import { updateSquad } from '../services/squad.service';
 import type { RankingEntry, SquadActivity } from '../types/domain';
 
 export function GroupsScreen() {
@@ -30,12 +32,20 @@ export function GroupsScreen() {
   const podium = [ranking[1], ranking[0], ranking[2]].filter((member): member is RankingEntry => Boolean(member));
   const rest = ranking.slice(3);
   const [leaderboardVisible, setLeaderboardVisible] = useState(false);
+  const hasFocusedRef = useRef(false);
   const [inviteCode, setInviteCode] = useState('');
   const [joining, setJoining] = useState(false);
   const [joinError, setJoinError] = useState<string | null>(null);
   const [createVisible, setCreateVisible] = useState(false);
   const [groupName, setGroupName] = useState('');
+  const [groupDescription, setGroupDescription] = useState('');
+  const [editVisible, setEditVisible] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [updating, setUpdating] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
   const [sharing, setSharing] = useState(false);
+  const [copying, setCopying] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const [squadActionError, setSquadActionError] = useState<string | null>(null);
   const displayName = profile?.name?.trim()
@@ -245,6 +255,9 @@ export function GroupsScreen() {
       backgroundColor: 'rgba(33,33,33,0.5)',
       justifyContent: 'flex-end',
     },
+    leaderboardBackdrop: {
+      backgroundColor: 'rgba(0,0,0,0.68)',
+    },
     leaderboardModal: {
       backgroundColor: temaAtual.card,
       borderTopLeftRadius: radius.lg,
@@ -324,7 +337,8 @@ export function GroupsScreen() {
     },
     createLink: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, paddingVertical: spacing.sm },
     createLinkText: { fontFamily: fonts.bodyBold, fontSize: 14, color: temaAtual.secondary },
-    createModal: { backgroundColor: temaAtual.card, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg, padding: spacing.lg, gap: spacing.md },
+    createModal: { backgroundColor: temaAtual.card, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg, padding: spacing.lg, gap: spacing.md, maxHeight: '85%' },
+    descriptionInput: { width: '100%', minHeight: 88, borderWidth: 1, borderColor: temaAtual.border, borderRadius: radius.md, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, fontFamily: fonts.bodyRegular, color: temaAtual.ink, textAlignVertical: 'top' as const },
     inviteCard: { gap: spacing.md },
     inviteHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
     inviteTitle: { flex: 1, fontFamily: fonts.headlineBold, fontSize: 15, color: temaAtual.ink },
@@ -335,10 +349,12 @@ export function GroupsScreen() {
     shareButtonText: { fontFamily: fonts.bodyBold, fontSize: 13, color: '#fff' },
     leaveButton: { minHeight: 46, borderRadius: radius.pill, borderWidth: 1, borderColor: temaAtual.danger, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.xs, paddingHorizontal: spacing.md },
     leaveButtonText: { fontFamily: fonts.bodyBold, fontSize: 13, color: temaAtual.danger },
+    editButton: { minHeight: 44, borderRadius: radius.pill, backgroundColor: temaAtual.surface, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.xs, paddingHorizontal: spacing.md },
+    editButtonText: { fontFamily: fonts.bodyBold, fontSize: 13, color: temaAtual.secondary },
   });
 
-  function refreshAll() {
-    void Promise.all([refreshSquad(), refreshRanking(), refreshActivity()]);
+  function refreshAll(silent = false) {
+    void Promise.all([refreshSquad(silent), refreshRanking(silent), refreshActivity(silent)]);
   }
 
   async function handleJoin() {
@@ -353,8 +369,34 @@ export function GroupsScreen() {
 
   async function handleCreate() {
     if (!groupName.trim() || creating) return;
-    const result = await createSquad(groupName.trim());
-    if (result.ok) { setCreateVisible(false); setGroupName(''); refreshAll(); }
+    const result = await createSquad(groupName.trim(), groupDescription.trim());
+    if (result.ok) { setCreateVisible(false); setGroupName(''); setGroupDescription(''); refreshAll(true); }
+  }
+
+  function openEditSquad() {
+    if (!squad || squad.created_by !== session?.user.id) return;
+    setEditName(squad.name);
+    setEditDescription(squad.subtitle ?? '');
+    setEditError(null);
+    setEditVisible(true);
+  }
+
+  function closeEditSquad() {
+    setEditVisible(false);
+  }
+
+  function handleUpdateSquad() {
+    if (!squad || squad.created_by !== session?.user.id || !editName.trim() || updating) return;
+    setUpdating(true);
+    setEditError(null);
+    void updateSquad(squad.id, editName.trim(), editDescription.trim()).then((result) => {
+      if (!result.ok) {
+        setEditError(result.error.message);
+        return;
+      }
+      setEditVisible(false);
+      refreshAll(true);
+    }).finally(() => setUpdating(false));
   }
 
   async function handleShareSquad() {
@@ -370,6 +412,20 @@ export function GroupsScreen() {
       setSquadActionError(t('groups.shareError'));
     } finally {
       setSharing(false);
+    }
+  }
+
+  async function handleCopyInviteCode() {
+    if (!squad || copying) return;
+    setCopying(true);
+    setSquadActionError(null);
+    try {
+      await Clipboard.setStringAsync(squad.invite_code);
+      Alert.alert(t('groups.copyCode'));
+    } catch {
+      setSquadActionError(t('groups.shareError'));
+    } finally {
+      setCopying(false);
     }
   }
 
@@ -393,7 +449,11 @@ export function GroupsScreen() {
   }
 
   useFocusEffect(useCallback(() => {
-    void Promise.all([refreshSquad(), refreshRanking(), refreshActivity()]);
+    if (!hasFocusedRef.current) {
+      hasFocusedRef.current = true;
+      return;
+    }
+    void Promise.all([refreshSquad(true), refreshRanking(true), refreshActivity(true)]);
   }, [refreshActivity, refreshRanking, refreshSquad]));
 
   return (
@@ -402,7 +462,7 @@ export function GroupsScreen() {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {loading && <ActivityIndicator color={temaAtual.primary} accessibilityLabel={t('groups.loadingSquad')} />}
         {error && (
-          <Pressable onPress={refreshAll} accessibilityRole="button" accessibilityLabel={t('groups.retryLoading')} style={styles.stateAction}>
+          <Pressable onPress={() => refreshAll()} accessibilityRole="button" accessibilityLabel={t('groups.retryLoading')} style={styles.stateAction}>
             <Text style={styles.errorText}>{error.message} · {t('groups.tapToRetry')}</Text>
           </Pressable>
         )}
@@ -444,6 +504,12 @@ export function GroupsScreen() {
             <Pill label={t('groups.studySquad')} variant="secondary" icon={<Ionicons name="people" size={12} color="#fff" />} />
             <Text style={styles.squadName}>{squad.name}</Text>
             <Text style={styles.squadSubtitle}>{squad.subtitle || t('groups.defaultSubtitle')}</Text>
+            {squad.created_by === session?.user.id && (
+              <Pressable style={styles.editButton} onPress={openEditSquad} accessibilityRole="button" accessibilityLabel={t('groups.editGroup')}>
+                <Ionicons name="create-outline" size={17} color={temaAtual.secondary} />
+                <Text style={styles.editButtonText}>{t('groups.editGroup')}</Text>
+              </Pressable>
+            )}
           </View>
           <Card style={styles.inviteCard}>
             <View style={styles.inviteHeader}>
@@ -458,6 +524,17 @@ export function GroupsScreen() {
             </View>
             {squadActionError && <Text style={styles.errorText}>{squadActionError}</Text>}
             <View style={styles.squadActions}>
+              <Pressable
+                style={[styles.shareButton, copying && styles.disabledButton]}
+                onPress={() => void handleCopyInviteCode()}
+                disabled={copying}
+                accessibilityRole="button"
+                accessibilityState={{ disabled: copying, busy: copying }}
+                accessibilityLabel={t('groups.copyCode')}
+              >
+                {copying ? <ActivityIndicator color="#fff" /> : <Ionicons name="copy-outline" size={18} color="#fff" />}
+                {!copying && <Text style={styles.shareButtonText}>{t('groups.copyCode')}</Text>}
+              </Pressable>
               <Pressable
                 style={[styles.shareButton, sharing && styles.disabledButton]}
                 onPress={() => void handleShareSquad()}
@@ -579,7 +656,7 @@ export function GroupsScreen() {
         transparent
         onRequestClose={() => setLeaderboardVisible(false)}
       >
-        <View style={styles.backdrop}>
+        <View style={[styles.backdrop, styles.leaderboardBackdrop]}>
           <SafeAreaView style={styles.leaderboardModal} edges={['bottom']}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>{t('groups.fullLeaderboard')}</Text>
@@ -616,23 +693,50 @@ export function GroupsScreen() {
       </Modal>
       <Modal visible={createVisible} transparent animationType="slide" onRequestClose={() => setCreateVisible(false)}>
         <Pressable style={styles.backdrop} onPress={() => setCreateVisible(false)} accessibilityLabel={t('common.close')}>
-          <Pressable
-            style={[styles.createModal, { paddingBottom: spacing.lg + insets.bottom }]}
-            onPress={(event) => event.stopPropagation()}
-          >
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{t('groups.createGroup', { defaultValue: 'Criar grupo' })}</Text>
-              <Pressable onPress={() => setCreateVisible(false)} accessibilityRole="button" accessibilityLabel={t('common.close')}>
-                <Ionicons name="close" size={22} color={temaAtual.ink} />
-              </Pressable>
-            </View>
-            <Text style={styles.stateText}>{t('groups.createGroupHint', { defaultValue: 'Defina um nome para organizar seus estudos com outras pessoas.' })}</Text>
-            <TextInput value={groupName} onChangeText={setGroupName} placeholder={t('groups.groupNamePlaceholder', { defaultValue: 'Nome do grupo' })} placeholderTextColor={temaAtual.inkMuted} style={styles.inviteInput} accessibilityLabel={t('groups.groupNamePlaceholder', { defaultValue: 'Nome do grupo' })} />
-            {createError && <Text style={styles.errorText}>{createError.message}</Text>}
-            <Pressable style={[styles.joinButton, (!groupName.trim() || creating) && styles.disabledButton]} onPress={() => void handleCreate()} disabled={!groupName.trim() || creating} accessibilityRole="button" accessibilityState={{ disabled: !groupName.trim() || creating, busy: creating }}>
-              {creating ? <ActivityIndicator color="#fff" /> : <Text style={styles.joinButtonText}>{t('groups.createGroup', { defaultValue: 'Criar grupo' })}</Text>}
+          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+            <Pressable
+              style={[styles.createModal, { paddingBottom: spacing.lg + insets.bottom }]}
+              onPress={(event) => event.stopPropagation()}
+            >
+              <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: spacing.md }}>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>{t('groups.createGroup', { defaultValue: 'Criar grupo' })}</Text>
+                  <Pressable onPress={() => setCreateVisible(false)} accessibilityRole="button" accessibilityLabel={t('common.close')}>
+                    <Ionicons name="close" size={22} color={temaAtual.ink} />
+                  </Pressable>
+                </View>
+                <Text style={styles.stateText}>{t('groups.createGroupHint', { defaultValue: 'Defina um nome para organizar seus estudos com outras pessoas.' })}</Text>
+                <TextInput value={groupName} onChangeText={setGroupName} placeholder={t('groups.groupNamePlaceholder', { defaultValue: 'Nome do grupo' })} placeholderTextColor={temaAtual.inkMuted} style={styles.inviteInput} accessibilityLabel={t('groups.groupNamePlaceholder', { defaultValue: 'Nome do grupo' })} />
+                <TextInput value={groupDescription} onChangeText={setGroupDescription} placeholder={t('groups.groupDescriptionPlaceholder')} placeholderTextColor={temaAtual.inkMuted} style={styles.descriptionInput} accessibilityLabel={t('groups.groupDescription')} multiline maxLength={160} />
+                {createError && <Text style={styles.errorText}>{createError.message}</Text>}
+                <Pressable style={[styles.joinButton, (!groupName.trim() || creating) && styles.disabledButton]} onPress={() => void handleCreate()} disabled={!groupName.trim() || creating} accessibilityRole="button" accessibilityState={{ disabled: !groupName.trim() || creating, busy: creating }}>
+                  {creating ? <ActivityIndicator color="#fff" /> : <Text style={styles.joinButtonText}>{t('groups.createGroup', { defaultValue: 'Criar grupo' })}</Text>}
+                </Pressable>
+              </ScrollView>
             </Pressable>
-          </Pressable>
+          </KeyboardAvoidingView>
+        </Pressable>
+      </Modal>
+      <Modal visible={editVisible} transparent animationType="slide" onRequestClose={closeEditSquad} >
+        <Pressable style={styles.backdrop} onPress={() => setEditVisible(false)} accessibilityLabel={t('common.close')}>
+          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+            <Pressable style={[styles.createModal, { paddingBottom: spacing.lg + insets.bottom }]} onPress={(event) => event.stopPropagation()}>
+              <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: spacing.md }}>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>{t('groups.editGroup')}</Text>
+                  <Pressable onPress={closeEditSquad} accessibilityRole="button" accessibilityLabel={t('common.close')} hitSlop={8} style={styles.modalClose}>
+                    <Ionicons name="close" size={22} color={temaAtual.ink} />
+                  </Pressable>
+                </View>
+                <TextInput value={editName} onChangeText={setEditName} placeholder={t('groups.groupNamePlaceholder')} placeholderTextColor={temaAtual.inkMuted} style={styles.inviteInput} accessibilityLabel={t('groups.groupNamePlaceholder')} maxLength={100} />
+                <TextInput value={editDescription} onChangeText={setEditDescription} placeholder={t('groups.groupDescriptionPlaceholder')} placeholderTextColor={temaAtual.inkMuted} style={styles.descriptionInput} accessibilityLabel={t('groups.groupDescription')} multiline maxLength={160} />
+                {editError && <Text style={styles.errorText} accessibilityRole="alert">{editError}</Text>}
+                <Pressable style={[styles.joinButton, (!editName.trim() || updating) && styles.disabledButton]} onPress={handleUpdateSquad} disabled={!editName.trim() || updating} accessibilityRole="button" accessibilityState={{ disabled: !editName.trim() || updating, busy: updating }}>
+                  {updating ? <ActivityIndicator color="#fff" /> : <Text style={styles.joinButtonText}>{t('groups.editGroup')}</Text>}
+                </Pressable>
+              </ScrollView>
+            </Pressable>
+          </KeyboardAvoidingView>
         </Pressable>
       </Modal>
     </SafeAreaView>

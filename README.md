@@ -168,7 +168,7 @@ O script detecta o IPv4 ativo, atualiza a URL local do Supabase e abre o Expo pa
 |---|---|
 | Supabase Auth, REST e RPC | `http://localhost:54321` |
 | Health check | `http://localhost:54321/health` |
-| PostgreSQL | `postgresql://postgres:postgres@localhost:54322/postgres` |
+| PostgreSQL | Acesso interno ao Compose: `docker-compose exec db psql -U postgres -d postgres` |
 
 ---
 
