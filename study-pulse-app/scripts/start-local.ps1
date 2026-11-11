@@ -70,22 +70,27 @@ Update-LocalEnvironment $lanAddress
 Start-DockerIfNeeded
 
 $localHealthUrl = 'http://127.0.0.1:54321/health'
+Write-Host 'Garantindo que o backend Docker Compose esteja iniciado...' -ForegroundColor Cyan
+docker-compose up -d
+if ($LASTEXITCODE -ne 0) { throw 'Nao foi possivel iniciar o Docker Compose. Verifique o Docker Desktop e execute docker-compose logs.' }
+
 $composeRunning = $false
-try {
-  $localHealth = Invoke-WebRequest -UseBasicParsing -Uri $localHealthUrl -TimeoutSec 3
-  $composeRunning = $localHealth.StatusCode -eq 200
-} catch {
-  $composeRunning = $false
+for ($attempt = 0; $attempt -lt 30; $attempt++) {
+  try {
+    $localHealth = Invoke-WebRequest -UseBasicParsing -Uri $localHealthUrl -TimeoutSec 3
+    if ($localHealth.StatusCode -eq 200) {
+      $composeRunning = $true
+      break
+    }
+  } catch {
+    Start-Sleep -Seconds 2
+  }
 }
 
-if ($composeRunning) {
-  Write-Host 'Backend Docker Compose já está em execução.' -ForegroundColor Cyan
-} else {
-  Write-Host 'Iniciando Supabase local pela CLI...' -ForegroundColor Cyan
-  npx supabase start
-  if ($LASTEXITCODE -ne 0) { throw 'Não foi possível iniciar o Supabase local.' }
+if (-not $composeRunning) {
+  throw 'O gateway Docker Compose nao respondeu em http://127.0.0.1:54321/health apos 60 segundos. Confira docker-compose ps/logs; nao inicie a Supabase CLI junto deste backend.'
 }
-
+Write-Host 'Backend Docker Compose pronto.' -ForegroundColor Cyan
 $healthUrl = "http://${lanAddress}:54321/auth/v1/health"
 $health = Invoke-WebRequest -UseBasicParsing -Uri $healthUrl -TimeoutSec 10
 if ($health.StatusCode -ne 200) { throw "Supabase não respondeu em $healthUrl." }
