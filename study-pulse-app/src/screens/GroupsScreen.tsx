@@ -462,7 +462,7 @@ export function GroupsScreen() {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {loading && <ActivityIndicator color={temaAtual.primary} accessibilityLabel={t('groups.loadingSquad')} />}
         {error && (
-          <Pressable onPress={refreshAll} accessibilityRole="button" accessibilityLabel={t('groups.retryLoading')} style={styles.stateAction}>
+          <Pressable onPress={() => refreshAll()} accessibilityRole="button" accessibilityLabel={t('groups.retryLoading')} style={styles.stateAction}>
             <Text style={styles.errorText}>{error.message} · {t('groups.tapToRetry')}</Text>
           </Pressable>
         )}

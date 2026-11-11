@@ -34,7 +34,7 @@ export function useProgression() {
     return { ok: true as const, data: { catalog: catalogResult.data, badges: badgeResult.data, history: historyResult.data } };
   }, []);
   useEffect(() => {
-    void Promise.resolve().then(refresh);
+    void Promise.resolve().then(() => refresh());
   }, [refresh]);
   return { catalog, badges, history, loading, error, catalogError, badgesError, historyError, refresh };
 }

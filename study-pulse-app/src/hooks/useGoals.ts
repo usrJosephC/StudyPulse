@@ -89,7 +89,7 @@ export function useGoals() {
   }, []);
 
   useEffect(() => {
-    void Promise.resolve().then(refresh);
+    void Promise.resolve().then(() => refresh());
   }, [refresh]);
   return {
     goals,
