@@ -1,11 +1,15 @@
+
 import { StyleSheet, Text, View } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { HomeScreen } from '../screens/HomeScreen';
 import { GoalsScreen } from '../screens/GoalsScreen';
 import { GroupsScreen } from '../screens/GroupsScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
-import { colors, fonts, spacing } from '../theme';
+import { fonts } from '../theme';
+import { useTheme } from '../contexts/ThemeContext';
+import { NotificationsHost } from '../components/NotificationsHost';
 
 export type TabParamList = {
   Home: undefined;
@@ -23,40 +27,119 @@ const icons: Record<keyof TabParamList, keyof typeof Ionicons.glyphMap> = {
   Profile: 'person',
 };
 
-function TabIcon({ name, label, focused }: { name: keyof TabParamList; label: string; focused: boolean }) {
+function TabIcon({
+  name,
+  label,
+  focused,
+  palette,
+}: {
+  name: keyof TabParamList;
+  label: string;
+  focused: boolean;
+  palette: ReturnType<typeof useTheme>['temaAtual'];
+}) {
   return (
     <View style={styles.tabItem}>
-      <View style={[styles.iconWrap, focused && styles.iconWrapActive]}>
-        <Ionicons name={icons[name]} size={20} color={focused ? colors.ink : colors.inkMuted} />
+      <View style={[styles.iconWrap, focused && { backgroundColor: palette.primary }]}>
+        <Ionicons
+          name={icons[name]}
+          size={20}
+          color={focused ? palette.background : palette.inkMuted}
+        />
       </View>
-      <Text style={[styles.tabLabel, focused && styles.tabLabelActive]}>{label}</Text>
+      <Text
+        style={[styles.tabLabel, { color: focused ? palette.ink : palette.inkMuted }, focused && styles.tabLabelActive]}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.9}
+      >
+        {label}
+      </Text>
     </View>
   );
 }
 
 export function RootTabs() {
+  const { t } = useTranslation();
+  const { temaAtual } = useTheme();
+
   return (
+    <NotificationsHost>
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: false,
-        tabBarStyle: styles.tabBar,
+        tabBarStyle: [styles.tabBar, { backgroundColor: temaAtual.card, borderTopColor: temaAtual.border }],
+        tabBarItemStyle: styles.tabBarItem,
       }}
     >
-      <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarIcon: ({ focused }) => <TabIcon name="Home" label="Home" focused={focused} /> }} />
-      <Tab.Screen name="Goals" component={GoalsScreen} options={{ tabBarIcon: ({ focused }) => <TabIcon name="Goals" label="Goals" focused={focused} /> }} />
-      <Tab.Screen name="Groups" component={GroupsScreen} options={{ tabBarIcon: ({ focused }) => <TabIcon name="Groups" label="Groups" focused={focused} /> }} />
-      <Tab.Screen name="Profile" component={ProfileScreen} options={{ tabBarIcon: ({ focused }) => <TabIcon name="Profile" label="Profile" focused={focused} /> }} />
+      <Tab.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabIcon
+              name="Home"
+              label={t('navigation.tabs.home')}
+              focused={focused}
+              palette={temaAtual}
+            />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Goals"
+        component={GoalsScreen}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabIcon
+              name="Goals"
+              label={t('navigation.tabs.goals')}
+              focused={focused}
+              palette={temaAtual}
+            />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Groups"
+        component={GroupsScreen}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabIcon
+              name="Groups"
+              label={t('navigation.tabs.groups')}
+              focused={focused}
+              palette={temaAtual}
+            />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabIcon
+              name="Profile"
+              label={t('navigation.tabs.profile')}
+              focused={focused}
+              palette={temaAtual}
+            />
+          ),
+        }}
+      />
     </Tab.Navigator>
+    </NotificationsHost>
   );
 }
 
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor: colors.card,
-    borderTopWidth: 0,
-    height: 78,
-    paddingTop: spacing.sm,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    height: 88,
+    paddingTop: 6,
+    paddingBottom: 8,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     shadowColor: '#000',
@@ -64,9 +147,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 8,
   },
+  tabBarItem: {
+    height: 72,
+  },
   tabItem: {
+    width: 76,
+    height: 64,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     gap: 4,
   },
   iconWrap: {
@@ -76,16 +164,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  iconWrapActive: {
-    backgroundColor: colors.primary,
-  },
   tabLabel: {
     fontFamily: fonts.bodyMedium,
     fontSize: 11,
-    color: colors.inkMuted,
+    lineHeight: 14,
+    textAlign: 'center',
+    width: 76,
   },
   tabLabelActive: {
     fontFamily: fonts.bodyBold,
-    color: colors.ink,
   },
 });

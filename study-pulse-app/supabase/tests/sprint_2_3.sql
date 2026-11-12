@@ -1,0 +1,16 @@
+begin;
+select plan(12);
+select ok(to_regclass('public.points_reversals') is not null,'tabela de reversões existe');
+select ok(to_regclass('public.streak_history') is not null,'histórico de streak existe');
+select ok(to_regclass('public.badges') is not null,'badges existem');
+select ok(to_regclass('public.user_badges') is not null,'badges do usuário existem');
+select ok(to_regclass('public.weekly_resets') is not null,'reset semanal existe');
+select ok(exists(select 1 from information_schema.columns where table_name='goals' and column_name='archived_at'),'metas suportam arquivamento');
+select ok(has_function_privilege('authenticated','public.rpc_update_goal(bigint,text,text,date,text)','EXECUTE'),'edição via RPC exposta');
+select ok(has_function_privilege('authenticated','public.rpc_archive_goal(bigint,boolean)','EXECUTE'),'arquivamento via RPC exposto');
+select ok(has_function_privilege('authenticated','public.rpc_reverse_points(bigint,text)','EXECUTE'),'reversão via RPC exposta');
+select ok(has_function_privilege('authenticated','public.rpc_reset_weekly()','EXECUTE'),'reset semanal via RPC exposto');
+select ok(not has_table_privilege('authenticated','public.points_reversals','INSERT'),'ledger de reversões sem insert direto');
+select ok(not has_table_privilege('authenticated','public.user_badges','INSERT'),'badges sem insert direto');
+select * from finish();
+rollback;

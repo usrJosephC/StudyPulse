@@ -1,28 +1,63 @@
-import { StyleSheet, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Animated, StyleSheet, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
-import { colors } from '../theme';
+import type { ReactNode } from 'react';
+import { useTheme } from '../contexts/ThemeContext';
+import { useReducedMotion } from '../hooks/useReducedMotion';
 
 type Props = {
-  progress: number; // 0..1
+  progress: number;
   size?: number;
   strokeWidth?: number;
   color?: string;
   trackColor?: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
 };
 
 export function ProgressRing({
   progress,
   size = 160,
   strokeWidth = 14,
-  color = colors.primary,
-  trackColor = colors.surface,
+  color,
+  trackColor,
   children,
 }: Props) {
+  const { temaAtual } = useTheme();
+  const reduceMotion = useReducedMotion();
+
   const radiusPx = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radiusPx;
   const clamped = Math.max(0, Math.min(1, progress));
-  const dashOffset = circumference * (1 - clamped);
+  const [animatedProgress] = useState(() => new Animated.Value(0));
+  const [displayProgress, setDisplayProgress] = useState(0);
+
+  useEffect(() => {
+    const listenerId = animatedProgress.addListener(({ value }) => {
+      setDisplayProgress(value);
+    });
+    return () => animatedProgress.removeListener(listenerId);
+  }, [animatedProgress]);
+
+  useEffect(() => {
+    animatedProgress.stopAnimation();
+    if (reduceMotion) {
+      animatedProgress.setValue(clamped);
+      return;
+    }
+
+    const animation = Animated.timing(animatedProgress, {
+      toValue: clamped,
+      duration: 320,
+      useNativeDriver: false,
+    });
+    animation.start();
+    return () => animation.stop();
+  }, [animatedProgress, clamped, reduceMotion]);
+
+  const dashOffset = circumference * (1 - displayProgress);
+
+  const ringColor = color ?? temaAtual.primary;
+  const backgroundColor = trackColor ?? temaAtual.surface;
 
   return (
     <View style={{ width: size, height: size }}>
@@ -31,7 +66,7 @@ export function ProgressRing({
           cx={size / 2}
           cy={size / 2}
           r={radiusPx}
-          stroke={trackColor}
+          stroke={backgroundColor}
           strokeWidth={strokeWidth}
           fill="none"
         />
@@ -39,7 +74,7 @@ export function ProgressRing({
           cx={size / 2}
           cy={size / 2}
           r={radiusPx}
-          stroke={color}
+          stroke={ringColor}
           strokeWidth={strokeWidth}
           fill="none"
           strokeLinecap="round"
@@ -49,7 +84,8 @@ export function ProgressRing({
           origin={`${size / 2}, ${size / 2}`}
         />
       </Svg>
-      <View style={StyleSheet.absoluteFillObject}>
+
+      <View style={StyleSheet.absoluteFill}>
         <View style={styles.center}>{children}</View>
       </View>
     </View>
