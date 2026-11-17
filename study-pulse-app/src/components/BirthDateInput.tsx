@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import { fonts, radius, spacing } from '../theme';
 import { useTheme } from '../contexts/ThemeContext';
+import { useReducedMotion } from '../hooks/useReducedMotion';
 import type { RegisterFormData } from '../validation/schemas';
 
 type Props = {
@@ -33,6 +34,7 @@ const years = Array.from({ length: 100 }, (_, index) => currentYear - index);
 export function BirthDateInput({ control, errors }: Props) {
   const { t } = useTranslation();
   const { temaAtual } = useTheme();
+  const reduceMotion = useReducedMotion();
   const [pickerType, setPickerType] = useState<PickerType>(null);
 
   const fieldLabels = {
@@ -70,7 +72,7 @@ export function BirthDateInput({ control, errors }: Props) {
       color: temaAtual.ink,
     },
     placeholder: {
-      color: temaAtual.inkFaint,
+      color: temaAtual.inkMuted,
     },
     error: {
       marginTop: spacing.xs,
@@ -210,7 +212,7 @@ export function BirthDateInput({ control, errors }: Props) {
             <Modal
               visible={pickerType !== null}
               transparent
-              animationType="fade"
+              animationType={reduceMotion ? 'none' : 'fade'}
               onRequestClose={() => setPickerType(null)}
             >
               <View style={styles.overlay}>

@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { ActivityIndicator, Modal, Pressable, ScrollView, Share, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Modal, Pressable, ScrollView, Share, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../contexts/ThemeContext';
+import { useMotion } from '../contexts/MotionContext';
+import { useReducedMotion } from '../hooks/useReducedMotion';
 import { changeAppLanguage, type AppLanguage } from '../i18n';
 import { deleteCurrentAccount, type AccountDeletionErrorCode } from '../services/accountDeletion.service';
 import { useAuth } from '../contexts/AuthContext';
@@ -32,6 +34,7 @@ export function ProfileFlows(props: ProfileFlowProps) {
 export function ProfilePreferences({ close }: { close: () => void }) {
   const { t, i18n } = useTranslation();
   const { tema, temaAtual, alternarTema } = useTheme();
+  const { reduceMotion, systemReduceMotion, setUserReduceMotion } = useMotion();
   const [legalView, setLegalView] = useState<'terms' | 'privacy' | null>(null);
   const [error, setError] = useState<string | null>(null);
   const language = (i18n.resolvedLanguage ?? i18n.language).toLowerCase().startsWith('en') ? 'en-US' : (i18n.resolvedLanguage ?? i18n.language).toLowerCase().startsWith('es') ? 'es-ES' : 'pt-BR';
@@ -65,6 +68,23 @@ export function ProfilePreferences({ close }: { close: () => void }) {
       <Text style={styles.optionText}>{tema === 'light' ? t('theme.dark') : t('theme.light')}</Text>
       <Ionicons name={tema === 'light' ? 'moon-outline' : 'sunny-outline'} size={20} color={temaAtual.secondary} />
     </Pressable>
+    <Text style={styles.label}>{t('motion.label')}</Text>
+    <View style={styles.option}>
+      <View style={{ flex: 1, gap: 2 }}>
+        <Text style={styles.optionText}>{t('motion.reduce')}</Text>
+        <Text style={styles.text}>{systemReduceMotion ? t('motion.systemRequired') : t('motion.description')}</Text>
+      </View>
+      <Switch
+        value={reduceMotion}
+        onValueChange={(enabled) => { void setUserReduceMotion(enabled); }}
+        disabled={systemReduceMotion}
+        accessibilityLabel={t('motion.reduce')}
+        accessibilityHint={systemReduceMotion ? t('motion.systemRequired') : t('motion.description')}
+        accessibilityState={{ checked: reduceMotion, disabled: systemReduceMotion }}
+        trackColor={{ false: temaAtual.border, true: temaAtual.primary }}
+        thumbColor={reduceMotion ? temaAtual.ink : temaAtual.card}
+      />
+    </View>
     <Text style={styles.label}>{t('language.label')}</Text>
     {(['pt-BR', 'en-US', 'es-ES'] as AppLanguage[]).map(value => {
       const selected = language === value;
@@ -76,7 +96,7 @@ export function ProfilePreferences({ close }: { close: () => void }) {
     })}
     <Pressable style={styles.option} onPress={() => setLegalView('terms')} accessibilityRole="button"><Text style={styles.optionText}>{t('login.termsOfService')}</Text><Ionicons name="chevron-forward" size={18} color={temaAtual.inkFaint} /></Pressable>
     <Pressable style={styles.option} onPress={() => setLegalView('privacy')} accessibilityRole="button"><Text style={styles.optionText}>{t('profile.settings.privacy')}</Text><Ionicons name="chevron-forward" size={18} color={temaAtual.inkFaint} /></Pressable>
-    <Modal transparent visible={legalView !== null} animationType="fade" onRequestClose={() => setLegalView(null)}>
+    <Modal transparent visible={legalView !== null} animationType={reduceMotion ? 'none' : 'fade'} onRequestClose={() => setLegalView(null)}>
       <View style={styles.legalOverlay}><View style={styles.legalCard}>
         <Text style={styles.title}>{legalView === 'terms' ? t('login.termsTitle') : t('profile.settings.privacy')}</Text>
         <Text style={styles.text}>{legalView === 'terms' ? `${t('login.termsContent.paragraph1')}\n\n${t('login.termsContent.paragraph2')}` : t('profile.privacy.content')}</Text>
@@ -89,6 +109,7 @@ export function ProfilePreferences({ close }: { close: () => void }) {
 function ProfileFlowContent({ flow, close, saved, initialName }: Omit<ProfileFlowProps, 'flow'> & { flow: Exclude<ProfileFlowName, 'preferences'> }) {
   const { t } = useTranslation();
   const { temaAtual } = useTheme();
+  const reduceMotion = useReducedMotion();
   const { session, profile } = useAuth();
   const [name, setName] = useState(initialName ?? profile?.name ?? '');
   const [email, setEmail] = useState(session?.user.email ?? '');
@@ -209,7 +230,7 @@ function ProfileFlowContent({ flow, close, saved, initialName }: Omit<ProfileFlo
     </Card>{error && <Text style={s.error} accessibilityRole="alert">{error}</Text>}{success && <Text style={s.text} accessibilityRole="alert">{success}</Text>}<Pressable style={s.button} onPress={() => void save()} disabled={busy || !name.trim()} accessibilityRole="button" accessibilityState={{ disabled: busy || !name.trim(), busy }}><Text style={s.buttonText}>{busy ? t('profile.pleaseWait') : t('profile.account.save', { defaultValue: 'Save changes' })}</Text></Pressable></>}
     {flow === 'account' && <>
       <Pressable style={s.dangerButton} onPress={openDeleteConfirmation} accessibilityRole="button" accessibilityLabel={t('profile.account.deleteAction')}><Text style={s.dangerText}>{t('profile.account.deleteAction')}</Text></Pressable>
-      <Modal transparent visible={deleteConfirmationOpen} animationType="fade" onRequestClose={closeDeleteConfirmation}>
+      <Modal transparent visible={deleteConfirmationOpen} animationType={reduceMotion ? 'none' : 'fade'} onRequestClose={closeDeleteConfirmation}>
         <View style={s.deleteOverlay}>
           <View style={s.deleteDialog} accessibilityViewIsModal accessibilityLabel={deleteSucceeded ? t('profile.account.deleteSuccessTitle') : t('profile.account.deleteConfirmTitle')}>
             {deleteSucceeded ? <>

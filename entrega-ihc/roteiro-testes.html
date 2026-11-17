@@ -1,0 +1,96 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>StudyPulse</title><style>@page{size:A4;margin:3cm 2cm 2cm 3cm}body{font:12pt/1.5 "Times New Roman",serif;max-width:900px;margin:auto;padding:20px}h1{font-size:16pt}h2{font-size:13pt}table{border-collapse:collapse;width:100%;font-size:10pt}td,th{border:1px solid #aaa;padding:6px;vertical-align:top}pre{white-space:pre-wrap;font-size:9pt;background:#eee;padding:12px}.pagebreak{break-before:page}</style><body><h1>Roteiro de teste com participantes externos</h1>
+<blockquote>
+<p>Atualização de 17/11: a equipe informou indisponibilidade de participantes externos. Este roteiro fica preservado como proposta NÃO EXECUTADA. Para a execução interna, use <code>casos-testes.md</code>. Resultados internos não atendem ao requisito de duas pessoas externas e não devem ser atribuídos a P1/P2 fictícios.</p>
+</blockquote>
+<p>StudyPulse — IHC — AFYA/UNIMA — Prof. Icaro Ferreira — entrega 18/11/2026.</p>
+<h2>Preparação do moderador</h2>
+<p>Convide duas pessoas que não integrem a equipe. Identifique-as somente como P1 e P2. Explique o objetivo e peça consentimento para capturas ou gravação; não registre rosto, voz ou dados pessoais sem concordância. Cada sessão dura aproximadamente 15 a 20 minutos. Registre data, plataforma, navegador/dispositivo, largura da tela, versão do código e condição de movimento. Use as contas locais de demonstração do LEIA-ME. Se o check-in já foi realizado no mesmo dia, use uma nova conta de teste; não apague registros para simular um resultado.</p>
+<p>Leia: “Estamos avaliando a interface, não você. Faça as tarefas do seu jeito e diga o que estiver pensando. Você pode parar quando quiser. Primeiro tentaremos sem ajuda.” Não indique onde clicar. Se a pessoa não conseguir prosseguir, registre a dificuldade e a ajuda dada antes de orientar.</p>
+<h2>Tarefas para ler ao participante</h2>
+<ol>
+<li><strong>Organizar e concluir:</strong> “Você precisa revisar um conteúdo de IHC hoje. Registre essa atividade, marque-a como concluída e explique como percebeu que foi concluída. Depois corrija a marcação, como se ainda faltasse estudar.”</li>
+<li><strong>Registrar presença:</strong> “Você estudou hoje e quer registrar sua presença diária. Faça isso e explique o resultado mostrado.”</li>
+<li><strong>Planejar uma meta:</strong> “Crie uma meta de estudo para os próximos sete dias. Depois altere o título e confira se a duração foi preservada.”</li>
+</ol>
+<p>Repita a tarefa 1 com <strong>Preferências → Reduzir movimentos</strong> ativado. Não descreva qual sensação a pessoa deveria ter. Pergunte: “O que mudou? O resultado continuou claro? Alguma versão causou desconforto ou demora?”</p>
+<h2>Observar cinco animações</h2>
+<p>Além das três tarefas, peça para abrir o histórico de metas (Slide), abrir conquistas no Perfil (Fade) e enviar um formulário vazio (Shake). A conclusão de tarefa mostra Scale + Fade e animação de dados. Observe o estado também com movimento reduzido. A animação não comprova que o servidor respondeu: confirme o resultado persistido.</p>
+<h2>Comparação rápida e lenta</h2>
+<p>Abra <code>comparacao-motion.html</code>. Compare checkmarks de 120/360 ms e barras de 180/600 ms. P1 observa a versão rápida primeiro; P2 observa a lenta primeiro. As durações atuais no aplicativo são 180 ms e 300 ms. Registre clareza, demora, desconforto e preferência. O comparador é uma simulação documentada e não substitui as tarefas reais.</p>
+<h2>Ficha individual — preencher uma cópia por participante</h2>
+<ul>
+<li>Participante: P1 / P2</li>
+<li>Data e hora:</li>
+<li>Dispositivo e plataforma:</li>
+<li>Versão/commit ou manifesto do pacote:</li>
+<li>Consentimento para captura/gravação: sim / não</li>
+<li>Movimento normal e reduzido verificados:</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Rodada</th>
+<th>Sem ajuda / com ajuda / não concluiu</th>
+<th>Dificuldade observável e ajuda fornecida</th>
+<th>Sensação relatada (fala/paráfrase fiel)</th>
+<th>Sugestão</th>
+<th>Evidência</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tarefa 1</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Tarefa 2</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Tarefa 3</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Tarefa 1 reduzida</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Comparação checkmark</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Comparação barra</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Não preencher campos vazios com resultados presumidos. Emoção esperada pela equipe e sensação relatada pelo participante são dados diferentes.</p>
+<h2>Duas melhorias depois dos testes</h2>
+<p>Para cada melhoria registre: problema observado; participante/tarefa; evidência anterior; alteração; motivo; arquivo/commit; repetição da tarefa; resultado observado; evidência posterior. Escolha os dois problemas de maior impacto entre os achados reais. Correções técnicas prévias, como CORS, não substituem melhorias decorrentes do teste externo.</p>
+<h2>Capturas ou OBS</h2>
+<p>Com consentimento, no OBS selecione Captura de janela para o navegador/aplicativo, enquadre somente a interface e evite gravar outras janelas. Inicie a gravação antes da tarefa e encerre após o relato. Alternativa: capture antes, ação e resultado em imagens. Nomeie <code>P1_T1_antes.png</code>, <code>P1_T1_resultado.png</code>, <code>P1_T1_reduzido.png</code>; repita para P2. Guarde evidências privadas fora do ZIP até revisar dados pessoais.</p>
+<p>As capturas em <code>evidencias/tecnicas/</code> são verificações automatizadas da interface e não representam sessões P1/P2.</p></body></html>

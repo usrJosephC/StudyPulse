@@ -1,0 +1,20 @@
+[
+  {
+    "kind": "check",
+    "completionMs": {
+      "fast": 143.69999998807907,
+      "slow": 358.69999998807907
+    },
+    "frames": 17,
+    "fastBeforeSlow": true
+  },
+  {
+    "kind": "bar",
+    "completionMs": {
+      "fast": 179.90000000596046,
+      "slow": 597.1000000089407
+    },
+    "frames": 36,
+    "fastBeforeSlow": true
+  }
+]

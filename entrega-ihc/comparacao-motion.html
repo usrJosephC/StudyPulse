@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>StudyPulse — comparação de duração</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#fafafa;color:#212121;font:18px/1.6 system-ui,sans-serif}main{max-width:900px;margin:auto;padding:32px 20px}h1{color:#003566}section{background:white;border:1px solid #d0d5db;border-radius:16px;margin:24px 0;padding:24px}button{background:#003566;color:white;border:0;border-radius:8px;padding:12px 18px;font:inherit;margin:4px;cursor:pointer}button:disabled{opacity:.65}button:focus-visible,input:focus-visible{outline:3px solid #005fcc;outline-offset:4px}.row{display:flex;flex-wrap:wrap;gap:24px}.sample{flex:1;min-width:180px}.track{height:18px;background:#ddd;border-radius:10px;overflow:hidden}.fill{height:100%;background:#003566;width:0}.check{display:inline-flex;justify-content:center;align-items:center;width:48px;height:48px;border-radius:50%;background:#f5cc00;font-weight:bold}.note{color:#595f6b}#state{min-height:32px}
+</style><main><h1>Comparação de duração das animações</h1>
+<p>Material auxiliar do relatório de IHC. Reproduz as propriedades e a curva cúbica de saída usadas no StudyPulse. A interface real deve ser testada separadamente. Não faz chamadas de API.</p>
+<label><input type="checkbox" id="reduce"> Reduzir movimentos</label><p class="note" id="system"></p>
+<section><h2>Scale + Fade do checkmark</h2><p>Escala e opacidade: 0,6 → 1. Escolha atual do app: 180 ms.</p><div class="row">
+<div class="sample"><p>Rápida — 120 ms</p><span class="check" id="checkFast">✓</span></div>
+<div class="sample"><p>Lenta — 360 ms</p><span class="check" id="checkSlow">✓</span></div></div><button id="check">Comparar checkmarks</button></section>
+<section><h2>Loading / progresso determinado</h2><p>Preenchimento: 0 → 75%. Escolha atual do app: 300 ms. Aqui o valor é uma simulação didática, não uma operação remota.</p><div class="row">
+<div class="sample"><p>Rápida — 180 ms</p><div class="track"><div class="fill" id="barFast"></div></div></div>
+<div class="sample"><p>Lenta — 600 ms</p><div class="track"><div class="fill" id="barSlow"></div></div></div></div><button id="bar">Comparar barras</button></section>
+<p id="state" role="status">Selecione uma comparação.</p>
+<p>Curva: <code>1 − (1 − t)³</code>, equivalente a <code>Easing.out(Easing.cubic)</code>. No roteiro, alternar a ordem da observação entre P1 e P2. Perguntar qual versão tornou o resultado mais claro, se houve atraso ou desconforto e registrar as palavras do participante.</p>
+<p class="note">Fonte conceitual: Laboratório de animações na IHC, Prof. Icaro Ferreira. Implementação didática adaptada das propriedades de ProgressBar e HomeScreen do StudyPulse.</p></main>
+<script>
+const $=id=>document.getElementById(id), system=matchMedia('(prefers-reduced-motion: reduce)');
+function reduced(){return system.matches||$('reduce').checked}
+function systemNote(){$('system').textContent=system.matches?'O sistema solicita redução; ela prevalece.':'A redução pode ser ativada pelo controle acima.'}
+system.addEventListener('change',systemNote);systemNote();
+function tween(duration,draw){return new Promise(resolve=>{const start=performance.now();function frame(now){const t=reduced()?1:Math.min(1,(now-start)/duration);draw(1-Math.pow(1-t,3));if(t<1)requestAnimationFrame(frame);else resolve()}requestAnimationFrame(frame)})}
+function scale(id,p){$(id).style.transform=`scale(${.6+.4*p})`;$(id).style.opacity=.6+.4*p}
+async function compare(kind){$('check').disabled=$('bar').disabled=true;$('state').textContent='Comparação em andamento.';try{if(kind==='check'){await Promise.all([tween(120,p=>scale('checkFast',p)),tween(360,p=>scale('checkSlow',p))])}else{await Promise.all([tween(180,p=>$('barFast').style.width=`${75*p}%`),tween(600,p=>$('barSlow').style.width=`${75*p}%`)])}$('state').textContent=reduced()?'Resultado final exibido sem transição.':'Comparação concluída. Registre a percepção no roteiro.'}finally{$('check').disabled=$('bar').disabled=false}}
+$('check').onclick=()=>compare('check');$('bar').onclick=()=>compare('bar');
+</script></html>

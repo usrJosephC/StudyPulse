@@ -60,7 +60,7 @@ export function NameInput({ control, errors }: Props) {
             <TextInput
               style={styles.input}
               placeholder={t('register.name')}
-              placeholderTextColor={temaAtual.inkFaint}
+              placeholderTextColor={temaAtual.inkMuted}
               value={value}
               onChangeText={onChange}
               onBlur={onBlur}

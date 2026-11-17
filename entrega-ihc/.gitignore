@@ -1,0 +1,5 @@
+# Renderizações intermediárias e caches locais; evidencias/ é versionado.
+.qa/
+tmp/
+__pycache__/
+*.pyc

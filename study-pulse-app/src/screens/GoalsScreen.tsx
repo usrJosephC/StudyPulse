@@ -32,10 +32,12 @@ import { useGoals } from '../hooks/useGoals';
 import { useHeatmap } from '../hooks/useHeatmap';
 import { useStreak } from '../hooks/useStreak';
 import { logSafeError } from '../lib/logger';
+import { useReducedMotion } from '../hooks/useReducedMotion';
 
 export function GoalsScreen() {
   const { t, i18n } = useTranslation();
   const { temaAtual } = useTheme();
+  const reduceMotion = useReducedMotion();
   const insets = useSafeAreaInsets();
   const hasFocusedRef = useRef(false);
   const { session, profile } = useAuth();
@@ -731,7 +733,7 @@ export function GoalsScreen() {
 
       <Modal
         visible={modalVisible}
-        animationType="slide"
+        animationType={reduceMotion ? 'none' : 'slide'}
         transparent
         onRequestClose={() => setModalVisible(false)}
       >
@@ -872,7 +874,7 @@ export function GoalsScreen() {
 
       <Modal
         visible={historyVisible}
-        animationType="slide"
+        animationType={reduceMotion ? 'none' : 'slide'}
         transparent
         onRequestClose={() => setHistoryVisible(false)}
       >

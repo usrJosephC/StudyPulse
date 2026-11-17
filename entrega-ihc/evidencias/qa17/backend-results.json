@@ -1,0 +1,119 @@
+[
+  {
+    "id": "CT09",
+    "step": "owner-update",
+    "status": "PASS",
+    "detail": {
+      "http": 200
+    }
+  },
+  {
+    "id": "CT09",
+    "step": "member-update-denied",
+    "status": "PASS",
+    "detail": {
+      "http": 403,
+      "code": "42501"
+    }
+  },
+  {
+    "id": "CT09",
+    "step": "empty-name-denied",
+    "status": "PASS",
+    "detail": {
+      "http": 400,
+      "code": "22023"
+    }
+  },
+  {
+    "id": "CT09",
+    "step": "long-description-denied",
+    "status": "PASS",
+    "detail": {
+      "http": 400,
+      "code": "22023"
+    }
+  },
+  {
+    "id": "CT09",
+    "step": "member-leave-api",
+    "status": "PASS",
+    "detail": {
+      "http": 200
+    }
+  },
+  {
+    "id": "CT09",
+    "step": "member-rejoin-api",
+    "status": "PASS",
+    "detail": {
+      "http": 200
+    }
+  },
+  {
+    "id": "CT09",
+    "step": "creator-preserved",
+    "status": "PASS",
+    "detail": "Creator unchanged after member leave/rejoin"
+  },
+  {
+    "id": "CT10",
+    "step": "progress-setup",
+    "status": "PASS",
+    "detail": {
+      "http": 200
+    }
+  },
+  {
+    "id": "CT10",
+    "step": "archive-api",
+    "status": "PASS",
+    "detail": {
+      "http": 200
+    }
+  },
+  {
+    "id": "CT10",
+    "step": "archive-persist",
+    "status": "PASS",
+    "detail": {
+      "id": 78,
+      "archived": true,
+      "progress": 0.5,
+      "due": "2026-11-24"
+    }
+  },
+  {
+    "id": "CT10",
+    "step": "restore-preserves",
+    "status": "PASS",
+    "detail": {
+      "id": 78,
+      "progress": 0.5,
+      "due": "2026-11-24"
+    }
+  },
+  {
+    "id": "CT13",
+    "step": "real-function-endpoint",
+    "status": "BLOCKED",
+    "detail": {
+      "http": 404,
+      "detail": "Compose gateway has no /functions/v1 route; real Edge Function unavailable"
+    }
+  },
+  {
+    "id": "CT13",
+    "step": "unauthenticated-endpoint",
+    "status": "BLOCKED",
+    "detail": {
+      "http": 404
+    }
+  },
+  {
+    "id": "CT13",
+    "step": "unrelated-fixture-intact",
+    "status": "PASS",
+    "detail": "QA owner still authenticates; no administrative deletion performed"
+  }
+]

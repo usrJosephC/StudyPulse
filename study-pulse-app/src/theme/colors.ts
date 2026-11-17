@@ -2,6 +2,7 @@
 
 export const lightColors = {
   primary: '#F5CC00',
+  progress: '#8A7000',
   primarySoft: '#FCEE9E',
   primaryMuted: '#FDF6D3',
 
@@ -13,8 +14,8 @@ export const lightColors = {
   card: '#FFFFFF',
 
   ink: '#212121',
-  inkMuted: '#6B7280',
-  inkFaint: '#9CA3AF',
+  inkMuted: '#595F6B',
+  inkFaint: '#626975',
 
   border: '#E5E5E5',
   danger: '#C1121F',
@@ -22,6 +23,7 @@ export const lightColors = {
 
 export const darkColors = {
   primary: '#F5CC00',
+  progress: '#F5CC00',
   primarySoft: '#665800',
   primaryMuted: '#393200',
 

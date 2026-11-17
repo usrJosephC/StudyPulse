@@ -44,7 +44,7 @@ function TabIcon({
         <Ionicons
           name={icons[name]}
           size={20}
-          color={focused ? palette.background : palette.inkMuted}
+          color={focused ? '#212121' : palette.inkMuted}
         />
       </View>
       <Text

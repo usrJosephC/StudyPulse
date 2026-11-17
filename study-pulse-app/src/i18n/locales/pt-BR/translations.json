@@ -23,6 +23,12 @@
     "light": "Tema claro",
     "label": "Tema"
   },
+  "motion": {
+    "label": "Movimento",
+    "reduce": "Reduzir movimentos",
+    "description": "Evita animações de deslocamento e mantém o conteúdo visível imediatamente.",
+    "systemRequired": "Ativado pela configuração de acessibilidade do dispositivo."
+  },
   "validation": {
     "invalidEmail": "Informe um e-mail válido.",
     "emailRequired": "O e-mail é obrigatório.",

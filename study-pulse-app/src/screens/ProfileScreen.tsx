@@ -16,6 +16,7 @@ import { useStreak } from '../hooks/useStreak';
 import { useTasks } from '../hooks/useTasks';
 import { useProgression } from '../hooks/useProgression';
 import { ProfileFlows, type ProfileFlowName } from './ProfileFlows';
+import { useReducedMotion } from '../hooks/useReducedMotion';
 
 const profileSettings = [
   { id: 'account', icon: 'person-outline' as const, labelKey: 'profile.settings.account' },
@@ -28,6 +29,7 @@ export function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const { t, i18n } = useTranslation();
   const { temaAtual } = useTheme();
+  const reduceMotion = useReducedMotion();
   const { session, profile, loading: authLoading, error: authError, signOut } = useAuth();
   const streak = useStreak();
   const points = usePoints();
@@ -211,12 +213,12 @@ export function ProfileScreen() {
           {signOutError && <Text style={styles.errorText}>{signOutError}</Text>}
         </View>
       </ScrollView>
-      <Modal visible={settingsView !== null && settingsView !== 'achievements'} animationType="slide" onRequestClose={() => setSettingsView(null)}>
+      <Modal visible={settingsView !== null && settingsView !== 'achievements'} animationType={reduceMotion ? 'none' : 'slide'} onRequestClose={() => setSettingsView(null)}>
         <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
           {settingsView && settingsView !== 'achievements' && <ProfileFlows key={settingsView} flow={settingsView as ProfileFlowName} close={() => setSettingsView(null)} saved={setSavedName} initialName={savedName ?? undefined} />}
         </SafeAreaView>
       </Modal>
-      <Modal visible={settingsView === 'achievements'} transparent animationType="fade" onRequestClose={() => setSettingsView(null)}>
+      <Modal visible={settingsView === 'achievements'} transparent animationType={reduceMotion ? 'none' : 'fade'} onRequestClose={() => setSettingsView(null)}>
         <View style={styles.modalBackdrop}>
           <Pressable
             style={StyleSheet.absoluteFill}

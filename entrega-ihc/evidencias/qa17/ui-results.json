@@ -1,0 +1,80 @@
+[
+  {
+    "id": "CT08",
+    "step": "valid-login",
+    "status": "PASS",
+    "detail": "Real UI login to local API; protected tabs visible"
+  },
+  {
+    "id": "CT08",
+    "step": "session-reload",
+    "status": "PASS",
+    "detail": "Session persisted across reload"
+  },
+  {
+    "id": "CT03",
+    "step": "duration-preserved",
+    "status": "PASS",
+    "detail": "{\"id\":81,\"due\":\"2026-11-24\",\"after\":\"2026-11-24\"}"
+  },
+  {
+    "id": "CT03",
+    "step": "completed",
+    "status": "PASS",
+    "detail": "{\"id\":81,\"progress\":1,\"completed\":true}"
+  },
+  {
+    "id": "CT03",
+    "step": "history-reload",
+    "status": "PASS",
+    "detail": "Completed goal present in history after reload"
+  },
+  {
+    "id": "CT10",
+    "step": "archive-ui",
+    "status": "FAIL",
+    "detail": "{\"id\":82,\"archived\":null,\"dialogCount\":0}"
+  },
+  {
+    "id": "CT04",
+    "step": "persisted",
+    "status": "PASS",
+    "detail": "Internal switch remained checked after reload"
+  },
+  {
+    "id": "CT05",
+    "step": "system-precedence",
+    "status": "FAIL",
+    "detail": "locator.click: Timeout 8000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('tab', { name: /Perfil/ })\u001b[22m\n\u001b[2m    - locator resolved to <a role=\"tab\" tabindex=\"0\" href=\"/Main/Profile\" aria-selected=\"true\" class=\"css-g5y9jx r-1otgn73 r-1awozwy r-1onu96p r-eqz5dr r-1h0z5md r-1uu6nss\">…</a>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div class=\"css-g5y9jx r-1uavh4e r-13awgt0\"></div> from <div>…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div class=\"css-g5y9jx r-1uavh4e r-13awgt0\"></div> from <div>…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    15 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is visible, enabled and stable\u001b[22m\n\u001b[2m       - scrolling into view if needed\u001b[22m\n\u001b[2m       - done scrolling\u001b[22m\n\u001b[2m       - <div class=\"css-g5y9jx r-1uavh4e r-13awgt0\"></div> from <div>…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n"
+  },
+  {
+    "id": "CT07",
+    "step": "keyboard-focus",
+    "status": "PASS",
+    "detail": "{\"tag\":\"BUTTON\",\"outline\":\"rgb(0, 53, 102) solid 3px\",\"hasFocus\":true}"
+  },
+  {
+    "id": "CT07",
+    "step": "zoom-overflow",
+    "status": "FAIL",
+    "detail": "Document horizontal overflow check at CSS zoom 200%; screen-reader audio not tested"
+  },
+  {
+    "id": "CT12",
+    "step": "English-persist",
+    "status": "PASS",
+    "detail": "Tab language persisted after reload"
+  },
+  {
+    "id": "CT12",
+    "step": "Español-persist",
+    "status": "PASS",
+    "detail": "Tab language persisted after reload"
+  },
+  {
+    "id": "CT12",
+    "step": "languages",
+    "status": "FAIL",
+    "detail": "locator.click: Timeout 8000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('tab', { name: /Metas/ })\u001b[22m\n"
+  }
+]

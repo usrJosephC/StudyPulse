@@ -23,6 +23,12 @@
     "light": "Light theme",
     "label": "Theme"
   },
+  "motion": {
+    "label": "Motion",
+    "reduce": "Reduce motion",
+    "description": "Avoids movement animations and shows content immediately.",
+    "systemRequired": "Enabled by the device accessibility setting."
+  },
   "validation": {
     "invalidEmail": "Please enter a valid email.",
     "emailRequired": "Email is required.",

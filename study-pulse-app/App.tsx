@@ -29,6 +29,8 @@ import {
   useTheme,
 } from './src/contexts/ThemeContext';
 import { AuthProvider } from './src/contexts/AuthContext';
+import { MotionProvider } from './src/contexts/MotionContext';
+import { WebAccessibility } from './src/components/WebAccessibility';
 import { logSafeError } from './src/lib/logger';
 
 export default function App() {
@@ -81,11 +83,13 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <ThemeProvider>
-        <AuthProvider>
-          <ThemedApp />
-        </AuthProvider>
-      </ThemeProvider>
+      <MotionProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <ThemedApp />
+          </AuthProvider>
+        </ThemeProvider>
+      </MotionProvider>
     </SafeAreaProvider>
   );
 }
@@ -124,6 +128,7 @@ function ThemedApp() {
 
   return (
     <>
+      <WebAccessibility />
       <NavigationContainer theme={navigationTheme}>
         <RootStack />
       </NavigationContainer>
