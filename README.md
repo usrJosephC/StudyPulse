@@ -13,15 +13,20 @@
 
 ## 🚀 O que tem aqui
 
-- **Autenticação completa:** cadastro, login, restauração de sessão e logout com Supabase Auth.
+- **Autenticação:** cadastro, login com aceite dos termos, restauração de sessão e logout com Supabase Auth.
 - **Home personalizada:** progresso diário, tarefas, sequência de estudos e pontuação semanal e total.
 - **Tarefas reais:** criação, listagem diária, conclusão e reabertura na Home, com atualização de progresso.
 - **Metas de estudo:** criação, edição, atualização de progresso, conclusão, arquivamento e restauração.
 - **Grupos de estudo:** criação com descrição, convite por código, cópia e compartilhamento separados, edição pelo criador, saída, ranking e feed.
 - **Perfil integrado:** dados da conta, estatísticas reais e encerramento seguro da sessão.
+- **Preferências e notificações:** edição do perfil, idioma, tema claro/escuro, acesso a termos e privacidade; notificações acessíveis pelo sino e pelo Perfil. A preferência local de lembretes não equivale a push remoto.
+- **Dez conquistas:** catálogo visual e desbloqueios persistidos no servidor, com modal rolável.
+- **Movimento acessível:** opção interna persistente de movimento reduzido, combinada à preferência do sistema; animações de progresso, checkmark e erro, além de transições de modais.
 - **Gamificação consistente:** pontos registrados em ledger, bônus de sequência e operações idempotentes.
-- **Internacionalização (i18n):** interface de todas as páginas com suporte a múltiplas línguas, utilizando i18next e react-i18next.
+- **Internacionalização (i18n):** português, inglês e espanhol com i18next e react-i18next; pendências de feedback Web estão registradas abaixo.
 - **Ambiente local reproduzível:** Docker Compose inicia banco, Auth, API, migrations e seed com um comando.
+
+**Estado em 18/11/2026:** a [PR #36](https://github.com/usrJosephC/StudyPulse/pull/36) foi integrada à `dev` e promovida à `main` pela [PR #37](https://github.com/usrJosephC/StudyPulse/pull/37). Os recursos implementados ainda possuem limitações de validação; consulte a seção **Validação e pendências**.
 
 ---
 
@@ -61,6 +66,8 @@ Os tokens ficam em `study-pulse-app/src/theme/` e são compartilhados pelas tela
 
 **Montserrat** é usada nos títulos e **Quicksand** no corpo, rótulos e controles. A interface reutiliza cards, botões, pills, avatar, barra e anel de progresso, cabeçalho e campos de autenticação.
 
+O `MotionProvider` mantém a preferência interna de redução de movimento e respeita a do sistema: se qualquer uma estiver ativa, os movimentos são reduzidos ou removidos, preservando texto e estado final. Modais e navegação seguem a mesma preferência. Textos secundários e indicadores receberam ajustes de contraste; no Web, controles recebem contorno de foco visível. Isso não representa certificação integral de acessibilidade.
+
 ---
 
 ## 🧭 Fluxo da aplicação
@@ -90,8 +97,12 @@ O schema atual contém:
 - `squads`
 - `squad_members`
 - `squad_activity`
+- `points_reversals`, `streak_history` e `weekly_resets`
+- `badges` e `user_badges`
 
 As policies de **Row Level Security** isolam os dados por usuário e por grupo. Check-ins, conclusão de tarefas e metas, progresso, entrada e saída de grupos passam por funções RPC autenticadas. A pontuação é escrita junto com a ação correspondente para reduzir duplicações e alterações indevidas pelo cliente.
+
+As migrations recentes incluem edição de grupo pelo criador (006), catálogo e concessão de conquistas (007), cascata necessária à exclusão de conta (008) e restrição de escrita direta nas tabelas de progressão (009). A migration 009 mantém leitura autorizada e operações pelas RPCs existentes. A Edge Function `delete-account` requer configuração própria no servidor; ela não é iniciada pelo Compose principal.
 
 ---
 
@@ -99,12 +110,13 @@ As policies de **Row Level Security** isolam os dados por usuário e por grupo. 
 
 ```text
 design/                        # referências visuais, paleta e telas exportadas
+entrega-ihc/                    # relatório, roteiro, casos e evidências de IHC
 study-pulse-app/
 ├── assets/                 # logos, ícones e splash
 ├── scripts/                # inicialização local e descoberta do IP da rede
 ├── src/
 │   ├── components/         # componentes reutilizáveis
-│   ├── contexts/           # sessão, tema e preferências compartilhadas
+│   ├── contexts/           # sessão, tema e preferência de movimento
 │   ├── hooks/              # estado e operações consumidos pelas telas
 │   ├── i18n/               # configuração i18n e traduções por idioma
 │   ├── lib/                # cliente Supabase e Result<T>
@@ -128,7 +140,7 @@ study-pulse-app/
 
 ## ⚙️ Rodando localmente
 
-**Pré-requisitos:** [Node.js](https://nodejs.org/) e [Docker Desktop](https://www.docker.com/products/docker-desktop/).
+**Pré-requisitos:** [Node.js](https://nodejs.org/) compatível com Expo SDK 57 (ambiente validado: Node 22.20), npm e [Docker Desktop](https://www.docker.com/products/docker-desktop/). O comando `start:local` usa PowerShell. Mantenha a versão do Expo definida no projeto.
 
 ```bash
 git clone https://github.com/usrJosephC/StudyPulse.git
@@ -160,7 +172,23 @@ Inicie o Expo em modo LAN:
 npm run start:local
 ```
 
-O script detecta o IPv4 ativo, atualiza a URL local do Supabase e abre o Expo para acesso pelo celular. O computador e o dispositivo devem estar na mesma rede.
+O script detecta o IPv4 ativo, atualiza a URL local do Supabase, garante a inicialização do Compose, aguarda a saúde do backend e abre o Expo para acesso pelo celular. O computador e o dispositivo devem estar na mesma rede. Copie `.env.example` apenas na primeira configuração, preservando um `.env` já existente.
+
+### Web e atualização do ambiente
+
+Com o backend iniciado, execute `npm run web`. O gateway aceita origens localhost, loopback e redes privadas, com os headers necessários ao Supabase/PostgREST. Essa configuração é destinada ao desenvolvimento local/LAN.
+
+Após atualizar migrations ou a configuração do gateway:
+
+```powershell
+docker-compose run --rm migrations
+docker-compose exec -T gateway nginx -t
+docker-compose exec -T gateway nginx -s reload
+```
+
+Para dados sintéticos de demonstração, execute `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/seed-local-demo.ps1`. O script é restrito à API HTTP local/privada; as contas de demonstração são descritas na documentação de testes.
+
+Execute o Compose por um único checkout: cópias do repositório usam o mesmo nome de projeto `studypulse`. Não inicie Supabase CLI em paralelo com esse backend. A porta 54321 pertence à API; a 8081 normalmente pertence ao Expo. Se o Expo oferecer 8082, outra instância pode estar usando 8081.
 
 ### Endpoints locais
 
@@ -181,6 +209,12 @@ O script detecta o IPv4 ativo, atualiza a URL local do Supabase e abre o Expo pa
 | `npm run android` | Inicia o Expo e abre o Android |
 | `npm run ios` | Inicia o Expo e abre o iOS |
 | `npm run web` | Inicia a versão web |
+| `npm run export:web` | Carrega `.env` e exporta a aplicação Web para `dist/` |
+| `npm run typecheck` | Verifica os contratos TypeScript |
+| `npm test` | Executa os testes da aplicação |
+| `npm run lint` | Executa a análise estática |
+| `node scripts/test-local-cors.mjs` | Verifica CORS no gateway local em execução |
+| `node scripts/test-local-sql.mjs` | Executa suítes SQL locais e exige ROLLBACK sem falhas |
 | `npm run db:start` | Inicia a stack Docker |
 | `npm run db:stop` | Encerra a stack sem apagar os dados |
 | `npm run db:status` | Mostra o estado dos containers |
@@ -197,7 +231,7 @@ docker-compose down
 
 ---
 
-## ✅ Validação
+## ✅ Validação e pendências
 
 ```bash
 npm run typecheck
@@ -207,6 +241,17 @@ npm run export:web
 ```
 
 Os testes SQL ficam em `study-pulse-app/supabase/tests/` e cobrem RLS, privilégios e idempotência das operações principais.
+
+Na rodada registrada em 17/11 e na conferência anterior à PR #36: typecheck e 5 testes passaram; lint teve zero erros e 11 avisos; 138 verificações CORS e 104 assertions SQL em sete suítes passaram. O CI Quality da PR #36 também passou. Esses resultados não substituem os testes dos fluxos na interface.
+
+O QA técnico Web registrou **7 casos aprovados, 4 reprovados e 2 bloqueados**. Joseph confirmou no Chrome os mesmos erros encontrados na execução automatizada no Edge. Permanecem:
+
+- Mensagem de credenciais inválidas sem feedback visível na Web e orientação incorreta no estado vazio de tarefas (#21/#17).
+- Confirmações de saída do grupo e arquivamento de meta que não abrem na Web (#18/#19).
+- Exclusão de conta bloqueada no Compose testado por ausência da rota da Edge Function (HTTP 404; #31).
+- Revalidação de Android, leitor de tela real e compartilhamento externo nesta versão.
+
+Resultados e evidências: [resumo do QA](entrega-ihc/evidencias/qa17/RESUMO-QA.md). Esses limites impedem afirmar aprovação integral do aplicativo.
 
 ---
 
@@ -222,7 +267,7 @@ O StudyPulse é o projeto oficial da entrega. JSX descreve a estrutura da interf
 
 A versão web utiliza o mesmo backend local das versões móveis. Inicie o Docker Compose antes de `npm run web`, configure `.env` a partir de `.env.example` e reinicie o Expo quando alterar as variáveis. Abrir somente o HTML exportado por `file://` não substitui um servidor HTTP nem inicia a API.
 
-O relatório e o roteiro de participantes ficam em `entrega-ihc/`. Registros de testes técnicos não substituem as observações de duas pessoas externas à equipe. O pacote deve ser gerado da raiz completa do repositório, para incluir este README e os documentos institucionais.
+O relatório principal, o roteiro e os casos de teste são documentos separados em `entrega-ihc/`, acompanhados das fontes e evidências. A avaliação externa prevista não foi realizada; os resultados internos estão identificados como tal. Procedimentos específicos de entrega ficam no [LEIA-ME acadêmico](entrega-ihc/LEIA-ME.md).
 
 ---
 

@@ -357,4 +357,4 @@ Se a Edge Function não estiver servida, registrar `BLOQUEADO — função delet
 | CT-12 | REPROVADO | `evidencias/qa17/RESUMO-QA.md` e registros do caso |
 | CT-13 | BLOQUEADO — ambiente | `evidencias/qa17/RESUMO-QA.md` e registros do caso |
 
-**Avaliação externa:** NÃO EXECUTADA / REQUISITO NÃO ATENDIDO. Turma e contribuições finais dos integrantes humanos continuam dependentes da equipe.
+**Avaliação externa:** NÃO EXECUTADA / REQUISITO NÃO ATENDIDO. Joseph confirmou em 18/11 a reprodução dos mesmos erros no Chrome e as contribuições individuais registradas no relatório principal. Os resultados detalhados deste documento correspondem à execução automatizada no Edge.
