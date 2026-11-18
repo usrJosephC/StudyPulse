@@ -21,7 +21,7 @@ Aplicativo de rotina de estudos com gamificação, desenvolvido para a disciplin
 | Repositório | [GitHub — StudyPulse](https://github.com/usrJosephC/StudyPulse) |
 | Design e protótipo | [Figma — StudyPulse](https://www.figma.com/design/LwbfI3P6NLJ5qugXShJtVE/StudyPulse?node-id=0-1&t=nitCGBD94poPS6Qy-1) |
 | Gestão da Sprint | [Trello — StudyPulse](https://trello.com/invite/b/6a853b12c9d53cd6f5a14e85/ATTI9822d432ba7e1624ada1d65fb3110c6a530C5AC4/studypulse) |
-| Última promoção para main | [PR #37 — entrega IHC, acessibilidade e QA](https://github.com/usrJosephC/StudyPulse/pull/37), integrada em 18/11/2026 |
+| Última promoção para main | [PR #39 - atualizar README, informações do projeto e relatório final](https://github.com/usrJosephC/StudyPulse/pull/39), integrada em 18/11/2026 |
 | Implementação recente | [PR #36 — movimento acessível, CORS, SQL e documentação](https://github.com/usrJosephC/StudyPulse/pull/36) |
 | Entrega de IHC | 18 de novembro de 2026 — StudyPulse com Expo/React Native e versão web |
 
