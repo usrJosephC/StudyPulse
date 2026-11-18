@@ -75,7 +75,7 @@ def cover(title, subtitle):
         Paragraph('Joseph Bartholomeu Cavalcante Rocha<br/>Letícya Beatryz dos Santos Medeiros<br/>Mariana Pereira de Melo', styles['CaptionAcademic']),
         Spacer(1, 2 * cm), Paragraph(title, styles['Title']),
         Paragraph(subtitle, styles['CaptionAcademic']), Spacer(1, 2 * cm),
-        Paragraph('Prof. Icaro Ferreira<br/>Turma: [PENDENTE]<br/>Entrega prevista: 18 de novembro de 2026', styles['CaptionAcademic']),
+        Paragraph('Prof. Icaro Ferreira<br/>Disciplina: Interação Humano-Computador<br/>Entrega prevista: 18 de novembro de 2026', styles['CaptionAcademic']),
         Spacer(1, 2 * cm), Paragraph('Maceió<br/>2026', styles['CaptionAcademic']), PageBreak(),
     ]
 

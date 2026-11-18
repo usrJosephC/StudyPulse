@@ -4,9 +4,9 @@ O StudyPulse é a entrega oficial. Expo/React Native/TypeScript são explicados 
 
 ## Material
 
-**Situação em 17/11:** QA interno executado por agente: 7 casos aprovados, 4 reprovados e 2 bloqueados. Evidências, capturas e vídeos estão em `evidencias/qa17/`. O aplicativo ainda não está aprovado integralmente. Não houve participantes externos; esse requisito permanece não atendido. Turma e contribuições humanas finais precisam ser confirmadas pela equipe.
+**Situação em 18/11:** QA interno no Edge executado por agente: 7 casos aprovados, 4 reprovados e 2 bloqueados. Joseph confirmou os mesmos erros em testes no Chrome. Evidências automatizadas, capturas e vídeos estão em `evidencias/qa17/`. O aplicativo ainda não está aprovado integralmente. Não houve participantes externos; esse requisito permanece não atendido. Contribuições individuais confirmadas por Joseph em 18/11.
 
-- `RelatorioIHC_StudyPulse.pdf`: documento principal, incluindo o roteiro completo no Apêndice C e os treze casos preenchidos no Apêndice D; resultados externos permanecem não realizados.
+- `RelatorioIHC_StudyPulse.pdf`: relatório principal com método, síntese dos resultados e contribuições individuais; roteiro e casos detalhados são documentos separados.
 - `relatorio.md`: fonte editável do relatório.
 - `casos-testes.md` e `CasosTestes_StudyPulse.pdf`: 13 casos preenchidos com resultados observados, divergências e referências às evidências.
 - `RoteiroTestes_StudyPulse.pdf` e `roteiro-testes.md`: instruções e fichas P1/P2.
@@ -14,7 +14,7 @@ O StudyPulse é a entrega oficial. Expo/React Native/TypeScript são explicados 
 - `evidencias/tecnicas/`: capturas de testes técnicos, não de participantes humanos.
 - `gerar-relatorio.py`: geração reproduzível dos PDFs a partir de Markdown.
 
-O ZIP reúne relatório integrado, PDFs avulsos de apoio, fontes Markdown/HTML, comparador de animações, evidências (capturas, vídeos e logs), código e instruções de execução. Os PDFs avulsos são cópias de consulta: não é necessário alternar entre eles para ler o roteiro e os resultados. Não inclui dependências instaladas, caches ou `.env` privado. As pendências técnicas e acadêmicas continuam registradas; empacotar não significa aprovação integral.
+O ZIP reúne três documentos separados (relatório principal, roteiro e casos de teste), fontes Markdown/HTML, comparador de animações, evidências (capturas, vídeos e logs), código e instruções de execução. Não inclui dependências instaladas, caches ou `.env` privado. As pendências técnicas e acadêmicas continuam registradas; empacotar não significa aprovação integral.
 
 ## Execução local do aplicativo
 
@@ -69,4 +69,4 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-delivery.ps1
 
 O ZIP é uma fotografia dos arquivos atuais e inclui `MANIFESTO_ENTREGA.json` com hashes, commit de base e indicação de mudanças locais. Exclui `.env`, caches, dependências e contexto privado. O script preserva pacotes existentes: use outro caminho se já existir um ZIP.
 
-Antes de enviar, preencher turma e contribuições, executar P1/P2, registrar duas melhorias reais e antes/depois, regenerar o relatório, revisar as páginas e testar o ZIP extraído em outra pasta. Não apresentar a versão com campos pendentes como relatório final concluído.
+Antes de enviar, conferir os três PDFs e o ZIP extraído. A ausência de P1/P2 e das melhorias decorrentes dessa avaliação permanece registrada como limitação. Os casos reprovados ou bloqueados precisam de correção e revalidação antes de declarar aprovação integral do aplicativo.

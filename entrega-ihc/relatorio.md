@@ -4,7 +4,6 @@ subtitulo: "Relatório acadêmico de Interação Humano-Computador"
 instituicao: "AFYA - Centro Universitário de Maceió (UNIMA)"
 disciplina: "Interação Humano-Computador"
 professor: "Prof. Icaro Ferreira"
-turma: "[PENDENTE - informar turma]"
 autores: "Joseph Bartholomeu Cavalcante Rocha; Letícya Beatryz dos Santos Medeiros; Mariana Pereira de Melo"
 data_documento: "17 de novembro de 2026"
 data_entrega: "18 de novembro de 2026"
@@ -16,12 +15,6 @@ versao: "Modelo preenchido v1 - avaliação externa não executada"
 O StudyPulse é um aplicativo de rotina de estudos que reúne tarefas, metas, check-in diário, pontos, sequência de estudos e grupos. Este relatório descreve decisões de interface e cinco animações implementadas no aplicativo oficial em Expo e React Native. A análise considera feedback de ação, comunicação de progresso, mudança de estado e redução de movimento. O documento também apresenta três trechos comentados de código, um comparador entre versões rápida e lenta e o método que seria usado em uma avaliação com duas pessoas externas à equipe. Essa avaliação externa não foi executada; portanto, o requisito de duas pessoas externas não foi atendido e não há resultados, sensações ou melhorias derivadas de P1/P2. A validação interna documentada separadamente não equivale a teste de usabilidade. Nenhum dado de participante foi inventado.
 
 **Palavras-chave:** interação humano-computador; animação de interface; acessibilidade; React Native; experiência do usuário.
-
-> **Situação em 17/11/2026:** a equipe informou que não conseguirá recrutar pessoas externas. A entrega passa a documentar validação técnica e casos de teste internos. O requisito de duas pessoas externas **NÃO FOI ATENDIDO**. O método de P1/P2 é mantido apenas para transparência metodológica; não representa sessões realizadas. Não existem conclusões sobre sensações de participantes nem duas melhorias decorrentes desses testes externos.
-
-## Convenção editorial adotada
-
-A apresentação usa página A4, margens acadêmicas, hierarquia numerada, texto corrido legível, legendas e identificação institucional inspiradas em práticas de apresentação ABNT. A organização técnica usa resumo, palavras-chave, seções numeradas, método, resultados e referências numéricas inspirados em artigos IEEE. Como esses estilos possuem finalidades e regras diferentes, este trabalho não declara conformidade integral simultânea com ABNT e IEEE. A convenção híbrida foi adotada apenas para manter apresentação acadêmica brasileira e estrutura técnica rastreável.
 
 <!-- pagebreak -->
 
@@ -35,7 +28,6 @@ A apresentação usa página A4, margens acadêmicas, hierarquia numerada, texto
 | Instituição | AFYA - Centro Universitário de Maceió (UNIMA) |
 | Disciplina | Interação Humano-Computador |
 | Professor | Prof. Icaro Ferreira |
-| Turma | [PENDENTE - informar turma] |
 | Integrantes | Joseph Bartholomeu Cavalcante Rocha; Letícya Beatryz dos Santos Medeiros; Mariana Pereira de Melo |
 | Data do documento | 17/11/2026 |
 | Entrega prevista | 18/11/2026 |
@@ -403,9 +395,9 @@ O padrão abaixo fica registrado apenas como referência para uma avaliação fu
 
 <!-- pagebreak -->
 
-## 9.4 Validação técnica interna por agente em 17/11
+## 9.4 Validação técnica interna e conferência pela equipe
 
-A rodada foi executada por Codex, agente automatizado de QA, em contas sintéticas locais. Não foi uma sessão humana nem avaliação externa. O browser real Edge/Chromium 157.0.4341.60 executou a aplicação exportada; scripts HTTP e SQL complementaram a observação. Foram produzidas capturas e vídeos WebM.
+A validação interna reuniu testes de Joseph no Google Chrome e uma rodada técnica de Codex, agente automatizado de QA, no Microsoft Edge/Chromium 157.0.4341.60. Joseph confirmou que encontrou os mesmos erros relatados na execução automatizada. A rodada de Codex, realizada em 17/11 com contas sintéticas locais e a aplicação exportada, foi complementada por scripts HTTP e SQL, capturas e vídeos WebM. A confirmação dos resultados no Chrome foi informada por Joseph em 18/11; os registros automatizados detalhados correspondem ao Edge. Ambas as atividades constituem validação interna, não avaliação com participantes externos.
 
 **Resultado: 7 casos aprovados no escopo Web, 4 reprovados e 2 bloqueados.**
 
@@ -433,15 +425,15 @@ Os registros completos, retestes e limites estão em `evidencias/qa17/RESUMO-QA.
 
 # 10 CONTRIBUIÇÕES INDIVIDUAIS
 
-O histórico do repositório sustenta parte das contribuições. A equipe deve revisar esta seção antes da entrega e confirmar trabalho de teste, análise e redação realizado após 16/11.
+As contribuições abaixo combinam o histórico do repositório e a confirmação fornecida por Joseph em 18/11/2026. As atividades compartilhadas de implementação e revisão são atribuídas conforme essa confirmação.
 
-| Integrante | Contribuição sustentada pelo histórico | Complemento a confirmar |
+| Integrante | Desenvolvimento | Testes, análise e documentação |
 |---|---|---|
-| Joseph Bartholomeu Cavalcante Rocha | Estrutura do aplicativo, design inicial, Supabase/RLS/RPCs, serviços e hooks, integrações de tarefas/check-in/metas/grupos, progressão, animações acessíveis, CI e infraestrutura local. | [PENDENTE - confirmar participação nos testes, análise e fechamento do relatório] |
-| Letícya Beatryz dos Santos Medeiros | Componentes e fluxos de login/cadastro, validações, navegação inicial, termos, atualização Expo, internacionalização PT/EN/ES e tema escuro persistente. | [PENDENTE - confirmar participação nos testes, análise e revisão do relatório] |
-| Mariana Pereira de Melo | O histórico comprova revisão/merge da PR #1 de interatividade. | [PENDENTE - descrever somente contribuições realmente executadas em testes, análise, evidências ou redação] |
+| Joseph Bartholomeu Cavalcante Rocha | Estrutura do aplicativo, design inicial, Supabase/RLS/RPCs, serviços e hooks, integrações de tarefas/check-in/metas/grupos, progressão, animações acessíveis, CI e infraestrutura local. | Participação confirmada nos testes, incluindo conferência no Chrome, análise dos resultados e fechamento do relatório. |
+| Letícya Beatryz dos Santos Medeiros | Participação confirmada na implementação de componentes e fluxos de login/cadastro, validações, navegação inicial, termos, atualização Expo, internacionalização PT/EN/ES e tema escuro persistente, em colaboração com Mariana. | Participação na revisão do relatório, conforme confirmação da equipe. |
+| Mariana Pereira de Melo | Compartilhou com Letícya a implementação de componentes e fluxos de login/cadastro, validações, navegação inicial, termos, atualização Expo, internacionalização PT/EN/ES e tema escuro persistente. O histórico também registra revisão/merge da PR #1 de interatividade. | Participação confirmada na implementação e na revisão do relatório. |
 
-Nenhuma contribuição deve ser atribuída apenas para equilibrar a tabela. O texto final deve refletir atividades efetivamente realizadas.
+O apoio automatizado de Codex à validação técnica está identificado na seção 9.4 e não é apresentado como participação humana externa.
 
 # 11 LIMITAÇÕES E PRÓXIMOS AJUSTES
 
@@ -504,8 +496,7 @@ Na instalação a partir do ZIP, a exportação comum compilou, mas omitiu as va
 
 # APÊNDICE B - CHECKLIST DE FECHAMENTO
 
-- [ ] Informar turma.
-- [ ] Confirmar contribuições finais dos três integrantes.
+- [x] Confirmar contribuições finais dos três integrantes, conforme informação de Joseph em 18/11.
 - [ ] Executar P1 externo.
 - [ ] Executar P2 externo.
 - [ ] Repetir tarefa com redução de movimento para ambos.
@@ -522,16 +513,6 @@ Na instalação a partir do ZIP, a exportação comum compilou, mas omitiu as va
 
 <!-- pagebreak -->
 
-# APÊNDICE C - ROTEIRO DE TESTE COM PARTICIPANTES
+# DOCUMENTOS COMPLEMENTARES
 
-O roteiro completo está incluído neste relatório para consulta independente. A fonte editável é `roteiro-testes.md`, também fornecida no ZIP. Este apêndice documenta o planejamento; as sessões externas não foram realizadas.
-
-<!-- include: roteiro-testes.md -->
-
-<!-- pagebreak -->
-
-# APÊNDICE D - CASOS E RESULTADOS DA VALIDAÇÃO INTERNA
-
-Os treze casos abaixo registram a execução técnica de 17/11/2026, com resultados, falhas e limites. A fonte editável é `casos-testes.md`, também fornecida no ZIP. Os arquivos de evidência referenciados acompanham o pacote em `entrega-ihc/evidencias/qa17/`.
-
-<!-- include: casos-testes.md -->
+O roteiro completo e os casos detalhados são entregues separadamente neste mesmo pacote: `RoteiroTestes_StudyPulse.pdf` documenta o protocolo externo não executado; `CasosTestes_StudyPulse.pdf` apresenta os treze casos de validação interna e seus resultados. As evidências de execução acompanham o ZIP em `entrega-ihc/evidencias/qa17/`. Este relatório mantém a síntese metodológica e os resultados consolidados.
