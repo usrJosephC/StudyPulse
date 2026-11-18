@@ -1,25 +1,5 @@
-import { useEffect, useState } from 'react';
-import { AccessibilityInfo } from 'react-native';
+import { useMotion } from '../contexts/MotionContext';
 
 export function useReducedMotion() {
-  const [isReducedMotion, setIsReducedMotion] = useState(true);
-
-  useEffect(() => {
-    let mounted = true;
-    void AccessibilityInfo.isReduceMotionEnabled().then((enabled) => {
-      if (mounted) setIsReducedMotion(enabled);
-    });
-
-    const subscription = AccessibilityInfo.addEventListener(
-      'reduceMotionChanged',
-      setIsReducedMotion,
-    );
-
-    return () => {
-      mounted = false;
-      subscription.remove();
-    };
-  }, []);
-
-  return isReducedMotion;
+  return useMotion().reduceMotion;
 }

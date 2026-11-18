@@ -19,11 +19,13 @@ import { useSquadActivity } from '../hooks/useSquadActivity';
 import { useSquadCreation } from '../hooks/useSquadCreation';
 import { updateSquad } from '../services/squad.service';
 import type { RankingEntry, SquadActivity } from '../types/domain';
+import { useReducedMotion } from '../hooks/useReducedMotion';
 
 export function GroupsScreen() {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const { temaAtual } = useTheme();
+  const reduceMotion = useReducedMotion();
   const { session, profile } = useAuth();
   const { squad, loading: squadLoading, error: squadError, refresh: refreshSquad, joinSquad, leaveSquad } = useSquad();
   const { ranking, loading: rankingLoading, error: rankingError, refresh: refreshRanking } = useRanking(squad?.id ?? null);
@@ -652,7 +654,7 @@ export function GroupsScreen() {
       </ScrollView>
       <Modal
         visible={leaderboardVisible}
-        animationType="slide"
+        animationType={reduceMotion ? 'none' : 'slide'}
         transparent
         onRequestClose={() => setLeaderboardVisible(false)}
       >
@@ -691,7 +693,7 @@ export function GroupsScreen() {
           </SafeAreaView>
         </View>
       </Modal>
-      <Modal visible={createVisible} transparent animationType="slide" onRequestClose={() => setCreateVisible(false)}>
+      <Modal visible={createVisible} transparent animationType={reduceMotion ? 'none' : 'slide'} onRequestClose={() => setCreateVisible(false)}>
         <Pressable style={styles.backdrop} onPress={() => setCreateVisible(false)} accessibilityLabel={t('common.close')}>
           <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
             <Pressable
@@ -717,7 +719,7 @@ export function GroupsScreen() {
           </KeyboardAvoidingView>
         </Pressable>
       </Modal>
-      <Modal visible={editVisible} transparent animationType="slide" onRequestClose={closeEditSquad} >
+      <Modal visible={editVisible} transparent animationType={reduceMotion ? 'none' : 'slide'} onRequestClose={closeEditSquad} >
         <Pressable style={styles.backdrop} onPress={() => setEditVisible(false)} accessibilityLabel={t('common.close')}>
           <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
             <Pressable style={[styles.createModal, { paddingBottom: spacing.lg + insets.bottom }]} onPress={(event) => event.stopPropagation()}>

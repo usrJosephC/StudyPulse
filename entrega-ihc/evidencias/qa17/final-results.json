@@ -1,0 +1,114 @@
+[
+  {
+    "id": "ENV",
+    "step": "browser",
+    "status": "INFO",
+    "detail": "157.0.4341.60"
+  },
+  {
+    "id": "CT01",
+    "step": "normal-motion",
+    "status": "PASS",
+    "detail": {
+      "frames": 109,
+      "scaleValues": 13,
+      "ringValues": 31
+    }
+  },
+  {
+    "id": "CT10",
+    "step": "restore-ui-reload",
+    "status": "PASS",
+    "detail": {
+      "id": 83,
+      "progress": 0.5,
+      "due_date": "2026-11-24",
+      "archived_at": null,
+      "setup": "Archived by API fixture; archive UI remains failed"
+    }
+  },
+  {
+    "id": "CT07",
+    "step": "focus",
+    "status": "PASS",
+    "detail": {
+      "hasFocus": true,
+      "outline": "rgb(0, 53, 102) solid 3px"
+    }
+  },
+  {
+    "id": "CT07",
+    "step": "zoom-last-control",
+    "status": "PASS",
+    "detail": "Last preference item scrolled into view and activated at 200% CSS zoom"
+  },
+  {
+    "id": "CT07",
+    "step": "screen-reader",
+    "status": "BLOCKED",
+    "detail": "No real Narrator/TalkBack/VoiceOver audio session available; DOM semantics and focus do not prove spoken announcements"
+  },
+  {
+    "id": "ENV",
+    "step": "browser",
+    "status": "INFO",
+    "detail": "157.0.4341.60"
+  },
+  {
+    "id": "ENV",
+    "step": "browser",
+    "status": "INFO",
+    "detail": "157.0.4341.60"
+  },
+  {
+    "id": "CT12",
+    "step": "en-US-invalid-credentials",
+    "status": "FAIL",
+    "detail": {
+      "http": 400,
+      "expectedMessageVisible": false
+    }
+  },
+  {
+    "id": "CT12",
+    "step": "en-US-empty-state",
+    "status": "PASS",
+    "detail": {
+      "expected": "No tasks for today. Add one from the Goals tab."
+    }
+  },
+  {
+    "id": "CT12",
+    "step": "es-ES-invalid-credentials",
+    "status": "FAIL",
+    "detail": {
+      "http": 400,
+      "expectedMessageVisible": false
+    }
+  },
+  {
+    "id": "CT12",
+    "step": "es-ES-empty-state",
+    "status": "PASS",
+    "detail": {
+      "expected": "No hay tareas para hoy. Añade una desde la pestaña Objetivos."
+    }
+  },
+  {
+    "id": "CT12",
+    "step": "pt-BR-invalid-credentials",
+    "status": "FAIL",
+    "detail": {
+      "http": 400,
+      "expectedMessageVisible": false
+    }
+  },
+  {
+    "id": "CT12",
+    "step": "pt-BR-empty-state",
+    "status": "PASS",
+    "detail": {
+      "expected": "Nenhuma tarefa para hoje. Adicione uma pela aba Goals."
+    }
+  }
+]

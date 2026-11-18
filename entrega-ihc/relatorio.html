@@ -1,0 +1,1759 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>StudyPulse</title><style>@page{size:A4;margin:3cm 2cm 2cm 3cm}body{font:12pt/1.5 "Times New Roman",serif;max-width:900px;margin:auto;padding:20px}h1{font-size:16pt}h2{font-size:13pt}table{border-collapse:collapse;width:100%;font-size:10pt}td,th{border:1px solid #aaa;padding:6px;vertical-align:top}pre{white-space:pre-wrap;font-size:9pt;background:#eee;padding:12px}.pagebreak{break-before:page}</style><body><h1>RESUMO</h1>
+<p>O StudyPulse é um aplicativo de rotina de estudos que reúne tarefas, metas, check-in diário, pontos, sequência de estudos e grupos. Este relatório descreve decisões de interface e cinco animações implementadas no aplicativo oficial em Expo e React Native. A análise considera feedback de ação, comunicação de progresso, mudança de estado e redução de movimento. O documento também apresenta três trechos comentados de código, um comparador entre versões rápida e lenta e o método que seria usado em uma avaliação com duas pessoas externas à equipe. Essa avaliação externa não foi executada; portanto, o requisito de duas pessoas externas não foi atendido e não há resultados, sensações ou melhorias derivadas de P1/P2. A validação interna documentada separadamente não equivale a teste de usabilidade. Nenhum dado de participante foi inventado.</p>
+<p><strong>Palavras-chave:</strong> interação humano-computador; animação de interface; acessibilidade; React Native; experiência do usuário.</p>
+<blockquote>
+<p><strong>Situação em 17/11/2026:</strong> a equipe informou que não conseguirá recrutar pessoas externas. A entrega passa a documentar validação técnica e casos de teste internos. O requisito de duas pessoas externas <strong>NÃO FOI ATENDIDO</strong>. O método de P1/P2 é mantido apenas para transparência metodológica; não representa sessões realizadas. Não existem conclusões sobre sensações de participantes nem duas melhorias decorrentes desses testes externos.</p>
+</blockquote>
+<h2>Convenção editorial adotada</h2>
+<p>A apresentação usa página A4, margens acadêmicas, hierarquia numerada, texto corrido legível, legendas e identificação institucional inspiradas em práticas de apresentação ABNT. A organização técnica usa resumo, palavras-chave, seções numeradas, método, resultados e referências numéricas inspirados em artigos IEEE. Como esses estilos possuem finalidades e regras diferentes, este trabalho não declara conformidade integral simultânea com ABNT e IEEE. A convenção híbrida foi adotada apenas para manter apresentação acadêmica brasileira e estrutura técnica rastreável.</p>
+<div class="pagebreak"></div>
+
+<h1>1 IDENTIFICAÇÃO E CONTEXTO</h1>
+<h2>1.1 Identificação</h2>
+<table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Informação</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Projeto</td>
+<td>StudyPulse</td>
+</tr>
+<tr>
+<td>Instituição</td>
+<td>AFYA - Centro Universitário de Maceió (UNIMA)</td>
+</tr>
+<tr>
+<td>Disciplina</td>
+<td>Interação Humano-Computador</td>
+</tr>
+<tr>
+<td>Professor</td>
+<td>Prof. Icaro Ferreira</td>
+</tr>
+<tr>
+<td>Turma</td>
+<td>[PENDENTE - informar turma]</td>
+</tr>
+<tr>
+<td>Integrantes</td>
+<td>Joseph Bartholomeu Cavalcante Rocha; Letícya Beatryz dos Santos Medeiros; Mariana Pereira de Melo</td>
+</tr>
+<tr>
+<td>Data do documento</td>
+<td>17/11/2026</td>
+</tr>
+<tr>
+<td>Entrega prevista</td>
+<td>18/11/2026</td>
+</tr>
+</tbody>
+</table>
+<h2>1.2 Público-alvo, necessidade e objetivo</h2>
+<p>O público-alvo é formado por estudantes que precisam organizar atividades, acompanhar sua constância e receber feedback compreensível sobre o que já foi realizado. A necessidade concreta é reduzir a incerteza durante o planejamento: a pessoa deve conseguir registrar uma tarefa, concluí-la e entender imediatamente como essa ação alterou seu progresso.</p>
+<p>O objetivo de interface é conduzir o fluxo <strong>planejar - agir - confirmar - acompanhar</strong>. A tela Home concentra o fluxo principal, enquanto Goals, Groups e Profile ampliam a experiência com metas, colaboração e histórico pessoal.</p>
+<h2>1.3 Escopo tecnológico e equivalência com a proposta da disciplina</h2>
+<p>O projeto oficial usa Expo SDK 57, React Native, React e TypeScript. A disciplina descreve estrutura HTML, apresentação CSS e comportamento JavaScript. No StudyPulse, a correspondência técnica usada neste relatório é:</p>
+<table>
+<thead>
+<tr>
+<th>Conceito solicitado</th>
+<th>Equivalente no projeto</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HTML</td>
+<td>JSX/TSX, componentes e propriedades de acessibilidade</td>
+</tr>
+<tr>
+<td>CSS</td>
+<td><code>StyleSheet</code>, propriedades visuais e valores animados</td>
+</tr>
+<tr>
+<td>JavaScript</td>
+<td>TypeScript, handlers, hooks e <code>Animated</code></td>
+</tr>
+</tbody>
+</table>
+<p>Essa equivalência foi escolhida pela equipe para a entrega; não há neste documento comprovação de aceite específico do professor. O relatório não afirma que React Native gera os mesmos elementos e regras de uma página HTML tradicional; ele demonstra as mesmas responsabilidades de estrutura, apresentação e comportamento.</p>
+<h2>1.4 Estado verificável do projeto</h2>
+<p>A branch de consolidação analisada é <code>feat/sprint-priorities</code>, no commit <code>21129f2</code>. A Pull Request #30 foi mesclada em <code>dev</code> em 11/11/2026 e o workflow Quality foi concluído com sucesso. O repositório registra typecheck, lint, testes unitários e testes SQL. Essas verificações comprovam consistência técnica, mas não substituem o teste de usabilidade externo exigido para P1 e P2.</p>
+<div class="pagebreak"></div>
+
+<h1>2 FLUXO PRINCIPAL DA INTERFACE</h1>
+<h2>2.1 Sequência principal</h2>
+<ol>
+<li>A pessoa entra no aplicativo e chega à Home autenticada.</li>
+<li>Seleciona <strong>Adicionar tarefa</strong>.</li>
+<li>Informa título e categoria e salva.</li>
+<li>A tarefa aparece na lista do dia.</li>
+<li>Ao tocar na tarefa, o aplicativo envia a operação e bloqueia ações sobrepostas.</li>
+<li>Após o sucesso, o ícone de conclusão muda, o contador é atualizado e o anel de progresso avança.</li>
+<li>A pontuação é atualizada por meio do fluxo protegido do backend.</li>
+<li>A tarefa pode ser reaberta quando a pessoa precisa corrigir a ação.</li>
+</ol>
+<h2>2.2 Início, ação e resultado</h2>
+<table>
+<thead>
+<tr>
+<th>Momento</th>
+<th>Elemento</th>
+<th>Comunicação</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Início</td>
+<td>Lista de tarefas e CTA</td>
+<td>Mostra o estado atual e o próximo passo disponível.</td>
+</tr>
+<tr>
+<td>Ação</td>
+<td>Toque em salvar ou concluir</td>
+<td>Desabilita repetição enquanto a operação está em andamento.</td>
+</tr>
+<tr>
+<td>Resultado</td>
+<td>Ícone, texto, contador e progresso</td>
+<td>Confirma a alteração sem depender somente do movimento.</td>
+</tr>
+<tr>
+<td>Correção</td>
+<td>Toque em tarefa concluída</td>
+<td>Reabre a tarefa e mantém o estado coerente.</td>
+</tr>
+</tbody>
+</table>
+<h2>2.3 Fluxos complementares usados no teste</h2>
+<ul>
+<li><strong>Check-in:</strong> comunica operação em andamento e atualiza streak/pontos após sucesso.</li>
+<li><strong>Metas:</strong> usa formulário, barra de progresso e mudança de estado de uma meta.</li>
+<li><strong>Grupos:</strong> usa convite, ranking e feed, mas não integra o roteiro curto de P1/P2 desta versão.</li>
+</ul>
+<div class="pagebreak"></div>
+
+<h1>3 INVENTÁRIO DAS CINCO ANIMAÇÕES REAIS</h1>
+<p>As cinco animações abaixo existem no código da branch analisada. Emoções são hipóteses da equipe e não resultados de teste. A avaliação externa não foi executada; por isso, a coluna correspondente registra a ausência de evidência, sem simular P1/P2.</p>
+<h2>3.1 Animação 1 - tremor de erro do formulário</h2>
+<table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Registro</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Nome e localização</td>
+<td>Shake horizontal em Login, Register e campo de gênero; hook <code>src/hooks/useErrorShake.ts</code>.</td>
+</tr>
+<tr>
+<td>Gatilho</td>
+<td>Submissão inválida ou erro que exige correção.</td>
+</tr>
+<tr>
+<td>Função</td>
+<td>Direcionar atenção ao grupo de campos e anunciar a mensagem de erro.</td>
+</tr>
+<tr>
+<td>Emoção esperada</td>
+<td>Orientação e recuperação, tratadas como hipótese.</td>
+</tr>
+<tr>
+<td>Benefício</td>
+<td>Liga o feedback ao local onde a correção é necessária.</td>
+</tr>
+<tr>
+<td>Risco</td>
+<td>Tremor repetido pode parecer punitivo ou causar desconforto.</td>
+</tr>
+<tr>
+<td>Decisão técnica</td>
+<td>Sequência <code>translateX</code>: -8, 8, -6, 6 e 0; durações 55, 70, 70, 70 e 55 ms, total de 320 ms. Curva linear nos quatro primeiros segmentos e <code>Easing.out(Easing.cubic)</code> na chegada.</td>
+</tr>
+<tr>
+<td>Movimento reduzido</td>
+<td>Consulta o contexto compartilhado, que combina preferência manual e do sistema. Quando ativo, não executa o tremor e interrompe o efeito em curso; a mensagem permanece disponível.</td>
+</tr>
+<tr>
+<td>Evidência externa</td>
+<td>NÃO EXECUTADA — não houve P1/P2 externos.</td>
+</tr>
+</tbody>
+</table>
+<h2>3.2 Animação 2 - preenchimento da barra de progresso</h2>
+<table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Registro</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Nome e localização</td>
+<td>Barra animada em <code>src/components/ProgressBar.tsx</code>, usada em progresso de metas.</td>
+</tr>
+<tr>
+<td>Gatilho</td>
+<td>Alteração do valor de progresso recebido pelo componente.</td>
+</tr>
+<tr>
+<td>Função</td>
+<td>Mostrar a proporção entre estado anterior e novo estado.</td>
+</tr>
+<tr>
+<td>Emoção esperada</td>
+<td>Continuidade e avanço, como hipótese.</td>
+</tr>
+<tr>
+<td>Benefício</td>
+<td>Evita mudança visual abrupta e mantém escala de 0 a 100%.</td>
+</tr>
+<tr>
+<td>Risco</td>
+<td>Se lenta, pode atrasar a leitura; sem texto, poderia depender somente de forma/cor.</td>
+</tr>
+<tr>
+<td>Decisão técnica</td>
+<td><code>Animated.timing</code>, duração de 300 ms, interpolação de largura e <code>Easing.out(Easing.cubic)</code>, com desaceleração na chegada. O anel e contador da Home são outras aplicações da mesma família de animação de dados, com 320 ms.</td>
+</tr>
+<tr>
+<td>Movimento reduzido</td>
+<td>O valor final é aplicado diretamente com <code>setValue(clamped)</code>. O valor textual de progresso permanece na tela que usa o componente.</td>
+</tr>
+<tr>
+<td>Evidência externa</td>
+<td>NÃO EXECUTADA — não houve P1/P2 externos.</td>
+</tr>
+</tbody>
+</table>
+<h2>3.3 Animação 3 - Slide de painéis</h2>
+<table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Registro</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Nome e localização</td>
+<td>Slide nos modais de criação e histórico de metas; <code>src/screens/GoalsScreen.tsx</code>. Também aplicado aos grupos e preferências.</td>
+</tr>
+<tr>
+<td>Gatilho</td>
+<td>Abrir ou fechar um painel por um botão.</td>
+</tr>
+<tr>
+<td>Função</td>
+<td>Comunicar mudança de contexto mantendo a relação com a tela de origem.</td>
+</tr>
+<tr>
+<td>Emoção esperada</td>
+<td>Orientação e continuidade, como hipótese.</td>
+</tr>
+<tr>
+<td>Benefício</td>
+<td>Indica a entrada de uma camada de interação.</td>
+</tr>
+<tr>
+<td>Risco</td>
+<td>Deslocamentos amplos podem causar desconforto e atrasar navegação repetitiva.</td>
+</tr>
+<tr>
+<td>Decisão técnica</td>
+<td><code>Modal animationType="slide"</code>. Duração e curva são delegadas à implementação da plataforma; não se atribui um número não configurado pelo projeto.</td>
+</tr>
+<tr>
+<td>Movimento reduzido</td>
+<td>Usa <code>animationType="none"</code>; controles, conteúdo e retorno continuam disponíveis.</td>
+</tr>
+<tr>
+<td>Evidência externa</td>
+<td>NÃO EXECUTADA — não houve P1/P2 externos.</td>
+</tr>
+</tbody>
+</table>
+<h2>3.4 Animação 4 - Fade de conteúdo sobreposto</h2>
+<table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Registro</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Nome e localização</td>
+<td>Fade no catálogo de conquistas; <code>src/screens/ProfileScreen.tsx</code>. Também usado em textos legais e confirmação de exclusão.</td>
+</tr>
+<tr>
+<td>Gatilho</td>
+<td>Abrir ou fechar o modal correspondente.</td>
+</tr>
+<tr>
+<td>Função</td>
+<td>Revelar o conteúdo e o fundo escurecido sem deslocar a tela principal.</td>
+</tr>
+<tr>
+<td>Emoção esperada</td>
+<td>Suavidade e atenção, como hipótese.</td>
+</tr>
+<tr>
+<td>Benefício</td>
+<td>Torna a camada ativa perceptível e mantém contexto visual.</td>
+</tr>
+<tr>
+<td>Risco</td>
+<td>Uma aparição muito discreta pode passar despercebida.</td>
+</tr>
+<tr>
+<td>Decisão técnica</td>
+<td><code>Modal animationType="fade"</code>, com opacidade gerenciada pela plataforma. Duração e easing não são parametrizados pelo aplicativo.</td>
+</tr>
+<tr>
+<td>Movimento reduzido</td>
+<td>Usa <code>animationType="none"</code>; título, conteúdo e fechamento permanecem.</td>
+</tr>
+<tr>
+<td>Evidência externa</td>
+<td>NÃO EXECUTADA — não houve P1/P2 externos.</td>
+</tr>
+</tbody>
+</table>
+<h2>3.5 Animação 5 - escala do ícone de conclusão</h2>
+<table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Registro</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Nome e localização</td>
+<td>Escala do checkmark da tarefa na Home, em <code>src/screens/HomeScreen.tsx</code>.</td>
+</tr>
+<tr>
+<td>Gatilho</td>
+<td>Resposta de sucesso ao concluir uma tarefa.</td>
+</tr>
+<tr>
+<td>Função</td>
+<td>Confirmar localmente a mudança de estado solicitada.</td>
+</tr>
+<tr>
+<td>Emoção esperada</td>
+<td>Segurança e resposta imediata, como hipótese.</td>
+</tr>
+<tr>
+<td>Benefício</td>
+<td>O efeito está junto do item acionado e reforça a mudança do ícone.</td>
+</tr>
+<tr>
+<td>Risco</td>
+<td>Repetição rápida poderia distrair; por isso o fluxo bloqueia ações sobrepostas.</td>
+</tr>
+<tr>
+<td>Decisão técnica</td>
+<td>Scale + Fade: escala e opacidade de 0,6 para 1 em 180 ms, <code>Easing.out(Easing.cubic)</code> e <code>useNativeDriver: true</code>. A desaceleração estabiliza o ícone no tamanho final.</td>
+</tr>
+<tr>
+<td>Movimento reduzido</td>
+<td>Define a escala diretamente em 1. O ícone de checkmark e o estado da tarefa permanecem visíveis.</td>
+</tr>
+<tr>
+<td>Evidência externa</td>
+<td>NÃO EXECUTADA — não houve P1/P2 externos.</td>
+</tr>
+</tbody>
+</table>
+<h2>3.6 Cobertura dos requisitos de movimento</h2>
+<table>
+<thead>
+<tr>
+<th>Requisito</th>
+<th>Evidência escolhida</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Resposta à ação</td>
+<td>Shake de erro e checkmark de conclusão</td>
+</tr>
+<tr>
+<td>Indicação de progresso</td>
+<td>Barra, anel e contador</td>
+</tr>
+<tr>
+<td>Mudança de estado ou navegação</td>
+<td>Slide dos painéis e alteração do ícone de tarefa</td>
+</tr>
+<tr>
+<td>Duas escolhas adicionais</td>
+<td>Fade de modal e Scale do checkmark</td>
+</tr>
+</tbody>
+</table>
+<p>O laboratório da aula apresenta Fade, Slide, Scale, Easing, Spring/Bounce, Ripple, Loading/Progresso e Shake [2]. Easing é documentado como curva temporal, não como uma sexta animação isolada. Spring/Bounce, Ripple e Parallax não foram necessários ao fluxo escolhido. Barra, anel e contador são agrupados como animação de dados; não são contados como três tipos independentes para completar o mínimo.</p>
+<div class="pagebreak"></div>
+
+<h1>4 TRECHOS DE CÓDIGO COMENTADOS</h1>
+<h2>4.1 Estrutura JSX - equivalente à responsabilidade do HTML</h2>
+<p>Arquivo: <code>src/screens/HomeScreen.tsx</code>.</p>
+<pre><code class="language-tsx">&lt;ProgressRing progress={tasksProgress} size={150} strokeWidth={14}&gt;
+  {/* Valor textual preserva a informação sem depender do movimento. */}
+  &lt;Text style={styles.ringValue}&gt;
+    {displayTasksDone}/{tasksTotal}
+  &lt;/Text&gt;
+  &lt;Text style={styles.ringLabel}&gt;{t('home.tasks')}&lt;/Text&gt;
+&lt;/ProgressRing&gt;
+</code></pre>
+<p>O componente organiza a informação visual e textual. <code>progress</code> recebe uma razão entre 0 e 1; os filhos exibem parte e total. Em React Native não há uma tag HTML <code>progress</code>, mas a responsabilidade estrutural e semântica é exercida pelos componentes e propriedades acessíveis.</p>
+<h2>4.2 Apresentação e movimento - equivalente à responsabilidade do CSS</h2>
+<p>Arquivo: <code>src/components/ProgressBar.tsx</code>.</p>
+<pre><code class="language-tsx">animatedProgress.stopAnimation();
+if (reduceMotion) {
+  // Acessibilidade: aplica o estado final sem transição.
+  animatedProgress.setValue(clamped);
+  return;
+}
+
+const animation = Animated.timing(animatedProgress, {
+  toValue: clamped,      // destino entre 0 e 1
+  duration: 300,         // duração final adotada
+  easing: Easing.out(Easing.cubic), // desacelera na chegada
+  useNativeDriver: false // largura não usa native driver
+});
+animation.start();
+</code></pre>
+<p><code>Animated.timing</code> cumpre o papel que uma <code>transition</code> teria na Web. A largura interpolada é aplicada ao preenchimento, enquanto a preferência de movimento reduzido elimina a transição sem remover o estado final.</p>
+<h2>4.3 Evento e mudança de estado - equivalente à responsabilidade do JavaScript</h2>
+<p>Arquivo: <code>src/screens/HomeScreen.tsx</code>.</p>
+<pre><code class="language-tsx">const result = await toggleTask(id); // envia a ação pelo hook
+
+if (result.ok &amp;&amp; result.data.done) {
+  checkmarkScale.setValue(0.6);       // estado inicial do feedback
+  if (reduceMotion) {
+    checkmarkScale.setValue(1);       // alternativa sem movimento
+  } else {
+    Animated.timing(checkmarkScale, {
+      toValue: 1,
+      duration: 180,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true
+    }).start();
+  }
+}
+</code></pre>
+<p>O evento não anima antes de o backend confirmar sucesso. Isso reduz falsos positivos visuais. O handler também impede ações sobrepostas durante a atualização.</p>
+<div class="pagebreak"></div>
+
+<h1>5 COMPARAÇÃO DE DURAÇÃO E CURVA</h1>
+<h2>5.1 Fato implementado</h2>
+<p>As durações atuais são 180 ms para o checkmark, 300 ms para a barra, 320 ms para o anel e contador e 320 ms no total para o shake. As transições de dados e o checkmark usam <code>Easing.out(Easing.cubic)</code>: a alteração começa mais rápida e desacelera ao se aproximar do destino. No shake, segmentos lineares alternam a direção e a última etapa desacelera. Essas são decisões técnicas provisórias, justificadas por feedback curto e legibilidade do estado final. Como P1/P2 externos não foram avaliados, esta entrega não confirma preferência, conforto ou clareza percebida.</p>
+<h2>5.2 Protocolo rápido/lento - ainda não executado</h2>
+<table>
+<thead>
+<tr>
+<th>Elemento</th>
+<th style="text-align: right;">Versão rápida</th>
+<th style="text-align: right;">Versão lenta</th>
+<th style="text-align: right;">Versão atual</th>
+<th>Campo de resultado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Checkmark</td>
+<td style="text-align: right;">120 ms</td>
+<td style="text-align: right;">360 ms</td>
+<td style="text-align: right;">180 ms</td>
+<td>NÃO EXECUTADO com pessoas externas.</td>
+</tr>
+<tr>
+<td>Barra de progresso</td>
+<td style="text-align: right;">180 ms</td>
+<td style="text-align: right;">600 ms</td>
+<td style="text-align: right;">300 ms</td>
+<td>NÃO EXECUTADO com pessoas externas.</td>
+</tr>
+</tbody>
+</table>
+<p>Procedimento proposto:</p>
+<ol>
+<li>Manter conteúdo, dispositivo e tarefa iguais.</li>
+<li>Mostrar as duas durações em ordem alternada entre P1 e P2.</li>
+<li>Perguntar qual versão deixou a mudança mais clara e se alguma pareceu lenta ou abrupta.</li>
+<li>Registrar a fala por paráfrase fiel, sem atribuir emoção não declarada.</li>
+<li>Justificar a configuração final somente após os dados reais.</li>
+</ol>
+<blockquote>
+<p><strong>Estado em 17/11:</strong> o comparador didático <code>comparacao-motion.html</code> implementa as duas durações, com a mesma curva cúbica e controle de movimento reduzido. Ele usa valores simulados, sem alterar dados do aplicativo. A apresentação a participantes externos <strong>não foi executada</strong>; logo, não há preferência ou justificativa atribuível a P1/P2.</p>
+</blockquote>
+<div class="pagebreak"></div>
+
+<h1>6 ACESSIBILIDADE E CUIDADOS DE IMPLEMENTAÇÃO</h1>
+<h2>6.1 Redução de movimento</h2>
+<p>O <code>MotionProvider</code> consulta <code>AccessibilityInfo.isReduceMotionEnabled()</code>, acompanha <code>reduceMotionChanged</code> e carrega a preferência manual persistida no AsyncStorage. O hook <code>useReducedMotion</code> disponibiliza a decisão compartilhada. Barra, anel, contador e checkmark aplicam o estado final imediatamente; o shake mantém o anúncio acessível.</p>
+<p>O controle <strong>Reduzir movimentos</strong> está nas Preferências, acessíveis antes do login e pelo Perfil. A redução é ativada quando a preferência manual OU a do sistema está ativa. Quando o sistema solicita redução, a interface explica essa condição e não permite anulá-la. Modais usam <code>none</code>, rolagem programática elimina animação e a navegação nativa também respeita a preferência. A persistência manual foi verificada tecnicamente no navegador após recarregamento.</p>
+<h2>6.2 Informação preservada sem animação</h2>
+<ul>
+<li>O shake acompanha mensagem de erro e anúncio por acessibilidade.</li>
+<li>O anel inclui contagem textual.</li>
+<li>A barra é acompanhada por percentual ou estado da meta.</li>
+<li>O checkmark continua visível após o movimento.</li>
+<li>Operações assíncronas possuem texto, ícone ou indicador e controles desabilitados.</li>
+</ul>
+<h2>6.3 Outros critérios</h2>
+<table>
+<thead>
+<tr>
+<th>Critério</th>
+<th>Estado em 16/11/2026</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Rótulos e botões identificados</td>
+<td>Implementado em fluxos principais por texto e propriedades de acessibilidade.</td>
+</tr>
+<tr>
+<td>Ações sobrepostas</td>
+<td>Bloqueadas em handlers principais durante requisições.</td>
+</tr>
+<tr>
+<td>Contraste/tema</td>
+<td>Texto secundário e indicadores de progresso ajustados após revisão técnica; não constitui auditoria WCAG integral.</td>
+</tr>
+<tr>
+<td>Teclado e foco visível</td>
+<td>Foco Web com contorno de 3 px e acesso ao último controle com zoom CSS de 200% confirmados em 17/11; leitor de tela real não executado.</td>
+</tr>
+<tr>
+<td>Tela estreita</td>
+<td>Validação interna Android registrada; evidência externa pendente.</td>
+</tr>
+<tr>
+<td>Tela larga</td>
+<td>Captura técnica em viewport 1280 px; validação humana permanece necessária.</td>
+</tr>
+<tr>
+<td>Arrastar e soltar</td>
+<td>Não utilizado; não exige alternativa.</td>
+</tr>
+</tbody>
+</table>
+<h2>6.4 Checklist de acessibilidade para a sessão externa</h2>
+<ul>
+<li>Confirmar mensagem compreensível com animação normal.</li>
+<li>Ativar redução de movimento no sistema.</li>
+<li>Repetir a conclusão de tarefa.</li>
+<li>Confirmar que texto e ícone continuam comunicando o resultado.</li>
+<li>Perguntar se houve desconforto, atraso percebido ou perda de entendimento.</li>
+<li>Registrar dispositivo, largura aproximada e configuração usada.</li>
+</ul>
+<div class="pagebreak"></div>
+
+<h1>7 MÉTODO DO TESTE COM PESSOAS EXTERNAS</h1>
+<h2>7.1 Participantes e ética mínima</h2>
+<p>Devem participar pelo menos duas pessoas que não integrem a equipe. Elas serão identificadas apenas como P1 e P2. Não serão registrados nome, matrícula, e-mail ou outros dados pessoais desnecessários. Antes de capturar tela, áudio ou vídeo, a equipe deve informar a finalidade acadêmica e obter concordância.</p>
+<p><strong>Situação em 17/11/2026:</strong> não haverá recrutamento externo nesta rodada, conforme decisão informada pela equipe. O método abaixo permanece como proposta não executada. A alternativa operacional está em <code>casos-testes.md</code>, destinada à equipe, sem equivalência com avaliação externa.</p>
+<table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>P1</th>
+<th>P2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Confirmação de pessoa externa</td>
+<td>NÃO EXECUTADO</td>
+<td>NÃO EXECUTADO</td>
+</tr>
+<tr>
+<td>Data e horário</td>
+<td>Não se aplica</td>
+<td>Não se aplica</td>
+</tr>
+<tr>
+<td>Dispositivo/sistema</td>
+<td>Não se aplica</td>
+<td>Não se aplica</td>
+</tr>
+<tr>
+<td>Largura/orientação</td>
+<td>Não se aplica</td>
+<td>Não se aplica</td>
+</tr>
+<tr>
+<td>Concordância com registro</td>
+<td>Não se aplica</td>
+<td>Não se aplica</td>
+</tr>
+</tbody>
+</table>
+<h2>7.2 Orientação ao moderador</h2>
+<p>O moderador lê somente o objetivo da tarefa. Não aponta onde tocar e não demonstra o caminho. Se o participante pedir ajuda, registra o momento e oferece a menor pista possível. As perguntas sobre sensação são feitas depois da tentativa para evitar indução.</p>
+<h2>7.3 Três tarefas</h2>
+<h3>Tarefa 1 - criar e concluir uma tarefa</h3>
+<blockquote>
+<p>“Crie uma tarefa chamada ‘Revisar conteúdo de IHC’ para hoje e marque-a como concluída. Depois, diga o que mudou na tela.”</p>
+</blockquote>
+<p>Critérios observáveis: encontrou o CTA; preencheu e salvou; identificou a tarefa; concluiu; percebeu ícone, contador e progresso.</p>
+<h3>Tarefa 2 - realizar o check-in</h3>
+<blockquote>
+<p>“Registre o check-in de estudo de hoje e explique como o aplicativo informou que estava processando e que terminou.”</p>
+</blockquote>
+<p>Critérios observáveis: localizou a ação; evitou toque repetido; identificou loading/estado; percebeu resultado ou mensagem de conflito caso o check-in já exista.</p>
+<h3>Tarefa 3 - criar uma meta</h3>
+<blockquote>
+<p>“Crie uma meta chamada ‘Estudar animações’ com duração de sete dias e localize o progresso dessa meta.”</p>
+</blockquote>
+<p>Critérios observáveis: encontrou Goals; abriu formulário; preencheu título/duração; salvou; localizou a nova meta e sua barra.</p>
+<h2>7.4 Repetição com movimento reduzido</h2>
+<p>Ativar a preferência de redução de movimento no sistema. Criar outra tarefa equivalente e repetir a conclusão. Perguntar:</p>
+<ul>
+<li>A mudança continuou compreensível?</li>
+<li>O que indicou que a tarefa foi concluída?</li>
+<li>A versão com menos movimento pareceu melhor, pior ou equivalente? Por quê?</li>
+</ul>
+<h2>7.5 Registro por participante</h2>
+<p>Caso futuramente haja participantes externos, usar <code>roteiro-testes.md</code>. Cada participante gera quatro registros: três tarefas normais e a repetição reduzida. Para cada tentativa registrar conclusão sem ajuda/com ajuda/não concluída, dificuldade observável, sensação relatada, sugestão e referência da evidência.</p>
+<div class="pagebreak"></div>
+
+<h1>8 RESULTADOS DE P1 E P2</h1>
+<h2>8.1 Situação da avaliação externa</h2>
+<p><strong>NÃO EXECUTADO — REQUISITO NÃO ATENDIDO.</strong> Nenhuma pessoa externa à equipe participou de uma sessão. Consequentemente, não existem registros de conclusão, ajuda, dificuldade observada, sensação relatada, sugestão, preferência de duração ou evidência de P1/P2.</p>
+<p>Contas locais identificadas como <code>p1.demo</code> e <code>p2.demo</code>, quando usadas na validação técnica, são fixtures sintéticas. Elas não representam pessoas e seus resultados não podem preencher esta seção.</p>
+<h2>8.2 Limite de interpretação</h2>
+<p>Sem sessões externas, não é possível comparar P1 e P2, afirmar que um movimento foi percebido como útil, avaliar desconforto ou concluir que a versão reduzida foi compreendida por usuários. Os resultados internos e automatizados demonstram funcionamento técnico, mas não fornecem evidência de usabilidade externa.</p>
+<div class="pagebreak"></div>
+
+<h1>9 DUAS MELHORIAS APÓS OS TESTES</h1>
+<p>As duas melhorias obrigatórias deveriam ser escolhidas a partir de achados de P1/P2. Como a avaliação externa não foi executada, esse requisito <strong>NÃO FOI ATENDIDO</strong>. O commit <code>64ac832</code> contém correções derivadas de validação interna — foco/rolagem no formulário de tarefa, alinhamento do checkbox de termos e localização do conflito de check-in —, mas elas não são apresentadas como melhorias produzidas por participantes externos.</p>
+<h2>9.1 Melhoria 1</h2>
+<p><strong>NÃO EXECUTADA.</strong> Não houve achado externo que autorizasse atribuir uma primeira melhoria a P1 ou P2.</p>
+<h2>9.2 Melhoria 2</h2>
+<p><strong>NÃO EXECUTADA.</strong> Não houve achado externo que autorizasse atribuir uma segunda melhoria a P1 ou P2.</p>
+<h2>9.3 Padrão das figuras antes/depois</h2>
+<p>O padrão abaixo fica registrado apenas como referência para uma avaliação futura; nenhuma dupla de figuras é atribuída a P1/P2 nesta entrega.</p>
+<ul>
+<li>Figura N-a - estado antes, mesma tela e mesmo conteúdo.</li>
+<li>Figura N-b - estado depois, mesma escala e orientação.</li>
+<li>Legenda deve explicar a diferença observável sem usar somente “melhor”.</li>
+<li>Informar a tarefa e o achado que motivou a mudança.</li>
+</ul>
+<div class="pagebreak"></div>
+
+<h2>9.4 Validação técnica interna por agente em 17/11</h2>
+<p>A rodada foi executada por Codex, agente automatizado de QA, em contas sintéticas locais. Não foi uma sessão humana nem avaliação externa. O browser real Edge/Chromium 157.0.4341.60 executou a aplicação exportada; scripts HTTP e SQL complementaram a observação. Foram produzidas capturas e vídeos WebM.</p>
+<p><strong>Resultado: 7 casos aprovados no escopo Web, 4 reprovados e 2 bloqueados.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Caso</th>
+<th>Resultado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CT-01</td>
+<td>APROVADO — Web</td>
+</tr>
+<tr>
+<td>CT-02</td>
+<td>APROVADO — Web</td>
+</tr>
+<tr>
+<td>CT-03</td>
+<td>APROVADO — Web</td>
+</tr>
+<tr>
+<td>CT-04</td>
+<td>APROVADO — Web</td>
+</tr>
+<tr>
+<td>CT-05</td>
+<td>APROVADO — emulação Web</td>
+</tr>
+<tr>
+<td>CT-06</td>
+<td>APROVADO — Web</td>
+</tr>
+<tr>
+<td>CT-07</td>
+<td>BLOQUEADO — parcial</td>
+</tr>
+<tr>
+<td>CT-08</td>
+<td>REPROVADO</td>
+</tr>
+<tr>
+<td>CT-09</td>
+<td>REPROVADO</td>
+</tr>
+<tr>
+<td>CT-10</td>
+<td>REPROVADO</td>
+</tr>
+<tr>
+<td>CT-11</td>
+<td>APROVADO — local</td>
+</tr>
+<tr>
+<td>CT-12</td>
+<td>REPROVADO</td>
+</tr>
+<tr>
+<td>CT-13</td>
+<td>BLOQUEADO — ambiente</td>
+</tr>
+</tbody>
+</table>
+<p>Falhas confirmadas: arquivar meta e sair de grupo não abrem confirmação Web; credenciais inválidas retornam HTTP 400 sem mensagem visível nos três idiomas; orientação do estado vazio aponta incorretamente para a aba de metas. A exclusão está bloqueada pela ausência da rota da Edge Function no Compose (HTTP 404). A suíte SQL de cascata não substitui esse teste.</p>
+<p>Foco visível e acesso ao último controle com CSS zoom 200% foram confirmados. Movimento reduzido foi testado no app e por media query emulada; nenhum Android estava conectado. Não houve leitor de tela real com áudio nem envio de convite por aplicativo externo.</p>
+<p>Os registros completos, retestes e limites estão em <code>evidencias/qa17/RESUMO-QA.md</code>; resultados estruturados em <code>ui-results.json</code>, <code>supplement-results.json</code>, <code>final-results.json</code> e <code>backend-results.json</code>. A execução não alterou arquivos de produção, não realizou reset do banco e não publicou correções.</p>
+<h1>10 CONTRIBUIÇÕES INDIVIDUAIS</h1>
+<p>O histórico do repositório sustenta parte das contribuições. A equipe deve revisar esta seção antes da entrega e confirmar trabalho de teste, análise e redação realizado após 16/11.</p>
+<table>
+<thead>
+<tr>
+<th>Integrante</th>
+<th>Contribuição sustentada pelo histórico</th>
+<th>Complemento a confirmar</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Joseph Bartholomeu Cavalcante Rocha</td>
+<td>Estrutura do aplicativo, design inicial, Supabase/RLS/RPCs, serviços e hooks, integrações de tarefas/check-in/metas/grupos, progressão, animações acessíveis, CI e infraestrutura local.</td>
+<td>[PENDENTE - confirmar participação nos testes, análise e fechamento do relatório]</td>
+</tr>
+<tr>
+<td>Letícya Beatryz dos Santos Medeiros</td>
+<td>Componentes e fluxos de login/cadastro, validações, navegação inicial, termos, atualização Expo, internacionalização PT/EN/ES e tema escuro persistente.</td>
+<td>[PENDENTE - confirmar participação nos testes, análise e revisão do relatório]</td>
+</tr>
+<tr>
+<td>Mariana Pereira de Melo</td>
+<td>O histórico comprova revisão/merge da PR #1 de interatividade.</td>
+<td>[PENDENTE - descrever somente contribuições realmente executadas em testes, análise, evidências ou redação]</td>
+</tr>
+</tbody>
+</table>
+<p>Nenhuma contribuição deve ser atribuída apenas para equilibrar a tabela. O texto final deve refletir atividades efetivamente realizadas.</p>
+<h1>11 LIMITAÇÕES E PRÓXIMOS AJUSTES</h1>
+<ol>
+<li>A avaliação com duas pessoas externas não foi realizada; o requisito acadêmico correspondente não foi atendido.</li>
+<li>Não há resultados externos para justificar preferência entre as versões rápida e lenta.</li>
+<li>Não foram implementadas duas melhorias derivadas de achados externos; correções de auditoria interna não substituem esse requisito.</li>
+<li>A validação técnica interna e as contas-fixture não permitem inferir clareza, conforto, emoção ou usabilidade percebida.</li>
+<li>Permanecem como trabalho futuro uma avaliação externa ética, a comparação observacional das durações e a revalidação de eventuais melhorias.</li>
+<li>A rodada interna foi consolidada em 17/11 com capturas, vídeos e resultados. Permanecem falhas Web confirmadas, função de exclusão indisponível, validação Android e leitor de tela real não executados; corrigir e revalidar antes de declarar o app aprovado integralmente.</li>
+</ol>
+<h1>12 CONCLUSÃO</h1>
+<p>O StudyPulse possui um fluxo principal funcional e movimentos curtos associados a feedback, progresso e mudança de estado. A implementação preserva texto ou ícone quando a animação é removida e consulta a preferência de movimento reduzido do sistema. A análise técnica sustenta a existência e a finalidade proposta de cinco efeitos reais, mas não comprova benefício percebido por usuários externos.</p>
+<p>Esta entrega registra com transparência que P1/P2 não foram executados e que as duas melhorias obrigatórias derivadas dessas sessões não foram produzidas. Assim, as hipóteses emocionais permanecem hipóteses da equipe, e a validação interna é apresentada somente como evidência funcional e técnica, sem equivalência com teste de usabilidade. O requisito de participantes externos permanece <strong>NÃO ATENDIDO</strong>.</p>
+<div class="pagebreak"></div>
+
+<h1>REFERÊNCIAS</h1>
+<p>[1] FERREIRA, Icaro. <strong>Projeto de IHC: interface, animação e experiência - guia de entrega</strong>. AFYA/UNIMA Maceió, 2026. Material de disciplina fornecido em PDF.</p>
+<p>[2] FERREIRA, Icaro. <strong>Laboratório de animações na IHC</strong>. AFYA/UNIMA Maceió, 2026. Material didático em HTML, consultado em 16 nov. 2026.</p>
+<p>[3] META PLATFORMS, INC. <strong>AccessibilityInfo</strong>. React Native Documentation. Disponível em: <a href="https://reactnative.dev/docs/accessibilityinfo">https://reactnative.dev/docs/accessibilityinfo</a>. Acesso em: 16 nov. 2026.</p>
+<p>[4] META PLATFORMS, INC. <strong>Animated</strong>. React Native Documentation. Disponível em: <a href="https://reactnative.dev/docs/animated">https://reactnative.dev/docs/animated</a>. Acesso em: 16 nov. 2026.</p>
+<p>[5] WORLD WIDE WEB CONSORTIUM. <strong>Understanding Success Criterion 2.3.3: Animation from Interactions</strong>. WCAG 2.2. Disponível em: <a href="https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html">https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html</a>. Acesso em: 16 nov. 2026.</p>
+<p>[6] WORLD WIDE WEB CONSORTIUM. <strong>Understanding Success Criterion 4.1.3: Status Messages</strong>. WCAG 2.2. Disponível em: <a href="https://www.w3.org/WAI/WCAG22/Understanding/status-messages.html">https://www.w3.org/WAI/WCAG22/Understanding/status-messages.html</a>. Acesso em: 16 nov. 2026.</p>
+<p>[7] STUDYPULSE. <strong>Repositório do projeto</strong>. GitHub, 2026. Disponível em: <a href="https://github.com/usrJosephC/StudyPulse">https://github.com/usrJosephC/StudyPulse</a>. Acesso em: 16 nov. 2026.</p>
+<p>[8] UNIVERSIDADE DE BRASÍLIA. Biblioteca Central. <strong>Normalização ABNT atualizada em fevereiro de 2025</strong>. Disponível em: <a href="https://bce.unb.br/wp-content/uploads/2025/02/ABNT-ATUALIZADO-em-fevereiro-2025.pdf">https://bce.unb.br/wp-content/uploads/2025/02/ABNT-ATUALIZADO-em-fevereiro-2025.pdf</a>. Acesso em: 16 nov. 2026.</p>
+<p>[9] IEEE. <strong>Authoring tools and templates</strong>. IEEE Author Center Conferences. Disponível em: <a href="https://conferences.ieeeauthorcenter.ieee.org/write-your-paper/authoring-tools-and-templates/">https://conferences.ieeeauthorcenter.ieee.org/write-your-paper/authoring-tools-and-templates/</a>. Acesso em: 16 nov. 2026.</p>
+<h1>APÊNDICE A - MATRIZ DE EVIDÊNCIAS</h1>
+<h2>Validação técnica local em 17/11/2026</h2>
+<p>Na cópia de trabalho de <code>feat/sprint-priorities</code>, baseada em <code>21129f2</code> e ainda com alterações locais, passaram: typecheck, 5 testes do aplicativo, 138 verificações CORS e 104 assertions SQL em sete suítes com ROLLBACK. A exportação Expo Web também passou. O lint terminou com zero erros e 11 avisos preexistentes. Esses resultados são verificações locais, não um novo resultado de CI remoto.</p>
+<p>A revisão do banco motivou a migration 009: tabelas de progressão conservam leitura autorizada por RLS e perdem permissões de escrita direta do cliente. As contas locais de demonstração foram preparadas sem check-in inicial. Login, criação/conclusão de tarefa, check-in, criação de meta e persistência da preferência de movimento foram exercitados tecnicamente no navegador em 16/11, sem participantes externos.</p>
+<p>As correções de CORS, contraste e movimento reduzido são melhorias derivadas de auditoria técnica. Não são apresentadas como as duas melhorias obrigatórias derivadas de P1/P2.</p>
+<p>Na instalação a partir do ZIP, a exportação comum compilou, mas omitiu as variáveis de API do JavaScript final. A correção operacional foi criar <code>npm run export:web</code>, que inicia o Expo com <code>.env</code> já carregado e limpa o cache. O bundle regenerado contém a URL pública local esperada. Esse achado reforça a necessidade de testar a aplicação exportada, além de verificar apenas o código de saída do compilador.</p>
+<table>
+<thead>
+<tr>
+<th>Evidência</th>
+<th>Situação</th>
+<th>Local esperado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Código das cinco animações</td>
+<td>Existente</td>
+<td>Repositório StudyPulse</td>
+</tr>
+<tr>
+<td>CI e validações automatizadas</td>
+<td>Existente</td>
+<td>PR #30 / GitHub Actions</td>
+</tr>
+<tr>
+<td>Capturas técnicas das telas</td>
+<td>Incluídas ao final do PDF; não substituem P1/P2</td>
+<td><code>evidencias/tecnicas/</code></td>
+</tr>
+<tr>
+<td>Registros de P1</td>
+<td>Pendente</td>
+<td><code>evidencias/p1/</code></td>
+</tr>
+<tr>
+<td>Registros de P2</td>
+<td>Pendente</td>
+<td><code>evidencias/p2/</code></td>
+</tr>
+<tr>
+<td>Comparação rápida/lenta</td>
+<td>Execução técnica aprovada; preferência humana não avaliada</td>
+<td><code>evidencias/qa17/comparator-timing.json</code></td>
+</tr>
+<tr>
+<td>Duas melhorias antes/depois</td>
+<td>Pendente</td>
+<td>figuras e commits posteriores</td>
+</tr>
+</tbody>
+</table>
+<h1>APÊNDICE B - CHECKLIST DE FECHAMENTO</h1>
+<ul>
+<li>[ ] Informar turma.</li>
+<li>[ ] Confirmar contribuições finais dos três integrantes.</li>
+<li>[ ] Executar P1 externo.</li>
+<li>[ ] Executar P2 externo.</li>
+<li>[ ] Repetir tarefa com redução de movimento para ambos.</li>
+<li>[x] Executar comparação rápida/lenta tecnicamente; avaliação humana não realizada.</li>
+<li>[ ] Implementar duas melhorias derivadas dos testes.</li>
+<li>[ ] Inserir capturas antes/depois.</li>
+<li>[x] Inserir evidências técnicas; capturas no PDF e vídeos em <code>evidencias/qa17/</code>.</li>
+<li>[x] Revisar contraste e foco Web; limites de Android/leitor de tela registrados no CT-07.</li>
+<li>[x] Regenerar HTML e PDF com resultados técnicos de 17/11.</li>
+<li>[x] Revisar visualmente as páginas renderizadas; manter pendências acadêmicas explícitas.</li>
+<li>[x] Gerar versão anterior do ZIP sem <code>node_modules</code>, caches, credenciais e temporários.</li>
+<li>[x] Extrair versão anterior e testar instalação, exportação e aplicação; rodada de QA encontrou falhas descritas na seção 9.4.</li>
+<li>[ ] Atualizar pacote final após correções e revalidar cenários reprovados.</li>
+</ul>
+<div class="pagebreak"></div>
+
+<h1>APÊNDICE C - ROTEIRO DE TESTE COM PARTICIPANTES</h1>
+<p>O roteiro completo está incluído neste relatório para consulta independente. A fonte editável é <code>roteiro-testes.md</code>, também fornecida no ZIP. Este apêndice documenta o planejamento; as sessões externas não foram realizadas.</p>
+<blockquote>
+<p>Atualização de 17/11: a equipe informou indisponibilidade de participantes externos. Este roteiro fica preservado como proposta NÃO EXECUTADA. Para a execução interna, use <code>casos-testes.md</code>. Resultados internos não atendem ao requisito de duas pessoas externas e não devem ser atribuídos a P1/P2 fictícios.</p>
+</blockquote>
+<p>StudyPulse — IHC — AFYA/UNIMA — Prof. Icaro Ferreira — entrega 18/11/2026.</p>
+<h2>Preparação do moderador</h2>
+<p>Convide duas pessoas que não integrem a equipe. Identifique-as somente como P1 e P2. Explique o objetivo e peça consentimento para capturas ou gravação; não registre rosto, voz ou dados pessoais sem concordância. Cada sessão dura aproximadamente 15 a 20 minutos. Registre data, plataforma, navegador/dispositivo, largura da tela, versão do código e condição de movimento. Use as contas locais de demonstração do LEIA-ME. Se o check-in já foi realizado no mesmo dia, use uma nova conta de teste; não apague registros para simular um resultado.</p>
+<p>Leia: “Estamos avaliando a interface, não você. Faça as tarefas do seu jeito e diga o que estiver pensando. Você pode parar quando quiser. Primeiro tentaremos sem ajuda.” Não indique onde clicar. Se a pessoa não conseguir prosseguir, registre a dificuldade e a ajuda dada antes de orientar.</p>
+<h2>Tarefas para ler ao participante</h2>
+<ol>
+<li><strong>Organizar e concluir:</strong> “Você precisa revisar um conteúdo de IHC hoje. Registre essa atividade, marque-a como concluída e explique como percebeu que foi concluída. Depois corrija a marcação, como se ainda faltasse estudar.”</li>
+<li><strong>Registrar presença:</strong> “Você estudou hoje e quer registrar sua presença diária. Faça isso e explique o resultado mostrado.”</li>
+<li><strong>Planejar uma meta:</strong> “Crie uma meta de estudo para os próximos sete dias. Depois altere o título e confira se a duração foi preservada.”</li>
+</ol>
+<p>Repita a tarefa 1 com <strong>Preferências → Reduzir movimentos</strong> ativado. Não descreva qual sensação a pessoa deveria ter. Pergunte: “O que mudou? O resultado continuou claro? Alguma versão causou desconforto ou demora?”</p>
+<h2>Observar cinco animações</h2>
+<p>Além das três tarefas, peça para abrir o histórico de metas (Slide), abrir conquistas no Perfil (Fade) e enviar um formulário vazio (Shake). A conclusão de tarefa mostra Scale + Fade e animação de dados. Observe o estado também com movimento reduzido. A animação não comprova que o servidor respondeu: confirme o resultado persistido.</p>
+<h2>Comparação rápida e lenta</h2>
+<p>Abra <code>comparacao-motion.html</code>. Compare checkmarks de 120/360 ms e barras de 180/600 ms. P1 observa a versão rápida primeiro; P2 observa a lenta primeiro. As durações atuais no aplicativo são 180 ms e 300 ms. Registre clareza, demora, desconforto e preferência. O comparador é uma simulação documentada e não substitui as tarefas reais.</p>
+<h2>Ficha individual — preencher uma cópia por participante</h2>
+<ul>
+<li>Participante: P1 / P2</li>
+<li>Data e hora:</li>
+<li>Dispositivo e plataforma:</li>
+<li>Versão/commit ou manifesto do pacote:</li>
+<li>Consentimento para captura/gravação: sim / não</li>
+<li>Movimento normal e reduzido verificados:</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Rodada</th>
+<th>Sem ajuda / com ajuda / não concluiu</th>
+<th>Dificuldade observável e ajuda fornecida</th>
+<th>Sensação relatada (fala/paráfrase fiel)</th>
+<th>Sugestão</th>
+<th>Evidência</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tarefa 1</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Tarefa 2</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Tarefa 3</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Tarefa 1 reduzida</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Comparação checkmark</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Comparação barra</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Não preencher campos vazios com resultados presumidos. Emoção esperada pela equipe e sensação relatada pelo participante são dados diferentes.</p>
+<h2>Duas melhorias depois dos testes</h2>
+<p>Para cada melhoria registre: problema observado; participante/tarefa; evidência anterior; alteração; motivo; arquivo/commit; repetição da tarefa; resultado observado; evidência posterior. Escolha os dois problemas de maior impacto entre os achados reais. Correções técnicas prévias, como CORS, não substituem melhorias decorrentes do teste externo.</p>
+<h2>Capturas ou OBS</h2>
+<p>Com consentimento, no OBS selecione Captura de janela para o navegador/aplicativo, enquadre somente a interface e evite gravar outras janelas. Inicie a gravação antes da tarefa e encerre após o relato. Alternativa: capture antes, ação e resultado em imagens. Nomeie <code>P1_T1_antes.png</code>, <code>P1_T1_resultado.png</code>, <code>P1_T1_reduzido.png</code>; repita para P2. Guarde evidências privadas fora do ZIP até revisar dados pessoais.</p>
+<p>As capturas em <code>evidencias/tecnicas/</code> são verificações automatizadas da interface e não representam sessões P1/P2.</p>
+<div class="pagebreak"></div>
+
+<h1>APÊNDICE D - CASOS E RESULTADOS DA VALIDAÇÃO INTERNA</h1>
+<p>Os treze casos abaixo registram a execução técnica de 17/11/2026, com resultados, falhas e limites. A fonte editável é <code>casos-testes.md</code>, também fornecida no ZIP. Os arquivos de evidência referenciados acompanham o pacote em <code>entrega-ihc/evidencias/qa17/</code>.</p>
+<p><strong>Versão do protocolo:</strong> 17/11/2026<br />
+<strong>Branch de referência:</strong> <code>feat/sprint-priorities</code><br />
+<strong>Escopo:</strong> validação funcional e técnica executável pela própria equipe</p>
+<blockquote>
+<p><strong>Limitação obrigatória:</strong> o requisito acadêmico de avaliar o produto com pelo menos duas pessoas externas à equipe <strong>NÃO FOI ATENDIDO</strong>. As identidades <code>p1.demo</code> e <code>p2.demo</code> abaixo são contas sintéticas (fixtures), não participantes reais. A execução destes casos pela equipe não equivale a um teste de usabilidade externo e não permite relatar opiniões, sensações, tempos ou resultados de P1/P2 reais.</p>
+</blockquote>
+<h2>1. Regras de registro</h2>
+<p>Rodada executada por Codex em 17/11/2026. Resultado consolidado: <strong>7 aprovados no escopo Web, 4 reprovados e 2 bloqueados</strong>. Aprovação Web não abrange Android nativo, leitor de tela real ou avaliação com pessoas. Registros detalhados: <code>evidencias/qa17/RESUMO-QA.md</code>. Tentativas iniciais do harness e retestes estão identificados nos JSONs; o resultado consolidado abaixo prevalece.</p>
+<table>
+<thead>
+<tr>
+<th>Estado</th>
+<th>Uso</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NÃO EXECUTADO</code></td>
+<td>Caso ainda não iniciado.</td>
+</tr>
+<tr>
+<td><code>APROVADO</code></td>
+<td>Todos os resultados esperados foram observados e há evidência.</td>
+</tr>
+<tr>
+<td><code>REPROVADO</code></td>
+<td>Um ou mais resultados esperados não ocorreram; registrar a divergência.</td>
+</tr>
+<tr>
+<td><code>BLOQUEADO</code></td>
+<td>Dependência técnica impediu a conclusão; registrar a causa.</td>
+</tr>
+</tbody>
+</table>
+<p>Não registrar tokens, chaves, cookies, senhas digitadas ou dados pessoais em capturas e logs. Nomear evidências com o ID do caso, por exemplo <code>CT-02-03-tarefa-concluida.png</code>. As colunas “resultado observado” permanecem vazias até a execução.</p>
+<h2>2. Ambiente e dados sintéticos</h2>
+<h3>2.1 Pré-condições comuns</h3>
+<ol>
+<li>Confirmar a branch e o commit sob teste com <code>git branch --show-current</code> e <code>git rev-parse --short HEAD</code>.</li>
+<li>Iniciar o backend local conforme o fluxo adotado pela equipe (Docker Compose ou Supabase CLI).</li>
+<li>Aplicar migrations e popular dados locais. Para o seed reproduzível da equipe:</li>
+</ol>
+<p><code>powershell
+   powershell -ExecutionPolicy Bypass -File scripts/seed-local-demo.ps1</code></p>
+<ol>
+<li>Configurar o app para o Supabase <strong>local</strong>, nunca para produção, e iniciar Expo/Web.</li>
+<li>Registrar dispositivo, sistema, navegador/Expo Go, URL local e commit na ficha de execução.</li>
+<li>Recriar o seed antes de uma nova rodada quando um caso alterar dados compartilhados.</li>
+</ol>
+<h3>2.2 Contas-fixture locais</h3>
+<table>
+<thead>
+<tr>
+<th>Identificador técnico</th>
+<th>E-mail local</th>
+<th>Senha local</th>
+<th>Papel inicial</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Fixture P1</td>
+<td><code>p1.demo@studypulse.local</code></td>
+<td><code>StudyPulseP1!2026</code></td>
+<td>Proprietário da “Equipe StudyPulse”</td>
+</tr>
+<tr>
+<td>Fixture P2</td>
+<td><code>p2.demo@studypulse.local</code></td>
+<td><code>StudyPulseP2!2026</code></td>
+<td>Membro da “Equipe StudyPulse”</td>
+</tr>
+<tr>
+<td>Fixture descartável</td>
+<td><code>delete.fixture@studypulse.local</code></td>
+<td><code>DeleteFixture!2026</code></td>
+<td>Exclusão de conta; criar apenas no ambiente local</td>
+</tr>
+</tbody>
+</table>
+<p>Esses nomes servem apenas para distinguir massas de dados. Não usar “Participante P1/P2” em conclusões do relatório.</p>
+<h3>2.3 Ficha de execução</h3>
+<ul>
+<li>Executor: Codex, agente de QA automatizado (sem participante humano)</li>
+<li>Data: 17/11/2026; timestamps dos arquivos de evidência registram as capturas.</li>
+<li>Commit de base: 21129f2 + alterações locais em feat/sprint-priorities.</li>
+<li>Plataforma: Windows, Microsoft Edge/Chromium 157.0.4341.60, viewport 460×836; portal 460×828.</li>
+<li>Backend: Docker Compose em http://localhost:54321; app exportado em http://localhost:8093.</li>
+<li>Evidências: entrega-ihc/evidencias/qa17/. Contas qa1.demo, qa.run17a/qa.run17b e delete.qa17 são fixtures sintéticas.</li>
+</ul>
+<h2>3. Três tarefas principais</h2>
+<h3>CT-01 — Criar, concluir e reabrir uma tarefa</h3>
+<ul>
+<li><strong>Tipo/prioridade:</strong> funcional, P0</li>
+<li><strong>Resultado:</strong> <code>APROVADO — Web</code></li>
+<li><strong>Objetivo:</strong> verificar o ciclo principal de uma tarefa e a atualização visual associada.</li>
+<li><strong>Pré-condições:</strong> ambiente comum; seed aplicado; Fixture P1 autenticada; tela inicial aberta.</li>
+<li><strong>Dados:</strong> título único <code>Caso interno - revisar animações - &lt;HHMM&gt;</code>; data de hoje.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Passo</th>
+<th>Ação</th>
+<th>Resultado esperado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">1</td>
+<td>Registrar a quantidade de tarefas concluídas, progresso e pontos antes da ação.</td>
+<td>Estado inicial legível e consistente com o seed.</td>
+</tr>
+<tr>
+<td style="text-align: right;">2</td>
+<td>Acionar a criação de tarefa, preencher título/categoria e salvar; a data é o dia atual automaticamente.</td>
+<td>Tarefa aparece na lista sem recarregar manualmente; não há duplicata.</td>
+</tr>
+<tr>
+<td style="text-align: right;">3</td>
+<td>Marcar a nova tarefa como concluída uma única vez.</td>
+<td>Check fica no estado concluído; feedback de escala + opacidade ocorre quando movimentos estão ativos; progresso/contagem/pontos são atualizados uma vez.</td>
+</tr>
+<tr>
+<td style="text-align: right;">4</td>
+<td>Sair da tela e retornar ou atualizar a aplicação.</td>
+<td>Estado concluído persiste no backend.</td>
+</tr>
+<tr>
+<td style="text-align: right;">5</td>
+<td>Reabrir/desmarcar a tarefa.</td>
+<td>Estado volta a pendente e os indicadores ficam coerentes, sem saldo duplicado.</td>
+</tr>
+<tr>
+<td style="text-align: right;">6</td>
+<td>Repetir rapidamente o toque no controle.</td>
+<td>A interface bloqueia ou serializa envios; não cria atualização duplicada/inconsistente.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Evidências obrigatórias:</strong> captura antes da criação; tarefa criada; estado concluído com indicadores; estado após recarregar; estado reaberto; log de erro apenas se houver divergência.<br />
+<strong>Resultado observado:</strong> Tarefa id 132 criada uma vez; saldo 70→75 na conclusão, persistiu após reload; reabertura preservou saldo e nova conclusão/duplo clique não duplicou pontos. Animação normal: 109 frames, 13 valores de escala e 31 do arco.<br />
+<strong>Divergências/issue:</strong> Observação: pontos de tarefa não são estornados na reabertura. Ver portal-observations.md e final-results.json.</p>
+<h3>CT-02 — Fazer check-in diário com idempotência</h3>
+<ul>
+<li><strong>Tipo/prioridade:</strong> funcional + integração, P0</li>
+<li><strong>Resultado:</strong> <code>APROVADO — Web</code></li>
+<li><strong>Objetivo:</strong> verificar check-in, streak e pontos sem premiar duas vezes no mesmo dia.</li>
+<li><strong>Pré-condições:</strong> seed aplicado <strong>sem</strong> <code>-IncludeCompletedCheckIns</code>; Fixture P1 autenticada; registrar pontos e streak iniciais.</li>
+<li><strong>Dados:</strong> data local atual em <code>America/Sao_Paulo</code>.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Passo</th>
+<th>Ação</th>
+<th>Resultado esperado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">1</td>
+<td>Acionar o check-in diário.</td>
+<td>Botão entra em carregamento e impede novo envio concorrente.</td>
+</tr>
+<tr>
+<td style="text-align: right;">2</td>
+<td>Aguardar o retorno.</td>
+<td>Mensagem/estado de sucesso aparece; streak e pontos refletem exatamente um check-in.</td>
+</tr>
+<tr>
+<td style="text-align: right;">3</td>
+<td>Tentar executar novamente no mesmo dia.</td>
+<td>UI impede a ação ou backend devolve resultado idempotente/conflito tratado; nenhum segundo bônus é concedido.</td>
+</tr>
+<tr>
+<td style="text-align: right;">4</td>
+<td>Reabrir a aplicação.</td>
+<td>Check-in, streak e pontos persistem.</td>
+</tr>
+<tr>
+<td style="text-align: right;">5</td>
+<td>Conferir o registro no backend local, sem editar dados.</td>
+<td>Existe no máximo um check-in da conta para a data local.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Evidências obrigatórias:</strong> antes/depois de pontos e streak; botão após check-in; segunda tentativa; consulta/log sanitizado comprovando unicidade.<br />
+<strong>Resultado observado:</strong> Check-in alterou saldo 75→85 e streak 1→2. Repetição após reload mostrou aviso e manteve exatamente um registro diário.<br />
+<strong>Divergências/issue:</strong> UX: CTA volta a oferecer check-in após reload; servidor impede duplicação. #17. CT02-banco.txt e capturas CT02.</p>
+<h3>CT-03 — Criar, editar e concluir uma meta</h3>
+<ul>
+<li><strong>Tipo/prioridade:</strong> funcional + integração, P0</li>
+<li><strong>Resultado:</strong> <code>APROVADO — Web</code></li>
+<li><strong>Objetivo:</strong> validar o ciclo principal de metas e a persistência dos dados reais.</li>
+<li><strong>Pré-condições:</strong> ambiente comum; Fixture P2 autenticada; tela Metas aberta.</li>
+<li><strong>Dados:</strong> <code>Caso interno - estudar IHC - &lt;HHMM&gt;</code>; categoria <code>Estudos</code>; duração de 7 dias. A UI não possui campo de descrição.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Passo</th>
+<th>Ação</th>
+<th>Resultado esperado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">1</td>
+<td>Criar a meta com os dados definidos.</td>
+<td>Validação aceita dados válidos; meta aparece entre as ativas uma única vez.</td>
+</tr>
+<tr>
+<td style="text-align: right;">2</td>
+<td>Editar título/categoria sem alterar a duração; avançar progresso pelo CTA em passos de 25%.</td>
+<td>Valores novos aparecem e persistem, mantendo a duração.</td>
+</tr>
+<tr>
+<td style="text-align: right;">3</td>
+<td>Alterar o progresso até a conclusão pelo fluxo disponível.</td>
+<td>Meta recebe estado concluído; feedback e pontuação ocorrem uma única vez.</td>
+</tr>
+<tr>
+<td style="text-align: right;">4</td>
+<td>Reabrir a aplicação.</td>
+<td>Estado final e campos persistem, sem voltar ao mock/valor anterior.</td>
+</tr>
+<tr>
+<td style="text-align: right;">5</td>
+<td>Consultar histórico de metas.</td>
+<td>Conclusão aparece no histórico, sem apagar indevidamente os dados da meta. O heatmap não substitui esta verificação.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Evidências obrigatórias:</strong> formulário preenchido sem senha/chaves; lista ativa; edição; conclusão; estado após reinício; histórico/heatmap.<br />
+<strong>Resultado observado:</strong> Criação e edição pela UI preservaram vencimento 24/11/2026. Progresso avançou até 100%; conclusão persistiu e apareceu no histórico após reload.<br />
+<strong>Divergências/issue:</strong> Sem divergência funcional confirmada neste caso. ui-results.json e CT03-history.png.</p>
+<h2>4. Movimento e acessibilidade</h2>
+<h3>CT-04 — Repetição com “Reduzir movimentos” do aplicativo</h3>
+<ul>
+<li><strong>Tipo/prioridade:</strong> acessibilidade, P0</li>
+<li><strong>Resultado:</strong> <code>APROVADO — Web</code></li>
+<li><strong>Objetivo:</strong> garantir que a preferência interna remove movimento sem remover informação ou função.</li>
+<li><strong>Pré-condições:</strong> Fixture P1; sistema sem redução forçada; preferência do app inicialmente desligada.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Passo</th>
+<th>Ação</th>
+<th>Resultado esperado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">1</td>
+<td>Em Perfil/Preferências, ativar “Reduzir movimentos”.</td>
+<td>Controle confirma ativação.</td>
+</tr>
+<tr>
+<td style="text-align: right;">2</td>
+<td>Fechar e reabrir o app.</td>
+<td>Preferência permanece ativa.</td>
+</tr>
+<tr>
+<td style="text-align: right;">3</td>
+<td>Repetir CT-01 com outro título único.</td>
+<td>Check e indicadores chegam imediatamente ao estado final, sem transição de escala/opacidade/progresso; resultado funcional permanece correto.</td>
+</tr>
+<tr>
+<td style="text-align: right;">4</td>
+<td>Fazer logout e enviar Login/Cadastro com dados inválidos, mantendo a preferência ativa.</td>
+<td>Campo não se desloca; mensagem de erro permanece visível e anunciável por leitor de tela.</td>
+</tr>
+<tr>
+<td style="text-align: right;">5</td>
+<td>Abrir/fechar modais e navegar entre autenticação e app.</td>
+<td>Transições configuradas como reduzidas não fazem slide/fade; conteúdo final permanece disponível.</td>
+</tr>
+<tr>
+<td style="text-align: right;">6</td>
+<td>Desativar a preferência e reiniciar.</td>
+<td>Movimento volta apenas se o sistema também não solicitar redução.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Evidências obrigatórias:</strong> preferência antes/depois do reinício; vídeo curto da tarefa; vídeo/registro do erro; captura do estado final. Não afirmar conforto ou preferência de usuário externo.<br />
+<strong>Resultado observado:</strong> Preferência interna persistiu após reload. Na tarefa reduzida foram coletados 103 frames sem escala intermediária; check final correto. Erro textual de termos continuou disponível após logout.<br />
+<strong>Divergências/issue:</strong> Anúncio por leitor real pertence ao CT07 e não foi validado. supplement-results.json; vídeo CT04-execution.webm.</p>
+<h3>CT-05 — Respeito à redução de movimento do sistema</h3>
+<ul>
+<li><strong>Tipo/prioridade:</strong> acessibilidade, P0</li>
+<li><strong>Resultado:</strong> <code>APROVADO — emulação Web</code></li>
+<li><strong>Objetivo:</strong> verificar que a preferência do sistema prevalece sobre a preferência interna desligada.</li>
+<li><strong>Pré-condições:</strong> dispositivo/emulador compatível; preferência interna desligada.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Passo</th>
+<th>Ação</th>
+<th>Resultado esperado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">1</td>
+<td>Ativar “remover/reduzir animações” nas configurações de acessibilidade do sistema e reiniciar o app.</td>
+<td>App detecta a preferência e reduz os movimentos.</td>
+</tr>
+<tr>
+<td style="text-align: right;">2</td>
+<td>Repetir os passos 3 a 5 de CT-04.</td>
+<td>Estados finais, mensagens e ações permanecem; transições evitáveis não são exibidas.</td>
+</tr>
+<tr>
+<td style="text-align: right;">3</td>
+<td>Conferir o controle interno enquanto a redução do sistema está ativa.</td>
+<td>Controle desabilitado e explicação visível; redução continua ativa, pois a regra é sistema <strong>OU</strong> usuário.</td>
+</tr>
+<tr>
+<td style="text-align: right;">4</td>
+<td>Desligar a redução do sistema e reiniciar.</td>
+<td>Movimento volta se nenhuma das duas preferências estiver ativa.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Evidências obrigatórias:</strong> tela de configuração do sistema sem dados pessoais; vídeo antes/depois; plataforma e versão.<br />
+<strong>Resultado observado:</strong> Prefers-reduced-motion emulado: switch marcado e desabilitado com explicação; mudança da media query e reload respeitados.<br />
+<strong>Divergências/issue:</strong> Android nativo não testado: nenhum dispositivo/emulador conectado. #32. supplement-results.json; vídeo CT05-execution.webm.</p>
+<h3>CT-06 — Comparador técnico rápido/lento</h3>
+<ul>
+<li><strong>Tipo/prioridade:</strong> protocolo visual interno, P1</li>
+<li><strong>Resultado:</strong> <code>APROVADO — Web</code></li>
+<li><strong>Objetivo:</strong> comparar durações de forma controlada, sem apresentar a comparação como pesquisa de usabilidade.</li>
+<li><strong>Pré-condições:</strong> abrir <code>entrega-ihc/comparacao-motion.html</code> em navegador atual; DevTools sem limitação de CPU.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Passo</th>
+<th>Ação</th>
+<th>Resultado esperado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">1</td>
+<td>Deixar “Reduzir movimentos” desmarcado e acionar “Comparar checkmarks”.</td>
+<td>Versões de 120 ms e 360 ms partem/reiniciam e chegam ao mesmo check final; a diferença temporal é observável.</td>
+</tr>
+<tr>
+<td style="text-align: right;">2</td>
+<td>Acionar “Comparar barras”.</td>
+<td>Versões de 180 ms e 600 ms chegam ao mesmo preenchimento final com curva ease-out cúbica.</td>
+</tr>
+<tr>
+<td style="text-align: right;">3</td>
+<td>Repetir cada comparação três vezes e alternar qual região é observada primeiro.</td>
+<td>Resultado final não muda entre repetições; não há estado preso.</td>
+</tr>
+<tr>
+<td style="text-align: right;">4</td>
+<td>Marcar “Reduzir movimentos” e repetir.</td>
+<td>Elementos saltam ao estado final, preservando conteúdo e operação.</td>
+</tr>
+<tr>
+<td style="text-align: right;">5</td>
+<td>Operar controles apenas por teclado.</td>
+<td>Foco é visível; checkbox e botões podem ser acionados.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Evidências obrigatórias:</strong> gravação de tela rápida/lenta; captura em reduced motion; observações estritamente técnicas. Não preencher “preferiu”, “sentiu” ou “achou mais claro” em nome de pessoas inexistentes.<br />
+<strong>Resultado observado:</strong> Três ciclos de cada comparação chegaram ao mesmo estado final. Redução e acionamento por Enter passaram. Tempos observados escala ≈144/359 ms e barra ≈180/597 ms, rápida antes da lenta.<br />
+<strong>Divergências/issue:</strong> Medição técnica sujeita a frame rate; não há percepção humana. comparator-timing.json; vídeo CT06-execution.webm.</p>
+<h3>CT-07 — Acesso por teclado, leitor de tela e estados anunciados</h3>
+<ul>
+<li><strong>Tipo/prioridade:</strong> acessibilidade, P1</li>
+<li><strong>Resultado:</strong> <code>BLOQUEADO — parcial</code></li>
+<li><strong>Objetivo:</strong> verificar acesso básico além da animação.</li>
+<li><strong>Pré-condições:</strong> Web com teclado e leitor de tela disponível, ou TalkBack/VoiceOver no dispositivo.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Passo</th>
+<th>Ação</th>
+<th>Resultado esperado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">1</td>
+<td>Percorrer Login, Home, Metas, Grupos e Perfil usando navegação assistiva.</td>
+<td>Controles interativos têm nome compreensível, função e estado; ordem acompanha a interface.</td>
+</tr>
+<tr>
+<td style="text-align: right;">2</td>
+<td>Submeter Login inválido.</td>
+<td>Erro é exposto em texto e anunciado; foco não fica perdido.</td>
+</tr>
+<tr>
+<td style="text-align: right;">3</td>
+<td>Concluir uma tarefa e efetuar check-in.</td>
+<td>Alteração de estado pode ser percebida sem depender de cor/movimento; estado ocupado/desabilitado é comunicado.</td>
+</tr>
+<tr>
+<td style="text-align: right;">4</td>
+<td>Aumentar fonte/zoom do sistema ou navegador.</td>
+<td>Conteúdo essencial continua legível e acionável, sem sobreposição impeditiva.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Evidências obrigatórias:</strong> plataforma/leitor/versão; sequência de foco; transcrição curta dos anúncios; capturas com zoom.<br />
+<strong>Resultado observado:</strong> Foco sólido de 3 px observado; com CSS zoom 200% o último controle foi rolado e acionado. Não houve leitor de tela real com confirmação de áudio.<br />
+<strong>Divergências/issue:</strong> Não aprovar anúncios sem Narrator/TalkBack/VoiceOver. final-results.json, CT07-focus.png, CT07-zoom-last-control.png.</p>
+<h2>5. Segurança, persistência e integração</h2>
+<h3>CT-08 — Autenticação e controle de acesso</h3>
+<ul>
+<li><strong>Tipo/prioridade:</strong> segurança funcional, P0</li>
+<li><strong>Resultado:</strong> <code>REPROVADO</code></li>
+<li><strong>Objetivo:</strong> confirmar que rotas autenticadas dependem de sessão real e que erros não expõem detalhes sensíveis.</li>
+<li><strong>Pré-condições:</strong> app sem sessão; Fixture P1 existente.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Passo</th>
+<th>Ação</th>
+<th>Resultado esperado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">1</td>
+<td>Tentar entrar com e-mail P1 e senha incorreta.</td>
+<td>Mensagem segura em idioma ativo; usuário permanece no Login; nenhum token/stack trace é mostrado.</td>
+</tr>
+<tr>
+<td style="text-align: right;">2</td>
+<td>Entrar com credenciais válidas da Fixture P1.</td>
+<td>Root navigator libera a área principal apenas após sessão válida.</td>
+</tr>
+<tr>
+<td style="text-align: right;">3</td>
+<td>Reiniciar o app.</td>
+<td>Sessão é hidratada sem loop e rota principal é restaurada.</td>
+</tr>
+<tr>
+<td style="text-align: right;">4</td>
+<td>Sair pelo Perfil.</td>
+<td>Sessão local é removida e Login reaparece.</td>
+</tr>
+<tr>
+<td style="text-align: right;">5</td>
+<td>Reiniciar novamente.</td>
+<td>Área protegida continua inacessível até novo login.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Evidências obrigatórias:</strong> erro sanitizado; área principal; reinício; logout; logs sem credenciais/tokens.<br />
+<strong>Resultado observado:</strong> Login válido, sessão/reload e logout passaram. Senha incorreta retornou HTTP 400, mas a mensagem de credenciais inválidas não apareceu no Web.<br />
+<strong>Divergências/issue:</strong> Falha vinculada a #21: Login usa Alert.alert para o erro remoto. Evidências CT12-*-invalid.png e final-results.json.</p>
+<h3>CT-09 — Grupo, convite e isolamento RLS</h3>
+<ul>
+<li><strong>Tipo/prioridade:</strong> integração + segurança, P0</li>
+<li><strong>Resultado:</strong> <code>REPROVADO</code></li>
+<li><strong>Objetivo:</strong> verificar convite/compartilhamento, permissões de proprietário e isolamento de membro.</li>
+<li><strong>Pré-condições:</strong> seed aplicado; P1 proprietário e P2 membro da “Equipe StudyPulse”.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Passo</th>
+<th>Ação</th>
+<th>Resultado esperado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">1</td>
+<td>Entrar como Fixture P1, abrir Grupos e exibir o código de convite.</td>
+<td>Código real do grupo é visível; ação compartilhar/copiar oferece o mesmo código sem expor outros dados.</td>
+</tr>
+<tr>
+<td style="text-align: right;">2</td>
+<td>Como P1, editar nome/subtítulo com valores válidos.</td>
+<td>Atualização é salva e aparece para membros.</td>
+</tr>
+<tr>
+<td style="text-align: right;">3</td>
+<td>Tentar nome vazio e descrição acima do limite.</td>
+<td>Validação rejeita valores inválidos sem corromper o grupo.</td>
+</tr>
+<tr>
+<td style="text-align: right;">4</td>
+<td>Sair e entrar como Fixture P2; tentar editar por UI e, se a UI ocultar a ação, pela chamada de teste autorizada.</td>
+<td>Membro não proprietário não consegue editar; estado permanece intacto.</td>
+</tr>
+<tr>
+<td style="text-align: right;">5</td>
+<td>Como P2, sair do grupo.</td>
+<td>Membership da P2 é removida; dados de P1/grupo não são apagados.</td>
+</tr>
+<tr>
+<td style="text-align: right;">6</td>
+<td>Usar o convite para entrar novamente, se o fluxo estiver disponível.</td>
+<td>P2 volta como membro e não como proprietário; ranking/feed ficam limitados ao grupo.</td>
+</tr>
+<tr>
+<td style="text-align: right;">7</td>
+<td>Rodar a suíte SQL local.</td>
+<td>Todos os testes TAP, incluindo <code>squad_update.sql</code>, retornam <code>ok</code> e encerram com <code>ROLLBACK</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Comando recomendado:</p>
+<pre><code class="language-powershell">node scripts/test-local-sql.mjs
+</code></pre>
+<p><strong>Evidências obrigatórias:</strong> código + share sheet sanitizado; edição de P1; rejeição de P2; saída/reentrada; saída terminal TAP.<br />
+<strong>Resultado observado:</strong> Cópia contém só código (8 caracteres); edição UI pelo criador passou, membro não vê ação. RPC rejeita membro com 403 e dados inválidos com 400; saída/reentrada pela API preservam criador. Botão Sair no Web não abre confirmação.<br />
+<strong>Divergências/issue:</strong> #18: Alert.alert não apresenta confirmação Web. Share nativo disponível, envio externo não executado. backend-results.json e supplement-results.json.</p>
+<h3>CT-10 — Arquivar/restaurar meta e preservar histórico</h3>
+<ul>
+<li><strong>Tipo/prioridade:</strong> integração + persistência, P0</li>
+<li><strong>Resultado:</strong> <code>REPROVADO</code></li>
+<li><strong>Objetivo:</strong> verificar que uma meta arquivada sai das ativas, permanece no histórico e pode ser restaurada sem perda.</li>
+<li><strong>Pré-condições:</strong> seed aplicado; Fixture P1; meta <code>Concluir apresentação da Sprint</code> presente.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Passo</th>
+<th>Ação</th>
+<th>Resultado esperado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">1</td>
+<td>Registrar nome, prazo, progresso e categoria da meta.</td>
+<td>Estado inicial documentado.</td>
+</tr>
+<tr>
+<td style="text-align: right;">2</td>
+<td>Arquivar a meta pelo fluxo da UI.</td>
+<td>Meta deixa a lista ativa e aparece no histórico/arquivadas.</td>
+</tr>
+<tr>
+<td style="text-align: right;">3</td>
+<td>Reiniciar o app e abrir o histórico.</td>
+<td>Arquivamento persiste.</td>
+</tr>
+<tr>
+<td style="text-align: right;">4</td>
+<td>Restaurar a meta.</td>
+<td>Meta retorna às ativas com prazo, progresso e categoria preservados.</td>
+</tr>
+<tr>
+<td style="text-align: right;">5</td>
+<td>Reiniciar e conferir novamente.</td>
+<td>Restauração persiste sem duplicar a meta.</td>
+</tr>
+<tr>
+<td style="text-align: right;">6</td>
+<td>Rodar a suíte SQL local.</td>
+<td>Testes TAP de histórico retornam <code>ok</code> e finalizam com <code>ROLLBACK</code>.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Evidências obrigatórias:</strong> antes; ativa ausente; histórico; restauração; depois do reinício; saída TAP.<br />
+<strong>Resultado observado:</strong> Botão Arquivar não abre confirmação nem altera archived_at. API arquiva/restaura corretamente; restauração pela UI de fixture arquivada preservou 50% e prazo 24/11, incluindo reload.<br />
+<strong>Divergências/issue:</strong> #19: handleArchive depende de Alert.alert. ui-results.json, backend-results.json, final-results.json e capturas CT10.</p>
+<h3>CT-11 — CORS e autenticação no Expo Web</h3>
+<ul>
+<li><strong>Tipo/prioridade:</strong> integração web, P0</li>
+<li><strong>Resultado:</strong> <code>APROVADO — local</code></li>
+<li><strong>Objetivo:</strong> garantir que origens locais previstas funcionam e origens não autorizadas não recebem CORS permissivo.</li>
+<li><strong>Pré-condições:</strong> backend local saudável em <code>http://localhost:54321</code>; Node disponível.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Passo</th>
+<th>Ação</th>
+<th>Resultado esperado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">1</td>
+<td>Executar <code>node scripts/test-local-cors.mjs</code>.</td>
+<td>Script encerra com código 0 e informa <code>PASS: 138 CORS assertions</code>; origens permitidas têm headers exigidos e <code>Vary: Origin</code>.</td>
+</tr>
+<tr>
+<td style="text-align: right;">2</td>
+<td>Conferir no log os cenários negados (<code>example.org</code>, localhost malicioso e origem <code>null</code>).</td>
+<td>Nenhum recebe autorização CORS indevida.</td>
+</tr>
+<tr>
+<td style="text-align: right;">3</td>
+<td>Iniciar Expo Web em uma origem local aceita e entrar como Fixture P1.</td>
+<td>Login conclui sem loop/erro genérico de rede.</td>
+</tr>
+<tr>
+<td style="text-align: right;">4</td>
+<td>Abrir Network e inspecionar preflight e requisição.</td>
+<td>Preflight é aceito; resposta JSON é legível; nenhum segredo aparece no console.</td>
+</tr>
+<tr>
+<td style="text-align: right;">5</td>
+<td>Repetir em porta/origem local prevista, se usada pela apresentação.</td>
+<td>Comportamento permanece consistente.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Evidências obrigatórias:</strong> saída completa do script; Network sanitizado; captura pós-login; URL/porta utilizada.<br />
+<strong>Resultado observado:</strong> 138 verificações CORS passaram. Login e leitura reais no Web local (8081 e exportado 8093) funcionaram; API/SQL validadas separadamente.<br />
+<strong>Divergências/issue:</strong> Não extrapolar para implantação remota. #7. cors.txt, sql.txt e capturas pós-login.</p>
+<h3>CT-12 — Idioma e persistência da preferência</h3>
+<ul>
+<li><strong>Tipo/prioridade:</strong> internacionalização, P1</li>
+<li><strong>Resultado:</strong> <code>REPROVADO</code></li>
+<li><strong>Objetivo:</strong> verificar Português, Inglês e Espanhol nos fluxos principais e a persistência da seleção.</li>
+<li><strong>Pré-condições:</strong> Fixture P1 autenticada; Perfil/Preferências disponível.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Passo</th>
+<th>Ação</th>
+<th>Resultado esperado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">1</td>
+<td>Selecionar Português, reiniciar e percorrer Home, Metas, Grupos e Perfil.</td>
+<td>Seleção persiste; títulos, ações, estados vazios e erros observados estão em português, sem mistura evitável.</td>
+</tr>
+<tr>
+<td style="text-align: right;">2</td>
+<td>Selecionar Inglês e repetir.</td>
+<td>Seleção persiste; mesmos elementos aparecem em inglês.</td>
+</tr>
+<tr>
+<td style="text-align: right;">3</td>
+<td>Selecionar Espanhol e repetir.</td>
+<td>Seleção persiste; mesmos elementos aparecem em espanhol.</td>
+</tr>
+<tr>
+<td style="text-align: right;">4</td>
+<td>Em cada idioma, provocar Login inválido, lista vazia e validação de formulário.</td>
+<td>Mensagens dinâmicas acompanham o idioma; códigos/nomes próprios não são traduzidos indevidamente.</td>
+</tr>
+<tr>
+<td style="text-align: right;">5</td>
+<td>Voltar ao idioma definido para a apresentação.</td>
+<td>Preferência final persiste após reinício.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Evidências obrigatórias:</strong> matriz de telas × idioma; mensagens de erro/empty state; reinício.<br />
+<strong>Resultado observado:</strong> PT/EN/ES persistem após reload; telas e estados vazios renderizam nos três idiomas. Erros de credenciais não aparecem nos três idiomas. Texto vazio orienta a aba de metas incorretamente; PT ainda contém Goals.<br />
+<strong>Divergências/issue:</strong> #21: corrigir mensagem visível e orientação para criar tarefa na Home. final-results.json, supplement-results.json e capturas CT12.</p>
+<h3>CT-13 — Exclusão de conta descartável</h3>
+<ul>
+<li><strong>Tipo/prioridade:</strong> segurança + privacidade, P0, destrutivo local</li>
+<li><strong>Resultado:</strong> <code>BLOQUEADO — ambiente</code></li>
+<li><strong>Objetivo:</strong> verificar exclusão da própria conta sem permitir escolher/deletar outro usuário.</li>
+<li><strong>Pré-condições:</strong> <strong>somente ambiente local descartável</strong>; Supabase CLI e Edge Function <code>delete-account</code> disponíveis; service-role local em arquivo não versionado; criar exclusivamente <code>delete.fixture@studypulse.local</code>. Não usar P1/P2.</li>
+</ul>
+<p>Preparação: utilizar exclusivamente a stack local já identificada. Não executar <code>db reset</code>: ele apagaria dados locais alheios ao caso. Se a função não estiver disponível nessa stack, registrar bloqueio; uma stack isolada pode ser provisionada sem compartilhar seus volumes/portas.</p>
+<pre><code class="language-powershell">npx supabase functions serve delete-account --env-file supabase/.env.local
+</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Passo</th>
+<th>Ação</th>
+<th>Resultado esperado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">1</td>
+<td>Criar a Fixture descartável e alguns dados próprios; registrar os IDs técnicos, sem token.</td>
+<td>Conta e dados existem apenas no ambiente local.</td>
+</tr>
+<tr>
+<td style="text-align: right;">2</td>
+<td>Entrar nessa conta, abrir Perfil e solicitar exclusão; cancelar na primeira confirmação.</td>
+<td>Nada é removido após cancelar.</td>
+</tr>
+<tr>
+<td style="text-align: right;">3</td>
+<td>Solicitar novamente e confirmar.</td>
+<td>Função valida o bearer token e remove somente o usuário autenticado; app encerra a sessão após sucesso.</td>
+</tr>
+<tr>
+<td style="text-align: right;">4</td>
+<td>Tentar entrar novamente com a mesma credencial.</td>
+<td>Login falha porque a conta não existe.</td>
+</tr>
+<tr>
+<td style="text-align: right;">5</td>
+<td>Conferir backend local.</td>
+<td>Perfil/dados dependentes seguem as regras de exclusão; Fixtures P1/P2 permanecem intactas.</td>
+</tr>
+<tr>
+<td style="text-align: right;">6</td>
+<td>Fazer chamada sem token e, em teste isolado, enviar no corpo um ID diferente.</td>
+<td>Sem token é rejeitado; corpo não permite selecionar outro usuário para exclusão.</td>
+</tr>
+</tbody>
+</table>
+<p>Se a Edge Function não estiver servida, registrar <code>BLOQUEADO — função delete-account indisponível</code>; não substituir por exclusão manual e não alegar aprovação.</p>
+<p><strong>Evidências obrigatórias:</strong> criação da fixture; cancelamento; confirmação; retorno sanitizado da função; login posterior negado; consulta comprovando P1/P2 intactas.<br />
+<strong>Resultado observado:</strong> Cancelar preserva a conta. Confirmar mostra erro tratado. Rota real /functions/v1/delete-account retorna HTTP 404; stack Compose não publica a Edge Function. Fixture não foi excluída administrativamente.<br />
+<strong>Divergências/issue:</strong> #31/#7: configurar função no ambiente e repetir. SQL de cascata passou, mas não substitui teste da função. CT13-function-missing.png e backend-results.json.</p>
+<h2>6. Encerramento da rodada</h2>
+<ol>
+<li>Conferir se cada caso tem executor, data, commit, plataforma, resultado e evidências.</li>
+<li>Abrir issue para cada divergência reproduzível, vinculando o ID do caso e omitindo segredos.</li>
+<li>Restaurar o seed local quando necessário e remover apenas a fixture descartável que ainda existir.</li>
+<li>Não transformar estes resultados internos em frases como “dois participantes aprovaram”, “usuários preferiram” ou “o teste de usabilidade foi concluído”.</li>
+<li>No relatório da disciplina, declarar separadamente:</li>
+<li>quais casos técnicos foram executados pela equipe;</li>
+<li>quais resultados foram obtidos, com evidência;</li>
+<li>que a avaliação com duas pessoas externas permaneceu pendente/não atendida.</li>
+</ol>
+<h2>7. Resultado consolidado da rodada</h2>
+<table>
+<thead>
+<tr>
+<th>Caso</th>
+<th>Resultado</th>
+<th>Evidências</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CT-01</td>
+<td>APROVADO — Web</td>
+<td><code>evidencias/qa17/RESUMO-QA.md</code> e registros do caso</td>
+</tr>
+<tr>
+<td>CT-02</td>
+<td>APROVADO — Web</td>
+<td><code>evidencias/qa17/RESUMO-QA.md</code> e registros do caso</td>
+</tr>
+<tr>
+<td>CT-03</td>
+<td>APROVADO — Web</td>
+<td><code>evidencias/qa17/RESUMO-QA.md</code> e registros do caso</td>
+</tr>
+<tr>
+<td>CT-04</td>
+<td>APROVADO — Web</td>
+<td><code>evidencias/qa17/RESUMO-QA.md</code> e registros do caso</td>
+</tr>
+<tr>
+<td>CT-05</td>
+<td>APROVADO — emulação Web</td>
+<td><code>evidencias/qa17/RESUMO-QA.md</code> e registros do caso</td>
+</tr>
+<tr>
+<td>CT-06</td>
+<td>APROVADO — Web</td>
+<td><code>evidencias/qa17/RESUMO-QA.md</code> e registros do caso</td>
+</tr>
+<tr>
+<td>CT-07</td>
+<td>BLOQUEADO — parcial</td>
+<td><code>evidencias/qa17/RESUMO-QA.md</code> e registros do caso</td>
+</tr>
+<tr>
+<td>CT-08</td>
+<td>REPROVADO</td>
+<td><code>evidencias/qa17/RESUMO-QA.md</code> e registros do caso</td>
+</tr>
+<tr>
+<td>CT-09</td>
+<td>REPROVADO</td>
+<td><code>evidencias/qa17/RESUMO-QA.md</code> e registros do caso</td>
+</tr>
+<tr>
+<td>CT-10</td>
+<td>REPROVADO</td>
+<td><code>evidencias/qa17/RESUMO-QA.md</code> e registros do caso</td>
+</tr>
+<tr>
+<td>CT-11</td>
+<td>APROVADO — local</td>
+<td><code>evidencias/qa17/RESUMO-QA.md</code> e registros do caso</td>
+</tr>
+<tr>
+<td>CT-12</td>
+<td>REPROVADO</td>
+<td><code>evidencias/qa17/RESUMO-QA.md</code> e registros do caso</td>
+</tr>
+<tr>
+<td>CT-13</td>
+<td>BLOQUEADO — ambiente</td>
+<td><code>evidencias/qa17/RESUMO-QA.md</code> e registros do caso</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Avaliação externa:</strong> NÃO EXECUTADA / REQUISITO NÃO ATENDIDO. Turma e contribuições finais dos integrantes humanos continuam dependentes da equipe.</p></body></html>

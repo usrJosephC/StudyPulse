@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AccessibilityInfo, Animated, Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { AccessibilityInfo, Animated, Easing, Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -73,6 +73,7 @@ export function HomeScreen() {
     Animated.timing(animatedTasksDone, {
       toValue: tasksDone,
       duration: 320,
+      easing: Easing.out(Easing.cubic),
       useNativeDriver: false,
     }).start();
   }, [animatedTasksDone, reduceMotion, tasksDone]);
@@ -128,6 +129,7 @@ export function HomeScreen() {
           Animated.timing(checkmarkScale, {
             toValue: 1,
             duration: 180,
+            easing: Easing.out(Easing.cubic),
             useNativeDriver: true,
           }).start();
         }
@@ -150,7 +152,7 @@ export function HomeScreen() {
   useEffect(() => {
     if (!taskFormVisible) return;
     const keyboardSubscription = Keyboard.addListener('keyboardDidShow', () => {
-      taskListRef.current?.scrollTo({ y: Math.max(0, taskFormOffset.current - spacing.md), animated: true });
+      taskListRef.current?.scrollTo({ y: Math.max(0, taskFormOffset.current - spacing.md), animated: !reduceMotion });
     });
     const focusTimer = setTimeout(() => {
       taskTitleInputRef.current?.focus();
@@ -159,7 +161,7 @@ export function HomeScreen() {
       clearTimeout(focusTimer);
       keyboardSubscription.remove();
     };
-  }, [taskFormVisible]);
+  }, [reduceMotion, taskFormVisible]);
 
   async function refreshHomeData() {
     setTaskError(null);
@@ -534,6 +536,7 @@ export function HomeScreen() {
               onPress={() => { void handleToggleTask(task.id); }}
               disabled={updatingTaskId !== null}
               accessibilityRole="checkbox"
+              aria-checked={task.done}
               accessibilityState={{ checked: task.done }}
               accessibilityLabel={t('home.taskAccessibility', {
                 title: task.title,
@@ -549,13 +552,13 @@ export function HomeScreen() {
             >
               {task.done && task.id === feedbackTaskId ? (
                 <Animated.View style={{ opacity: checkmarkScale, transform: [{ scale: checkmarkScale }] }}>
-                  <Ionicons name="checkmark-circle" size={24} color={temaAtual.primary} />
+                  <Ionicons name="checkmark-circle" size={24} color={temaAtual.progress} />
                 </Animated.View>
               ) : (
                 <Ionicons
                   name={task.done ? 'checkmark-circle' : 'ellipse-outline'}
                   size={24}
-                  color={task.done ? temaAtual.primary : temaAtual.inkFaint}
+                  color={task.done ? temaAtual.progress : temaAtual.inkFaint}
                 />
               )}
 

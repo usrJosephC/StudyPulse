@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Animated, StyleSheet, View } from 'react-native';
+import { Animated, Easing, StyleSheet, View } from 'react-native';
 import { radius } from '../theme';
 import { useTheme } from '../contexts/ThemeContext';
 import { useReducedMotion } from '../hooks/useReducedMotion';
@@ -33,13 +33,14 @@ export function ProgressBar({
     const animation = Animated.timing(animatedProgress, {
       toValue: clamped,
       duration: 300,
+      easing: Easing.out(Easing.cubic),
       useNativeDriver: false,
     });
     animation.start();
     return () => animation.stop();
   }, [animatedProgress, clamped, reduceMotion]);
 
-  const fillColor = color ?? temaAtual.primary;
+  const fillColor = color ?? temaAtual.progress;
   const backgroundColor = trackColor ?? temaAtual.surface;
   const fillWidth = animatedProgress.interpolate({
     inputRange: [0, 1],

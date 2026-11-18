@@ -1,0 +1,5 @@
+*.pdf binary
+*.png binary
+*.webm binary
+# Dois espaços no fim da linha representam quebra explícita em Markdown.
+*.md whitespace=-blank-at-eol

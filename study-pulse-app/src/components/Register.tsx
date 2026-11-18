@@ -36,6 +36,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { logSafeError } from '../lib/logger';
 import { useErrorShake } from '../hooks/useErrorShake';
+import { useReducedMotion } from '../hooks/useReducedMotion';
 
 type Props = {
   onRegisterSuccess?: () => void;
@@ -43,6 +44,7 @@ type Props = {
 
 export function Register({ onRegisterSuccess }: Props) {
   const { t } = useTranslation();
+  const reduceMotion = useReducedMotion();
   const { signUp } = useAuth();
   const { temaAtual } = useTheme();
   const { shake, shakeStyle } = useErrorShake();
@@ -308,7 +310,7 @@ export function Register({ onRegisterSuccess }: Props) {
 
       {/* Terms modal */}
       <Modal
-        animationType="fade"
+        animationType={reduceMotion ? 'none' : 'fade'}
         transparent
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}

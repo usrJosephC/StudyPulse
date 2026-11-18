@@ -78,7 +78,7 @@ export function ConfirmPasswordInput({
             <TextInput
               style={styles.input}
               placeholder={t('register.confirmPassword')}
-              placeholderTextColor={temaAtual.inkFaint}
+              placeholderTextColor={temaAtual.inkMuted}
               value={value}
               onChangeText={onChange}
               onBlur={onBlur}

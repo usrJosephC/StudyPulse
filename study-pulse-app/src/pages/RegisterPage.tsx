@@ -19,6 +19,7 @@ import { RootStackParamList } from '../navigation/RootStack';
 import { fonts, spacing } from '../theme';
 import { useTheme } from '../contexts/ThemeContext';
 import { ProfilePreferences } from '../screens/ProfileFlows';
+import { useReducedMotion } from '../hooks/useReducedMotion';
 
 type Props = NativeStackScreenProps<
   RootStackParamList,
@@ -31,6 +32,7 @@ export function RegisterPage({
   const { t } = useTranslation();
   const [preferencesOpen, setPreferencesOpen] = useState(false);
   const { temaAtual } = useTheme();
+  const reduceMotion = useReducedMotion();
 
   const styles = StyleSheet.create({
     preferencesButton: { minHeight: 44, minWidth: 44, alignItems: 'center', justifyContent: 'center', alignSelf: 'flex-end', marginBottom: spacing.xs, borderRadius: 22 },
@@ -140,7 +142,7 @@ export function RegisterPage({
           </Text>
         </View>
       </ScrollView>
-      <Modal visible={preferencesOpen} animationType="slide" onRequestClose={() => setPreferencesOpen(false)}><SafeAreaView style={{ flex: 1, backgroundColor: temaAtual.background }} edges={['top', 'bottom']}><ProfilePreferences close={() => setPreferencesOpen(false)} /></SafeAreaView></Modal>
+      <Modal visible={preferencesOpen} animationType={reduceMotion ? 'none' : 'slide'} onRequestClose={() => setPreferencesOpen(false)}><SafeAreaView style={{ flex: 1, backgroundColor: temaAtual.background }} edges={['top', 'bottom']}><ProfilePreferences close={() => setPreferencesOpen(false)} /></SafeAreaView></Modal>
     </SafeAreaView>
   );
 }

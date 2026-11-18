@@ -75,7 +75,7 @@ export function EmailInput<T extends FieldValues>({
             <TextInput
               style={styles.input}
               placeholder={t('login.email')}
-              placeholderTextColor={temaAtual.inkFaint}
+              placeholderTextColor={temaAtual.inkMuted}
               value={value}
               onChangeText={onChange}
               onBlur={onBlur}
