@@ -1,0 +1,184 @@
+[
+  {
+    "id": "CT05",
+    "step": "system-initial",
+    "status": "PASS",
+    "detail": {
+      "checked": true,
+      "disabled": true,
+      "explanation": 1
+    }
+  },
+  {
+    "id": "CT05",
+    "step": "system-off",
+    "status": "PASS",
+    "detail": "Internal preference false; switch follows media change"
+  },
+  {
+    "id": "CT05",
+    "step": "system-reload",
+    "status": "PASS",
+    "detail": "Browser media emulation persisted through reload; native Android not available"
+  },
+  {
+    "id": "CT04",
+    "step": "preference-reload",
+    "status": "PASS",
+    "detail": "Stored option"
+  },
+  {
+    "id": "CT04",
+    "step": "reduced-task",
+    "status": "PASS",
+    "detail": {
+      "sampledFrames": 103,
+      "nonFinalScaleFrames": 0,
+      "checked": "true"
+    }
+  },
+  {
+    "id": "CT04",
+    "step": "invalid-visible",
+    "status": "PASS",
+    "detail": "Terms error remains textual with reduced motion"
+  },
+  {
+    "id": "CT06",
+    "step": "scale-run-1",
+    "status": "PASS",
+    "detail": "scale(1)"
+  },
+  {
+    "id": "CT06",
+    "step": "bar-run-1",
+    "status": "PASS",
+    "detail": [
+      "75%",
+      "75%"
+    ]
+  },
+  {
+    "id": "CT06",
+    "step": "scale-run-2",
+    "status": "PASS",
+    "detail": "scale(1)"
+  },
+  {
+    "id": "CT06",
+    "step": "bar-run-2",
+    "status": "PASS",
+    "detail": [
+      "75%",
+      "75%"
+    ]
+  },
+  {
+    "id": "CT06",
+    "step": "scale-run-3",
+    "status": "PASS",
+    "detail": "scale(1)"
+  },
+  {
+    "id": "CT06",
+    "step": "bar-run-3",
+    "status": "PASS",
+    "detail": [
+      "75%",
+      "75%"
+    ]
+  },
+  {
+    "id": "CT06",
+    "step": "reduced",
+    "status": "PASS",
+    "detail": "Resultado final exibido sem transição."
+  },
+  {
+    "id": "CT06",
+    "step": "keyboard",
+    "status": "PASS",
+    "detail": "Enter triggered comparison"
+  },
+  {
+    "id": "CT12",
+    "step": "en-persist",
+    "status": "PASS",
+    "detail": [
+      "HomeHome",
+      "GoalsGoals",
+      "GroupsGroups",
+      "ProfileProfile"
+    ]
+  },
+  {
+    "id": "CT12",
+    "step": "es-persist",
+    "status": "PASS",
+    "detail": [
+      "InicioInicio",
+      "ObjetivosObjetivos",
+      "GruposGrupos",
+      "PerfilPerfil"
+    ]
+  },
+  {
+    "id": "CT12",
+    "step": "pt-persist",
+    "status": "PASS",
+    "detail": [
+      "InícioInício",
+      "MetasMetas",
+      "GruposGrupos",
+      "PerfilPerfil"
+    ]
+  },
+  {
+    "id": "CT09",
+    "step": "clipboard",
+    "status": "PASS",
+    "detail": {
+      "length": 8,
+      "noWhitespace": true
+    }
+  },
+  {
+    "id": "CT09",
+    "step": "native-share",
+    "status": "AVAILABLE",
+    "detail": "Native sharing capability; no external message sent"
+  },
+  {
+    "id": "CT09",
+    "step": "owner-ui",
+    "status": "PASS",
+    "detail": "Name and description updated through UI"
+  },
+  {
+    "id": "CT09",
+    "step": "member-edit-hidden",
+    "status": "PASS",
+    "detail": "Member UI has no edit action"
+  },
+  {
+    "id": "CT09",
+    "step": "leave-confirmation",
+    "status": "FAIL",
+    "detail": "Web confirmation should appear before leaving"
+  },
+  {
+    "id": "CT13",
+    "step": "cancel",
+    "status": "PASS",
+    "detail": "Cancellation closes dialog and account session remains"
+  },
+  {
+    "id": "CT13",
+    "step": "actual-ui-delete",
+    "status": "BLOCKED",
+    "detail": {
+      "visibleError": 1,
+      "reason": "Local gateway endpoint absent (HTTP 404 confirmed separately)"
+    }
+  }
+]

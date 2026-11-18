@@ -6,6 +6,7 @@ import { RegisterPage } from '../pages/RegisterPage';
 import { RootTabs } from './RootTabs';
 import { useAuth } from '../contexts/AuthContext';
 import { colors } from '../theme';
+import { useReducedMotion } from '../hooks/useReducedMotion';
 
 export type RootStackParamList = {
   Login: undefined;
@@ -17,6 +18,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export function RootStack() {
   const { session, loading } = useAuth();
+  const reduceMotion = useReducedMotion();
 
   if (loading) {
     return (
@@ -30,6 +32,7 @@ export function RootStack() {
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
+        animation: reduceMotion ? 'none' : 'default',
       }}
     >
       {session ? (

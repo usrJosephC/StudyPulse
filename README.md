@@ -15,9 +15,9 @@
 
 - **Autenticação completa:** cadastro, login, restauração de sessão e logout com Supabase Auth.
 - **Home personalizada:** progresso diário, tarefas, sequência de estudos e pontuação semanal e total.
-- **Tarefas reais:** listagem diária e conclusão com pontuação, com contrato de criação pronto na camada de serviços.
-- **Metas de estudo:** criação, atualização de progresso, conclusão e mapa de consistência.
-- **Grupos de estudo:** entrada por código de convite, ranking semanal e feed de atividades.
+- **Tarefas reais:** criação, listagem diária, conclusão e reabertura na Home, com atualização de progresso.
+- **Metas de estudo:** criação, edição, atualização de progresso, conclusão, arquivamento e restauração.
+- **Grupos de estudo:** criação com descrição, convite por código, cópia e compartilhamento separados, edição pelo criador, saída, ranking e feed.
 - **Perfil integrado:** dados da conta, estatísticas reais e encerramento seguro da sessão.
 - **Gamificação consistente:** pontos registrados em ledger, bônus de sequência e operações idempotentes.
 - **Internacionalização (i18n):** interface de todas as páginas com suporte a múltiplas línguas, utilizando i18next e react-i18next.
@@ -104,7 +104,7 @@ study-pulse-app/
 ├── scripts/                # inicialização local e descoberta do IP da rede
 ├── src/
 │   ├── components/         # componentes reutilizáveis
-│   ├── context/            # sessão e perfil autenticado
+│   ├── contexts/           # sessão, tema e preferências compartilhadas
 │   ├── hooks/              # estado e operações consumidos pelas telas
 │   ├── i18n/               # configuração i18n e traduções por idioma
 │   ├── lib/                # cliente Supabase e Result<T>
@@ -133,7 +133,7 @@ study-pulse-app/
 ```bash
 git clone https://github.com/usrJosephC/StudyPulse.git
 cd StudyPulse/study-pulse-app
-npm install
+npm ci
 ```
 
 Crie o arquivo de ambiente:
@@ -200,8 +200,10 @@ docker-compose down
 ## ✅ Validação
 
 ```bash
-npx tsc --noEmit
-npx tsx --test tests/auth.test.ts
+npm run typecheck
+npm test
+npm run lint
+npm run export:web
 ```
 
 Os testes SQL ficam em `study-pulse-app/supabase/tests/` e cobrem RLS, privilégios e idempotência das operações principais.
@@ -212,6 +214,15 @@ Os testes SQL ficam em `study-pulse-app/supabase/tests/` e cobrem RLS, privilég
 
 - [Projeto, equipe e links externos](PROJECT_INFO.md)
 - [Supabase local](study-pulse-app/supabase/README.md)
+- [Entrega de IHC em 18/11/2026](entrega-ihc/LEIA-ME.md)
+
+### Entrega acadêmica e versão web
+
+O StudyPulse é o projeto oficial da entrega. JSX descreve a estrutura da interface; `StyleSheet` e `Animated` implementam apresentação e movimento; TypeScript descreve eventos e estado e é compilado para JavaScript. React Native Web converte os componentes para o navegador. `npm run export:web` gera `dist/index.html` e seus recursos, carregando `.env` antes do Expo e limpando o cache; exige Node 20.12 ou superior. O código-fonte continua em `study-pulse-app/src/`. Confirme login no resultado servido por HTTP: compilação sem erro não comprova configuração da API.
+
+A versão web utiliza o mesmo backend local das versões móveis. Inicie o Docker Compose antes de `npm run web`, configure `.env` a partir de `.env.example` e reinicie o Expo quando alterar as variáveis. Abrir somente o HTML exportado por `file://` não substitui um servidor HTTP nem inicia a API.
+
+O relatório e o roteiro de participantes ficam em `entrega-ihc/`. Registros de testes técnicos não substituem as observações de duas pessoas externas à equipe. O pacote deve ser gerado da raiz completa do repositório, para incluir este README e os documentos institucionais.
 
 ---
 

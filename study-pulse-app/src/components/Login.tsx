@@ -24,6 +24,7 @@ import { loginSchema, type LoginFormData } from '../validation/schemas';
 import { useAuth } from '../contexts/AuthContext';
 import { logSafeError } from '../lib/logger';
 import { useErrorShake } from '../hooks/useErrorShake';
+import { useReducedMotion } from '../hooks/useReducedMotion';
 
 type Props = {
   onLoginSuccess?: () => void;
@@ -36,6 +37,7 @@ export function Login({ onCreateAccount }: Props) {
   const { temaAtual } = useTheme();
   const styles = createStyles(temaAtual);
   const { shake, shakeStyle } = useErrorShake();
+  const reduceMotion = useReducedMotion();
   const [isLoading, setIsLoading] =
     useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
@@ -197,7 +199,7 @@ export function Login({ onCreateAccount }: Props) {
       </Animated.View>
       <Modal
         visible={termsVisible}
-        animationType="slide"
+        animationType={reduceMotion ? 'none' : 'slide'}
         transparent
         onRequestClose={() => setTermsVisible(false)}
       >

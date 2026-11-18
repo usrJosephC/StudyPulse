@@ -58,7 +58,7 @@ export function GenderInput({ control, errors }: Props) {
     label: {
       fontFamily: fonts.bodyMedium,
       fontSize: 14,
-      color: temaAtual.inkFaint,
+      color: temaAtual.inkMuted,
     },
     labelSelected: {
       fontFamily: fonts.bodyBold,
@@ -69,7 +69,7 @@ export function GenderInput({ control, errors }: Props) {
       height: 18,
       borderRadius: 9,
       borderWidth: 1,
-      borderColor: temaAtual.inkFaint,
+      borderColor: temaAtual.inkMuted,
       alignItems: 'center',
       justifyContent: 'center',
     },

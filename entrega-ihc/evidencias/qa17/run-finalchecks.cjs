@@ -1,0 +1,40 @@
+const fs=require('node:fs'),path=require('node:path'),os=require('node:os');
+const {chromium}=require(path.join(os.tmpdir(),'studypulse-qa-tools/node_modules/playwright'));
+const OUT=__dirname,ROOT=path.resolve(OUT,'../../../study-pulse-app'),APP='http://localhost:8093';
+const key=fs.readFileSync(path.join(ROOT,'.env.example'),'utf8').match(/^EXPO_PUBLIC_SUPABASE_ANON_KEY=(.+)$/m)[1].trim();
+const selected=process.argv[2];const results=selected&&fs.existsSync(path.join(OUT,'final-results.json'))?JSON.parse(fs.readFileSync(path.join(OUT,'final-results.json'))).filter(r=>r.id!==selected):[];let browser,token,uid;
+function note(id,step,status,detail){results.push({id,step,status,detail});fs.writeFileSync(path.join(OUT,'final-results.json'),JSON.stringify(results,null,2));console.log(id,step,status,JSON.stringify(detail));}
+async function req(route,method='GET',body,bearer=token){const r=await fetch('http://localhost:54321'+route,{method,headers:{apikey:key,Authorization:'Bearer '+(bearer||key),'Content-Type':'application/json',Prefer:'return=representation'},body:body===undefined?undefined:JSON.stringify(body)});return{status:r.status,data:await r.json().catch(()=>null)}}
+async function tab(p,name){await p.locator(`a[role=tab][href$='/Main/${name}']`).click();await p.waitForTimeout(350);}
+async function login(p,email='qa.run17a@studypulse.local',password='StudyPulseP1!2026',tr){await p.goto(APP);await p.getByPlaceholder(tr?.login.email||'E-mail',{exact:true}).fill(email);await p.getByPlaceholder(tr?.login.password||'Senha',{exact:true}).fill(password);await p.getByRole('checkbox').click();await p.getByRole('button',{name:tr?.login.loginButton||'Entrar',exact:true}).click();await p.locator('a[role=tab]').first().waitFor();}
+async function run(id,fn){if(selected&&selected!==id)return;const c=await browser.newContext({viewport:{width:460,height:836},reducedMotion:'no-preference',recordVideo:{dir:path.join(OUT,'videos'),size:{width:460,height:836}}});const p=await c.newPage();p.setDefaultTimeout(7000);try{await fn(p,c)}catch(e){note(id,'harness','BLOCKED',e.message)}finally{await c.close();fs.copyFileSync(await p.video().path(),path.join(OUT,'videos',id+'-final.webm'));}}
+async function shot(p,name){await p.screenshot({path:path.join(OUT,name+'.png')});}
+async function main(){
+ browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true});note('ENV','browser','INFO',browser.version());
+ const a=await req('/auth/v1/token?grant_type=password','POST',{email:'qa.run17a@studypulse.local',password:'StudyPulseP1!2026'});token=a.data.access_token;uid=a.data.user.id;
+ await run('CT01',async p=>{
+  await login(p);await p.getByRole('button',{name:'Adicionar tarefa',exact:true}).click();const title='QA normal motion '+Date.now();await p.getByLabel('Título da tarefa').fill(title);await p.getByLabel('Categoria da tarefa').fill('IHC');await p.getByRole('button',{name:/Salvar tarefa/}).click();const box=p.getByRole('checkbox',{name:new RegExp(title)});await box.scrollIntoViewIfNeeded();
+  await p.evaluate(name=>{window.samples=[];const end=performance.now()+1800;function f(){const e=Array.from(document.querySelectorAll('[role=checkbox]')).find(e=>e.getAttribute('aria-label')?.startsWith(name));window.samples.push({scale:e?Array.from(e.querySelectorAll('[style]')).map(x=>x.style.transform).filter(Boolean):[],ring:document.querySelectorAll('circle')[1]?.getAttribute('stroke-dashoffset')});if(performance.now()<end)requestAnimationFrame(f)}requestAnimationFrame(f)},title);
+  await box.click();await p.waitForTimeout(1900);const samples=await p.evaluate(()=>window.samples);fs.writeFileSync(path.join(OUT,'CT01-motion-samples.json'),JSON.stringify(samples));const scales=[...new Set(samples.flatMap(x=>x.scale))],ring=[...new Set(samples.map(x=>x.ring).filter(Boolean))];note('CT01','normal-motion',scales.length>2&&ring.length>2?'PASS':'FAIL',{frames:samples.length,scaleValues:scales.length,ringValues:ring.length});await shot(p,'CT01-normal-motion');
+ });
+ await run('CT10',async p=>{
+  const title='QA17 restaurar UI '+Date.now();let r=await req('/rest/v1/goals','POST',{user_id:uid,title,category:'QA',due_date:'2026-11-24'});const id=r.data[0].id;await req('/rest/v1/rpc/rpc_update_goal_progress','POST',{goal_id:id,new_progress:.5});await req('/rest/v1/rpc/rpc_archive_goal','POST',{goal_id:id,archived:true});
+  await login(p);await tab(p,'Goals');await p.getByRole('button',{name:'Abrir histórico de metas arquivadas'}).click();await p.getByText(title,{exact:true}).waitFor();await shot(p,'CT10-history-fixture');await p.getByRole('button',{name:'Restaurar a meta '+title,exact:true}).click();await p.waitForTimeout(400);await p.reload();await p.locator('a[role=tab]').first().waitFor();await tab(p,'Goals');await p.getByText(title,{exact:true}).waitFor();r=await req('/rest/v1/goals?select=progress,due_date,archived_at&id=eq.'+id);note('CT10','restore-ui-reload',r.data[0].progress===.5&&r.data[0].due_date==='2026-11-24'&&!r.data[0].archived_at?'PASS':'FAIL',{id,...r.data[0],setup:'Archived by API fixture; archive UI remains failed'});await shot(p,'CT10-restored');
+ });
+ await run('CT12',async p=>{
+  for(const [locale,choice] of [['en-US','English'],['es-ES','Español'],['pt-BR','Português']]){
+   const tr=JSON.parse(fs.readFileSync(path.join(ROOT,'src/i18n/locales',locale,'translations.json')));
+   await p.goto(APP);await p.locator('input[type=email]').waitFor();
+   await p.getByRole('button',{name:/^(Preferências|Preferences|Preferencias)$/}).click();await p.getByRole('radio',{name:choice,exact:true}).click();await p.reload();await p.locator('input[type=email]').waitFor();await p.locator('input[type=email]').fill('qa.run17a@studypulse.local');await p.locator('input[type=password]').fill('InvalidFixture!');await p.getByRole('checkbox').click();const response=p.waitForResponse(r=>r.url().includes('/auth/v1/token'));await p.getByRole('button',{name:tr.login.loginButton,exact:true}).click();const status=(await response).status();await p.waitForTimeout(600);const visible=(await p.locator('body').innerText()).includes(tr.login.invalidCredentials);note('CT12',locale+'-invalid-credentials',visible?'PASS':'FAIL',{http:status,expectedMessageVisible:visible});await shot(p,'CT12-'+locale+'-invalid');
+   await p.locator('input[type=email]').fill('delete.qa17@studypulse.local');await p.locator('input[type=password]').fill('DeleteFixture!2026');await p.getByRole('button',{name:tr.login.loginButton,exact:true}).click();await p.locator('a[role=tab]').first().waitFor();await p.getByText(tr.home.noTasksToday,{exact:true}).waitFor().catch(()=>{});const text=await p.locator('body').innerText();note('CT12',locale+'-empty-state',text.includes(tr.home.noTasksToday)?'PASS':'FAIL',{expected:tr.home.noTasksToday});await shot(p,'CT12-'+locale+'-empty');
+   await tab(p,'Profile');await p.getByRole('button',{name:tr.profile.signOut,exact:true}).click();await p.locator('input[type=email]').waitFor();
+  }
+ });
+ await run('CT07',async p=>{
+  await login(p);await tab(p,'Profile');await p.getByRole('button',{name:'Preferências',exact:true}).click();await p.keyboard.press('Tab');const f=await p.evaluate(()=>({hasFocus:document.hasFocus(),outline:getComputedStyle(document.activeElement).outline}));note('CT07','focus',f.outline.includes('solid')?'PASS':'FAIL',f);
+  await p.evaluate(()=>document.documentElement.style.zoom='200%');await shot(p,'CT07-zoom200-final');const pref=p.getByRole('button',{name:'Política de privacidade',exact:false});await pref.scrollIntoViewIfNeeded();await pref.click();note('CT07','zoom-last-control','PASS','Last preference item scrolled into view and activated at 200% CSS zoom');await shot(p,'CT07-zoom-last-control');
+  note('CT07','screen-reader','BLOCKED','No real Narrator/TalkBack/VoiceOver audio session available; DOM semantics and focus do not prove spoken announcements');
+ });
+ await browser.close();
+}
+main().catch(async e=>{console.error(e.message);await browser?.close();process.exitCode=1});

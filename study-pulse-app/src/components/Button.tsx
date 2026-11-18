@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Pressable, StyleSheet, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { fonts, radius, spacing } from '../theme';
@@ -21,6 +22,7 @@ export function Button({
   disabled = false,
 }: Props) {
   const { temaAtual } = useTheme();
+  const [focused, setFocused] = useState(false);
 
   const styles = StyleSheet.create({
     base: {
@@ -30,9 +32,14 @@ export function Button({
       gap: spacing.sm,
       paddingVertical: 14,
       borderRadius: radius.pill,
+      borderWidth: 2,
+      borderColor: 'transparent',
     },
     pressed: {
       opacity: 0.85,
+    },
+    focused: {
+      borderColor: temaAtual.secondary,
     },
     label: {
       fontFamily: fonts.bodyBold,
@@ -75,6 +82,8 @@ export function Button({
   return (
     <Pressable
       onPress={onPress}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
       disabled={disabled}
       accessibilityRole="button"
       accessibilityState={{ disabled }}
@@ -82,6 +91,7 @@ export function Button({
         styles.base,
         variantStyles[variant].container,
         pressed && styles.pressed,
+        focused && styles.focused,
         disabled && { opacity: 0.5 },
       ]}
     >

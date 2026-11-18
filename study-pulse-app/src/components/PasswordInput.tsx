@@ -79,7 +79,7 @@ export function PasswordInput<T extends FieldValues>({
             <TextInput
               style={styles.input}
               placeholder={t('login.password')}
-              placeholderTextColor={temaAtual.inkFaint}
+              placeholderTextColor={temaAtual.inkMuted}
               value={value}
               onChangeText={onChange}
               onBlur={onBlur}

@@ -51,6 +51,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
+    "export:web": "node --env-file=.env node_modules/expo/bin/cli export --platform web --clear",
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
     "test": "node --import tsx --test \"tests/**/*.test.ts\""

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Animated, StyleSheet, View } from 'react-native';
+import { Animated, Easing, StyleSheet, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import type { ReactNode } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
@@ -48,6 +48,7 @@ export function ProgressRing({
     const animation = Animated.timing(animatedProgress, {
       toValue: clamped,
       duration: 320,
+      easing: Easing.out(Easing.cubic),
       useNativeDriver: false,
     });
     animation.start();
@@ -56,7 +57,7 @@ export function ProgressRing({
 
   const dashOffset = circumference * (1 - displayProgress);
 
-  const ringColor = color ?? temaAtual.primary;
+  const ringColor = color ?? temaAtual.progress;
   const backgroundColor = trackColor ?? temaAtual.surface;
 
   return (
